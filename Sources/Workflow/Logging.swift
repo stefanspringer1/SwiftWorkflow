@@ -199,7 +199,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A longer textual representation of the logging event used in the actual logging.
     public func descriptionForLogging(usingStepIndentation: Bool = false) -> String {
-        let messagePart1 = self.applicationPrefix + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.stepStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
+        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationPrefix + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.stepStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
         let messagePart2 = self.description + (self.stepStack?.isEmpty == false ? " (step path: " + self.stepStack!.joined(separator: "/") + ")" : "")
         return messagePart1 + messagePart2 + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "") + (self.itemInfo != nil ? " [\(self.itemInfo!)]" : "")
     }
