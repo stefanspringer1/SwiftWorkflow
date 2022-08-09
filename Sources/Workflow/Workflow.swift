@@ -43,6 +43,7 @@ public actor Execution {
     var stepFunctionStack = [String]()
     var stepNameStack = [String]()
     var _logger: Logger
+    var processID: String?
     var applicationPrefix: String
     var itemInfo: String? = nil
     var _worseMessageType: MessageType = .Debug
@@ -54,8 +55,9 @@ public actor Execution {
     let debug: Bool
     let showSteps: Bool
     
-    public init (logger: Logger, applicationPrefix: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
+    public init (logger: Logger, processID: String? = nil, applicationPrefix: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
         self._logger = logger
+        self.processID = processID
         self.applicationPrefix = applicationPrefix
         self.itemInfo = itemInfo
         self.debug = debug
@@ -99,6 +101,7 @@ public actor Execution {
             if showSteps {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
+                    processID: processID,
                     applicationPrefix: applicationPrefix,
                     localizingMessage: [.en: ">> STEP \(stepName)"],
                     stepStack: stepNameStack
@@ -109,6 +112,7 @@ public actor Execution {
             if showSteps {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
+                    processID: processID,
                     applicationPrefix: applicationPrefix,
                     localizingMessage: [.en: stopped ? "<< ABORDED \(stepName)" : "<< DONE \(stepName)" ],
                     stepStack: stepNameStack
@@ -131,6 +135,7 @@ public actor Execution {
         await log(event: LoggingEvent(
             messageID: message.id,
             type: message.type,
+            processID: processID,
             applicationPrefix: applicationPrefix,
             localizingMessage: fillLocalizingMessage(message: message.localizingMessage, with: arguments),
             itemInfo: itemInfo,

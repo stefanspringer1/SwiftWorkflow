@@ -15,6 +15,7 @@ extension LoggingEvent {
         return LoggingEvent(
             messageID: messageID,
             type: type,
+            processID: processID,
             applicationPrefix: applicationPrefix,
             localizingMessage: localizingMessage,
             itemInfo: itemInfo,
@@ -102,6 +103,7 @@ public extension Logger {
     
     /// Logging the data that is to be composed into a `LoggingEvent`.
     func log(
+        processID: String? = nil,
         applicationPrefix: String,
         _ type: MessageType,
         _ localizingMessage: LocalizingMessage,
@@ -112,6 +114,7 @@ public extension Logger {
         await log(LoggingEvent(
             messageID: messageID,
             type: type,
+            processID: processID,
             applicationPrefix: applicationPrefix,
             localizingMessage: localizingMessage,
             stepID: stepID,
@@ -128,6 +131,9 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// Teh message type.
     public let type: MessageType
+
+    /// The process ID for embedding in a complex processign scenario.
+    public let processID: String?
     
     /// The application prefix informing about teh application being executed.
     public let applicationPrefix: String
@@ -157,6 +163,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     public init(
         messageID: MessageID? = nil,
         type: MessageType,
+        processID: String? = nil,
         applicationPrefix: String,
         localizingMessage: LocalizingMessage,
         itemInfo: String? = nil,
@@ -168,6 +175,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     ) {
         self.messageID = messageID
         self.type = type
+        self.processID = processID
         self.applicationPrefix = applicationPrefix
         self.localizingMessage = localizingMessage
         self.itemInfo = itemInfo
@@ -200,6 +208,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     enum CodingKeys: String, CodingKey {
         case messageID
         case type
+        case processID
         case applicationPrefix
         case localizingMessage
         case itemInfo
@@ -215,6 +224,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(messageID, forKey: .messageID)
         try container.encode(type, forKey: .type)
+        try container.encode(processID, forKey: .processID)
         try container.encode(applicationPrefix, forKey: .applicationPrefix)
         try container.encode(itemInfo, forKey: .itemInfo)
         try container.encode(itemPositionInfo, forKey: .itemPositionInfo)
@@ -237,6 +247,7 @@ extension LoggingEvent: Decodable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.messageID = try values.decode(String?.self, forKey: .messageID)
         self.type = try values.decode(MessageType.self, forKey: .type)
+        self.processID = try values.decode(String.self, forKey: .processID)
         self.applicationPrefix = try values.decode(String.self, forKey: .applicationPrefix)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
         self.itemPositionInfo = try values.decode(String?.self, forKey: .itemPositionInfo)
