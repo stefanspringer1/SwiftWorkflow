@@ -100,7 +100,7 @@ An `Execution` has control over the steps, i.e. it can decide if a step actually
 
 ### Formulation of a step
 
-A step fullfilling "task A" is to be formulated as follows. Just as an example, `data` is here is the instance of a class being changed during the execution (of cource, our steps could also return a value etc.). An `ExecutionDatabase` keeps track of the steps run (we have to use it separatelty from the `Execution` instance because the `ExecutionDatabase` has to be set for each Swift package separately; more on that later). The `ExecutionDatabase` instance keeps track of the functions by their function signature (name and argument names), therefore all step function _have to be top-level function_ so that the function names are unambiguous. An `ExecutionDatabase` must not be shared between several `Excution` instances.
+A step fullfilling "task a" is to be formulated as follows. Just as an example, `data` is here is the instance of a class being changed during the execution (of cource, our steps could also return a value etc.). An `ExecutionDatabase` keeps track of the steps run (we have to use it separatelty from the `Execution` instance because the `ExecutionDatabase` has to be set for each Swift package separately; more on that later). The `ExecutionDatabase` instance keeps track of the functions by their function signature (name and argument names), therefore all step function _have to be top-level function_ so that the function names are unambiguous. An `ExecutionDatabase` must not be shared between several `Excution` instances.
 
 ---
 **Convention**
@@ -123,7 +123,7 @@ func a_step(
 }
 ```
 
-The call of the `effectuate` method of the execution, which should contain all other instructions inside the step function, is (besides the naming scheme for steps) the second convention regarding steps. We say that `taskA_step` gets executed when we actually mean that its content inside its `effectuate` statement gets executed. It is the `effectuate` method that controls the execution of the steps.
+The call of the `effectuate` method of the execution, which should contain all other instructions inside the step function, is (besides the naming scheme for steps) the second convention regarding steps. We say that `a_step` gets executed when we actually mean that its content inside its `effectuate` statement gets executed. It is the `effectuate` method that controls the execution of the steps.
 
 ---
 **Convention**
