@@ -8,7 +8,9 @@ Additionally, loggers are used that outlive the creation of executions. Part of 
 
 The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services. Without suspension happening, those calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
-This framework relies in part on some easy conventions. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.
+This framework relies in part on some easy conventions. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1]
+
+[^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` method with an appropriate ID, which implements a process management. The conventions are primarily used for clarity and are not decisive from a conceptual point of view.)
 
 For (parallel) processing of several work items, [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms) should provide easy solutions, but we might add some customized tooling in the future. See the section on future directions at the end about what else might be added in the future.
 
