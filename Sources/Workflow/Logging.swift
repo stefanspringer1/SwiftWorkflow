@@ -269,7 +269,7 @@ public actor MultiLogger: Logger {
     }
     
     nonisolated public func close() async throws {
-        try await loggers.forEachAsyncThrowing { logger in
+        try await loggers.forEachAsync { logger in
             try await logger.close()
         }
     }

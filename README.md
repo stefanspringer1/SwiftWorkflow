@@ -368,7 +368,7 @@ logging events to several other loggers (so actually several loggers are used at
 
 The same logger instances clearly should be used for all `Execution` instances. So you do not create loggers for each execution, but you create the loggers once and use them in each creation of an execution.
 
-If you need logging in a synchronous subcontext, use a call of `collectingErrors(forExecution:block:)` or `collectingErrorsThrowing(forExecution:block:)` to be able to use a `SynchronousCollectingLogger` within the its closure argument:
+If you need logging in a synchronous subcontext, use a call of `collectingErrors(forExecution:block:)` to be able to use a `SynchronousCollectingLogger` within the its closure argument:
 
 ```Swift
 await collectingErrors(forExecution: execution) { logger in
@@ -382,7 +382,7 @@ See the example project for more details.
 
 In an asynchronuous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Execution`.
 
-Use `forEachAsync` or `forEachAsyncThrowing` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronuous context.
+Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronuous context.
 
 ### Future directions
 
