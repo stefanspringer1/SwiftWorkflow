@@ -36,10 +36,6 @@ public class ExecutionDatabase {
     }
 }
 
-#if !os(macOS)
-    import FoundationNetworking // for URLRequest and URLSession
-#endif
-
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging

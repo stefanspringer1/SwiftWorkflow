@@ -4,6 +4,10 @@
 import Foundation
 import Utilities
 
+#if !(os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    import FoundationNetworking // for URLRequest and URLSession
+#endif
+
 extension LoggingEvent {
     
     /// Put a prefix before each message text.
