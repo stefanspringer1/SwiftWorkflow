@@ -83,7 +83,7 @@ So when we use functions as steps, the following requirements are missing:
 - There should be an environment accessible inside the steps which can be used for logging (or other communication).
 - This environment should also have control over the execution of the steps, e.g. when there is a fatal error, the execution of the steps should stop.
 
-We will see in the next section how this is resolved. For the second question ("How can we visually make clear in the code where a step gets executed?"): The solution to this is simple but might somehow dissapointing to some: We just use the convenstion that a step i.e. a function that realizes a step always has the postfix "\_step" in its name.  Some people do not like relying on conventions, but in practice this works out pretty good.
+We will see in the next section how this is resolved. For the second question ("How can we visually make clear in the code where a step gets executed?"): The solution to this is simple but might somehow dissapointing to some: We just use the convenstion that a step i.e. a function that realizes a step always has the postfix "\_step" in its name.  Some people do not like relying on conventions, but in practice this works out pretty well.
 
 ---
 **Convention**
