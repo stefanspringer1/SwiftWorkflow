@@ -296,7 +296,7 @@ It is a good practice to always create a job for each step even if such a job is
 
 ### Using an execution just for logging
 
-An `Execution` can also be used without an `Executiondatabase`, just for logging. E.g. at the start of a programm when we first have to decide what job to be run and for what data, we can create an `Execution` instance just to make the logging easy.
+An `Execution` can also be used without an `Executiondatabase`, just for logging. E.g. at the start of a programm when we first have to decide what job to be run and for what data, we can create an `Execution` instance just to make the logging streamlined.
 
 ### Jobs as starting point for the same kind of data
 
