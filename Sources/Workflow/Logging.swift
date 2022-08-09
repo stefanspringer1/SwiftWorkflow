@@ -82,13 +82,13 @@ public class SynchronousCollectingLogger {
     public var loggingEvents: [SimpleLoggingEvent] { _loggingEvents }
 }
 
-public func collectingErrors(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) -> ()) async {
+public func collectingMessages(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) -> ()) async {
     let collectingLogger = SynchronousCollectingLogger()
     block(collectingLogger)
     await execution.log(collected: collectingLogger.loggingEvents)
 }
 
-public func collectingErrorsThrowing(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) throws -> ()) async throws {
+public func collectingMessages(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) throws -> ()) async throws {
     let collectingLogger = SynchronousCollectingLogger()
     try block(collectingLogger)
     await execution.log(collected: collectingLogger.loggingEvents)
