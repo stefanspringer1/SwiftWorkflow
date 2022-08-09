@@ -83,7 +83,7 @@ So when we use functions as steps, the following requirements are missing:
 - There should be an environment accessible inside the steps which can be used for logging (or other communication).
 - This environment should also have control over the execution of the steps, e.g. when there is a fatal error, the execution of the steps should stop.
 
-We will see in the next section how this is resolved. For the second question ("How can we visually make clear in the code where a step gets executed?"): The solution to this is simple but might somehow dissapointing to some: We just use the convenstion that a step i.e. a function that realizes a step always has the postfix "\_step" in its name.  Some people do not like relying on conventions, but in practice this works out pretty good.
+We will see in the next section how this is resolved. For the second question ("How can we visually make clear in the code where a step gets executed?"): The solution to this is simple but might somehow dissapointing to some: We just use the convenstion that a step i.e. a function that realizes a step always has the postfix "\_step" in its name.  Some people do not like relying on conventions, but in practice this works out pretty well.
 
 ---
 **Convention**
@@ -100,7 +100,7 @@ An `Execution` has control over the steps, i.e. it can decide if a step actually
 
 ### Formulation of a step
 
-A step fullfilling "task A" is to be formulated as follows. Just as an example, `data` is here is the instance of a class being changed during the execution (of cource, our steps could also return a value etc.). An `ExecutionDatabase` keeps track of the steps run (we have to use it separatelty from the `Execution` instance because the `ExecutionDatabase` has to be set for each Swift package separately; more on that later). The `ExecutionDatabase` instance keeps track of the functions by their function signature (name and argument names), therefore all step function _have to be top-level function_ so that the function names are unambiguous. An `ExecutionDatabase` must not be shared between several `Excution` instances.
+A step fullfilling "task a" is to be formulated as follows. Just as an example, `data` is here is the instance of a class being changed during the execution (of cource, our steps could also return a value etc.). An `ExecutionDatabase` keeps track of the steps run (we have to use it separatelty from the `Execution` instance because the `ExecutionDatabase` has to be set for each Swift package separately; more on that later). The `ExecutionDatabase` instance keeps track of the functions by their function signature (name and argument names), therefore all step function _have to be top-level function_ so that the function names are unambiguous. An `ExecutionDatabase` must not be shared between several `Excution` instances.
 
 ---
 **Convention**
@@ -123,7 +123,7 @@ func a_step(
 }
 ```
 
-The call of the `effectuate` method of the execution, which should contain all other instructions inside the step function, is (besides the naming scheme for steps) the second convention regarding steps. We say that `taskA_step` gets executed when we actually mean that its content inside its `effectuate` statement gets executed. It is the `effectuate` method that controls the execution of the steps.
+The call of the `effectuate` method of the execution, which should contain all other instructions inside the step function, is (besides the naming scheme for steps) the second convention regarding steps. We say that `a_step` gets executed when we actually mean that its content inside its `effectuate` statement gets executed. It is the `effectuate` method that controls the execution of the steps.
 
 ---
 **Convention**
@@ -296,7 +296,7 @@ It is a good practice to always create a job for each step even if such a job is
 
 ### Using an execution just for logging
 
-An `Execution` can also be used without an `Executiondatabase`, just for logging. E.g. at the start of a programm when we first have to decide what job to be run and for what data, we can create an `Execution` instance just to make the logging easy.
+An `Execution` can also be used without an `Executiondatabase`, just for logging. E.g. at the start of a programm when we first have to decide what job to be run and for what data, we can create an `Execution` instance just to make the logging streamlined.
 
 ### Jobs as starting point for the same kind of data
 
