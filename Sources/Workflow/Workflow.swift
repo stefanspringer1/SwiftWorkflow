@@ -90,38 +90,37 @@ public actor Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate(_ executionDatabase: ExecutionDatabase, _ functionName: String, work: () async -> ()) async {
-        let stepName = functionName.until(substring: "(")
+    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
         if stopped {
-            await self.log(executionMessages.skippingStep, stepName, functionName)
+            await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
-        else if !executionDatabase.started(functionName) || forceValues.last == true {
-            stepFunctionStack.append(functionName)
-            stepNameStack.append(stepName)
+        else if !executionDatabase.started(effectuationID) || forceValues.last == true {
+            stepFunctionStack.append(effectuationID)
+            stepNameStack.append(effectuationID)
             if showSteps {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    localizingMessage: [.en: ">> STEP \(stepName)"],
+                    localizingMessage: [.en: ">> STEP \(effectuationID)"],
                     stepStack: stepNameStack
                 ))
             }
-            executionDatabase.notifyStarting(functionName)
+            executionDatabase.notifyStarting(effectuationID)
             await execute(force: false, work: work)
             if showSteps {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    localizingMessage: [.en: stopped ? "<< ABORDED \(stepName)" : "<< DONE \(stepName)" ],
+                    localizingMessage: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
                     stepStack: stepNameStack
                 ))
             }
             stepFunctionStack.removeLast()
             stepNameStack.removeLast()
         } else if debug {
-            await self.log(executionMessages.skippingStep, stepName, functionName)
+            await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
     }
     
