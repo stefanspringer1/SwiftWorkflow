@@ -209,7 +209,7 @@ public enum MessageType: Comparable, Codable {
     case Warning
     
     /// Information about the execution for a work item, e.g. starting.
-    case Execution
+    case Iteration
     
     /// Errors from the processing.
     case Error
@@ -230,7 +230,7 @@ public enum MessageType: Comparable, Codable {
       case .Progress: return "Progress"
       case .Info: return "Info"
       case .Warning: return "Warning"
-      case .Execution: return "Execution"
+      case .Iteration: return "Iteration"
       case .Error: return "Error"
       case .Fatal: return "Fatal"
       case .Deadly: return "Deadly"
