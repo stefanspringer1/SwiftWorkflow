@@ -345,6 +345,10 @@ The resolving of a job name and the call of the appropriate job is then done as 
     }
 ```
 
+### Spare usage of step arguments
+
+Generally, a step should only get as data what it really needs in its arguments. E.g. handling over a big collection of configuration data might ease the formulation of the steps, but being more explicit here - i.e. handling over just the parts of the configuration data that the step needs – makes the usage of the data much more transparent.
+
 ### Step data
 
 Each step should have an instance of `StepData` in its script with:
