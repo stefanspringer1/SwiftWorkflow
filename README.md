@@ -8,13 +8,15 @@ Additionally, loggers are used that outlive the creation of executions. Part of 
 
 The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services. Without suspension happening, those calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
-This framework relies in part on some easy conventions. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1]
+This framework relies in part on some easy conventions. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
 
 [^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with an appropriate ID, which implements a process management. The conventions are primarily used for clarity and are not decisive from a conceptual point of view.
 
 For (parallel) processing of several work items, [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms) should provide easy solutions, but we might add some customized tooling in the future. See the section on future directions at the end about what else might be added in the future.
 
 For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData).
+
+The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.
 
 The `import Workflow` and other imports are being dropped in the code samples.
 
