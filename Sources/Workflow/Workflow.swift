@@ -40,8 +40,7 @@ public class ExecutionDatabase {
 /// - prevents double execution of steps
 /// - keeps global information for logging
 public actor Execution {
-    var stepFunctionStack = [String]()
-    var stepNameStack = [String]()
+    var effectuationIDStack = [String]()
     var _logger: Logger
     var processID: String?
     var applicationPrefix: String
@@ -95,15 +94,14 @@ public actor Execution {
             await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
         else if !executionDatabase.started(effectuationID) || forceValues.last == true {
-            stepFunctionStack.append(effectuationID)
-            stepNameStack.append(effectuationID)
+            effectuationIDStack.append(effectuationID)
             if showSteps {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
                     localizingMessage: [.en: ">> STEP \(effectuationID)"],
-                    stepStack: stepNameStack
+                    effectuationIDStack: effectuationIDStack
                 ))
             }
             executionDatabase.notifyStarting(effectuationID)
@@ -114,11 +112,10 @@ public actor Execution {
                     processID: processID,
                     applicationPrefix: applicationPrefix,
                     localizingMessage: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
-                    stepStack: stepNameStack
+                    effectuationIDStack: effectuationIDStack
                 ))
             }
-            stepFunctionStack.removeLast()
-            stepNameStack.removeLast()
+            effectuationIDStack.removeLast()
         } else if debug {
             await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
@@ -139,9 +136,7 @@ public actor Execution {
             localizingMessage: fillLocalizingMessage(message: message.localizingMessage, with: arguments),
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
-            stepID: stepNameStack.last,
-            stepFunction: stepFunctionStack.last,
-            stepStack: stepNameStack
+            effectuationIDStack: effectuationIDStack
         ))
     }
     

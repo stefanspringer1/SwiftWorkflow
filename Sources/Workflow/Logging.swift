@@ -20,9 +20,7 @@ extension LoggingEvent {
             localizingMessage: localizingMessage,
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
-            stepID: stepID,
-            stepFunction: stepFunction,
-            stepStack: stepStack
+            effectuationIDStack: effectuationIDStack
         )
     }
 }
@@ -108,8 +106,7 @@ public extension Logger {
         _ type: MessageType,
         _ localizingMessage: LocalizingMessage,
         messageID: MessageID? = nil,
-        stepID: String? = nil,
-        parentSteps: [String]? = nil
+        effectuationIDStack: [String]? = nil
     ) async {
         await log(LoggingEvent(
             messageID: messageID,
@@ -117,8 +114,7 @@ public extension Logger {
             processID: processID,
             applicationPrefix: applicationPrefix,
             localizingMessage: localizingMessage,
-            stepID: stepID,
-            stepStack: parentSteps
+            effectuationIDStack: effectuationIDStack
         ))
     }
 }
@@ -147,15 +143,9 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// The information about the position in the work item.
     public var itemPositionInfo: String? = nil
     
-    /// The step ID.
-    public var stepID: String? = nil
-    
-    /// The signature of the step function.
-    public var stepFunction: String? = nil
-    
-    /// The whole chain of the step stack,
-    /// including the current step.
-    public var stepStack: [String]? = nil
+    /// The whole chain of the effectuation IDs,
+    /// including the current effectuation ID.
+    public var effectuationIDStack: [String]? = nil
     
     /// The time of the event.
     public var time: String
@@ -168,9 +158,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         localizingMessage: LocalizingMessage,
         itemInfo: String? = nil,
         itemPositionInfo: String? = nil,
-        stepID: String? = nil,
-        stepFunction: String? = nil,
-        stepStack: [String]? = nil,
+        effectuationIDStack: [String]? = nil,
         time: String = formattedTime()
     ) {
         self.messageID = messageID
@@ -180,27 +168,25 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         self.localizingMessage = localizingMessage
         self.itemInfo = itemInfo
         self.itemPositionInfo = itemPositionInfo
-        self.stepID = stepID
-        self.stepFunction = stepFunction
-        self.stepStack = stepStack
+        self.effectuationIDStack = effectuationIDStack
         self.time = time
     }
     
     /// A textual representation of the step stack.
-    func stepStackToString () -> String {
-        return self.stepStack?.joined(separator: ", ") ?? ""
+    func effectuationIDStackToString () -> String {
+        return self.effectuationIDStack?.joined(separator: ", ") ?? ""
     }
     
     /// A short textual representation of the logging event.
     public var description: String {
-        let fullID = [stepID, messageID].joined(separator: " / ")
+        let fullID = [effectuationIDStack?.last, messageID].joined(separator: " / ")
         return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(localizingMessage[.en]?.trim() ?? "?")"
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
     public func descriptionForLogging(usingStepIndentation: Bool = false) -> String {
-        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationPrefix + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.stepStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
-        let messagePart2 = self.description + (self.stepStack?.isEmpty == false ? " (step path: " + self.stepStack!.joined(separator: "/") + ")" : "")
+        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationPrefix + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationIDStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
+        let messagePart2 = self.description + (self.effectuationIDStack?.isEmpty == false ? " (step path: " + self.effectuationIDStack!.joined(separator: "/") + ")" : "")
         return messagePart1 + messagePart2 + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "") + (self.itemInfo != nil ? " [\(self.itemInfo!)]" : "")
     }
     
@@ -213,9 +199,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         case localizingMessage
         case itemInfo
         case itemPositionInfo
-        case stepID
-        case stepFunction
-        case stepStack
+        case effectuationIDStack
         case time
     }
     
@@ -228,9 +212,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         try container.encode(applicationPrefix, forKey: .applicationPrefix)
         try container.encode(itemInfo, forKey: .itemInfo)
         try container.encode(itemPositionInfo, forKey: .itemPositionInfo)
-        try container.encode(stepID, forKey: .stepID)
-        try container.encode(stepFunction, forKey: .stepFunction)
-        try container.encode(stepStack, forKey: .stepStack)
+        try container.encode(effectuationIDStack, forKey: .effectuationIDStack)
         try container.encode(time, forKey: .time)
 
         var languageContainer = container.nestedContainer(keyedBy: Language.self, forKey: .localizingMessage)
@@ -251,9 +233,7 @@ extension LoggingEvent: Decodable {
         self.applicationPrefix = try values.decode(String.self, forKey: .applicationPrefix)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
         self.itemPositionInfo = try values.decode(String?.self, forKey: .itemPositionInfo)
-        self.stepID = try values.decode(String?.self, forKey: .stepID)
-        self.stepFunction = try values.decode(String?.self, forKey: .stepFunction)
-        self.stepStack = try values.decode([String]?.self, forKey: .stepStack)
+        self.effectuationIDStack = try values.decode([String]?.self, forKey: .effectuationIDStack)
         self.time = try values.decode(String.self, forKey: .time)
         let messages = try values.nestedContainer(keyedBy: Language.self, forKey: .localizingMessage)
         self.localizingMessage = [Language.en: try messages.decode(String.self, forKey: .en),
@@ -459,9 +439,6 @@ public actor RESTLogger: Logger {
     public func close() async throws {}
 }
 
-/// The step name is just a text.
-public typealias StepName = String
-
 /// A message contains a message ID, a message type, and a `LocalizingMessage`.
 public struct Message {
     
@@ -542,8 +519,8 @@ public class StepDataCollector {
     public func collect(from stepData: StepData, forStep stepName: String) {
         let stepMessages = stepData.messages
         allData[stepName] = (stepData.stepDescription,stepMessages)
-        stepData.messages.values.forEach { localiziingMessage in
-            localiziingMessage.localizingMessage.keys.forEach{ language in
+        stepData.messages.values.forEach { localizingMessage in
+            localizingMessage.localizingMessage.keys.forEach{ language in
                 _languages.insert(language)
             }
         }
