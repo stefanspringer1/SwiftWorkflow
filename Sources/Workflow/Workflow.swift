@@ -100,7 +100,7 @@ public actor Execution {
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    localizingMessage: [.en: ">> STEP \(effectuationID)"],
+                    info: [.en: ">> STEP \(effectuationID)"],
                     effectuationIDStack: effectuationIDStack
                 ))
             }
@@ -111,7 +111,7 @@ public actor Execution {
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    localizingMessage: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
+                    info: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
                     effectuationIDStack: effectuationIDStack
                 ))
             }
@@ -133,7 +133,8 @@ public actor Execution {
             type: message.type,
             processID: processID,
             applicationPrefix: applicationPrefix,
-            localizingMessage: fillLocalizingMessage(message: message.localizingMessage, with: arguments),
+            info: fillLocalizingMessage(message: message.info, with: arguments),
+            solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
             effectuationIDStack: effectuationIDStack
@@ -167,7 +168,7 @@ public actor Execution {
 struct ExecutionMessages: MessagesHolder {
     
     /// A standard message informing aboout the skipping of a step.
-    let skippingStep = Message(id: "skipping step", type: .Debug, localizingMessage: [
+    let skippingStep = Message(id: "skipping step", type: .Debug, info: [
         .en: "Skipping step $1 since it ran already, function: $2.",
         .fr: "L'étape $1 est ignorée car elle a déjà été exécutée, fonction $2.",
         .de: "Schritt $1 wird übersprungen, da er bereits gelaufen ist, Funktion $2.",
@@ -292,4 +293,13 @@ public func fillLocalizingMessage(message: LocalizingMessage, with arguments: [S
         newMessage[language] = format(text, using: arguments)
     }
     return newMessage
+}
+
+/// Replaces the placeholders in all message texts of an instance of
+/// `LocalizingMessage` by the accordings arguments.
+public func fillLocalizingMessage(optionalMessage _message: LocalizingMessage?, with arguments: [String]?) -> LocalizingMessage? {
+    guard let message = _message else {
+        return nil
+    }
+    return fillLocalizingMessage(message: message, with: arguments)
 }

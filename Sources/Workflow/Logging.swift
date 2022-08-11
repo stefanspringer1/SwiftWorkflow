@@ -17,7 +17,8 @@ extension LoggingEvent {
             type: type,
             processID: processID,
             applicationPrefix: applicationPrefix,
-            localizingMessage: localizingMessage,
+            info: info,
+            solution: solution,
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
             effectuationIDStack: effectuationIDStack
@@ -104,7 +105,8 @@ public extension Logger {
         processID: String? = nil,
         applicationPrefix: String,
         _ type: MessageType,
-        _ localizingMessage: LocalizingMessage,
+        _ info: LocalizingMessage,
+        solution: LocalizingMessage? = nil,
         messageID: MessageID? = nil,
         effectuationIDStack: [String]? = nil
     ) async {
@@ -113,7 +115,8 @@ public extension Logger {
             type: type,
             processID: processID,
             applicationPrefix: applicationPrefix,
-            localizingMessage: localizingMessage,
+            info: info,
+            solution: solution,
             effectuationIDStack: effectuationIDStack
         ))
     }
@@ -135,7 +138,10 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     public let applicationPrefix: String
     
     /// The message.
-    public let localizingMessage: LocalizingMessage
+    public let info: LocalizingMessage
+    
+    /// Possibly a proposed solution.
+    public let solution: LocalizingMessage?
     
     /// The information about the work item.
     public var itemInfo: String? = nil
@@ -155,7 +161,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         type: MessageType,
         processID: String? = nil,
         applicationPrefix: String,
-        localizingMessage: LocalizingMessage,
+        info: LocalizingMessage,
+        solution: LocalizingMessage? = nil,
         itemInfo: String? = nil,
         itemPositionInfo: String? = nil,
         effectuationIDStack: [String]? = nil,
@@ -165,7 +172,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         self.type = type
         self.processID = processID
         self.applicationPrefix = applicationPrefix
-        self.localizingMessage = localizingMessage
+        self.info = info
+        self.solution = solution
         self.itemInfo = itemInfo
         self.itemPositionInfo = itemPositionInfo
         self.effectuationIDStack = effectuationIDStack
@@ -180,7 +188,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// A short textual representation of the logging event.
     public var description: String {
         let fullID = [effectuationIDStack?.last, messageID].joined(separator: " / ")
-        return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(localizingMessage[.en]?.trim() ?? "?")"
+        return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(info[.en]?.trim() ?? "?")\(solution != nil ? " – soloution: \(solution?[.en]?.trim() ?? "?")" : "")"
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
@@ -196,7 +204,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         case type
         case processID
         case applicationPrefix
-        case localizingMessage
+        case info
+        case solution
         case itemInfo
         case itemPositionInfo
         case effectuationIDStack
@@ -215,10 +224,16 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         try container.encode(effectuationIDStack, forKey: .effectuationIDStack)
         try container.encode(time, forKey: .time)
 
-        var languageContainer = container.nestedContainer(keyedBy: Language.self, forKey: .localizingMessage)
-        try languageContainer.encode(localizingMessage[Language.en], forKey: .en)
-        try languageContainer.encode(localizingMessage[Language.fr], forKey: .fr)
-        try languageContainer.encode(localizingMessage[Language.de], forKey: .de)
+        var languageContainerForInfo = container.nestedContainer(keyedBy: Language.self, forKey: .info)
+        try languageContainerForInfo.encode(info[Language.en], forKey: .en)
+        try languageContainerForInfo.encode(info[Language.fr], forKey: .fr)
+        try languageContainerForInfo.encode(info[Language.de], forKey: .de)
+        
+        var languageContainerForSolution = container.nestedContainer(keyedBy: Language.self, forKey: .solution)
+        try languageContainerForSolution.encode(solution?[Language.en], forKey: .en)
+        try languageContainerForSolution.encode(solution?[Language.fr], forKey: .fr)
+        try languageContainerForSolution.encode(solution?[Language.de], forKey: .de)
+
     }
 }
 
@@ -235,10 +250,14 @@ extension LoggingEvent: Decodable {
         self.itemPositionInfo = try values.decode(String?.self, forKey: .itemPositionInfo)
         self.effectuationIDStack = try values.decode([String]?.self, forKey: .effectuationIDStack)
         self.time = try values.decode(String.self, forKey: .time)
-        let messages = try values.nestedContainer(keyedBy: Language.self, forKey: .localizingMessage)
-        self.localizingMessage = [Language.en: try messages.decode(String.self, forKey: .en),
-                                 Language.fr: try messages.decode(String.self, forKey: .fr),
-                                 Language.de: try messages.decode(String.self, forKey: .de)]
+        let info = try values.nestedContainer(keyedBy: Language.self, forKey: .info)
+        self.info = [Language.en: try info.decode(String.self, forKey: .en),
+                                 Language.fr: try info.decode(String.self, forKey: .fr),
+                                 Language.de: try info.decode(String.self, forKey: .de)]
+        let solution = try values.nestedContainer(keyedBy: Language.self, forKey: .solution)
+        self.solution = [Language.en: try solution.decode(String.self, forKey: .en),
+                                 Language.fr: try solution.decode(String.self, forKey: .fr),
+                                 Language.de: try solution.decode(String.self, forKey: .de)]
     }
 }
 
@@ -442,15 +461,18 @@ public actor RESTLogger: Logger {
 /// A message contains a message ID, a message type, and a `LocalizingMessage`.
 public struct Message {
     
-    public init(id: MessageID?, type: MessageType, localizingMessage: LocalizingMessage) {
-        self.id = id
-        self.type = type
-        self.localizingMessage = localizingMessage
-    }
-    
     public let id: MessageID?
     public let type: MessageType
-    public let localizingMessage: LocalizingMessage
+    public let info: LocalizingMessage
+    public let solution: LocalizingMessage?
+    
+    public init(id: MessageID?, type: MessageType, info: LocalizingMessage, solution: LocalizingMessage? = nil) {
+        self.id = id
+        self.type = type
+        self.info = info
+        self.solution = solution
+    }
+    
 }
 
 /// A collection of messages as a map from the message ID to the message.
@@ -520,7 +542,10 @@ public class StepDataCollector {
         let stepMessages = stepData.messages
         allData[stepName] = (stepData.stepDescription,stepMessages)
         stepData.messages.values.forEach { localizingMessage in
-            localizingMessage.localizingMessage.keys.forEach{ language in
+            localizingMessage.info.keys.forEach{ language in
+                _languages.insert(language)
+            }
+            localizingMessage.solution?.keys.forEach{ language in
                 _languages.insert(language)
             }
         }
@@ -550,7 +575,7 @@ public class StepDataCollector {
         let languageList = Language.languageList //_languages.sorted()
         fileHandle.write("\"Step\";\"Step Description\";\"Message ID\";\"Message Type\"".data(using: .utf8)!)
         languageList.forEach { language in
-            fileHandle.write(";\"Message (\(language))\"".data(using: .utf8)!)
+            fileHandle.write(";\"Info (\(language))\";\"Solution (\(language))\"".data(using: .utf8)!)
         }
         fileHandle.write("\r\n".data(using: .utf8)!)
         allData.keys.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
@@ -564,8 +589,10 @@ public class StepDataCollector {
                         if let message = messagesForStep[messageID] {
                             fileHandle.write("\"\(stepNameEscaped)\";\"\(stepDescriptionEscaped)\";\"\(messageIDEscaped)\";\"\(message.type)\"".data(using: .utf8)!)
                             languageList.forEach { language in
-                                let messageEscaped = (message.localizingMessage[language] ?? "").replacingOccurrences(of: "\"", with: "\"\"")
-                                fileHandle.write(";\"\(messageEscaped)\"".data(using: .utf8)!)
+                                let infoEscaped = message.info[language]?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
+                                fileHandle.write(";\"\(infoEscaped)\"".data(using: .utf8)!)
+                                let solutionEscaped = message.solution?[language]?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
+                                fileHandle.write(";\"\(solutionEscaped)\"".data(using: .utf8)!)
                             }
                             fileHandle.write("\r\n".data(using: .utf8)!)
                         }
