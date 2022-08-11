@@ -8,9 +8,9 @@ Additionally, loggers are used that outlive the creation of executions. Part of 
 
 The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services. Without suspension happening, those calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
-This framework relies in part on some easy conventions. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
+This framework relies in part on some easy conventions to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
 
-[^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with an appropriate ID, which implements a process management. The conventions are primarily used for clarity and are not decisive from a conceptual point of view.
+[^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with an appropriate ID, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
 For (parallel) processing of several work items, [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms) should provide easy solutions, but we might add some customized tooling in the future. See the section on future directions at the end about what else might be added in the future.
 
@@ -68,7 +68,7 @@ We would even go further:
 
 - In each step, there should be no rules of how to mix “real work” and the calling of other steps. This should be completely flexible.
 
-We should elaborate this last point. Maybe this mixture of the calling of steps and other code sounds like anarchy. There are frameworks for organizing the processing which are quite strict in their structure and make a more or less strict separation between the definition of which steps are to be executing and when, and the actual code doing the real work. But seldom this matches reality (or what we want the reality to be). E.g. we might have to decide dynamically during execution which step to be processed at a certain point of the execution. This decision might be complex, so we would like to be able to use complex code to make the decision, and moreover, put the code exactly to where the call of the step is done (or not done). So think of that kind of “anarchy” as a good thing!
+We should elaborate this last point. This mixture of the calling of steps and other code may seem suspicious to some. There are frameworks for organizing the processing which are quite strict in their structure and make a more or less strict separation between the definition of which steps are to be executing and when, and the actual code doing the real work. But seldom this matches reality (or what we want the reality to be). E.g. we might have to decide dynamically during execution which step to be processed at a certain point of the execution. This decision might be complex, so we would like to be able to use complex code to make the decision, and moreover, put the code exactly to where the call of the step is done (or not done).
 
 We now have an idea of how we would like the steps to be organized.
 
@@ -254,7 +254,7 @@ The `_external` infix is there to make the call hierarchy clear in the logs.
 ---
 **Convention**
 
-A function representing a public interface to a step (a "library function") has the following properties:
+A function representing a public interface to a step (a “library function”) has the following properties:
 
 - it is public,
 - it has the postfix `_lib` in its name,
@@ -262,6 +262,10 @@ A function representing a public interface to a step (a "library function") has 
 - and it should be wrapped by a step function with the same name prefix and a second prefix (i.e. infix) `_external` in the package that uses the package with the library function.
 
 ---
+
+The recursive patterm of steps that you are able to use in a workflow is a natural[^2] starting point to outsource some functionality of your workflow into an external package.
+
+[^2]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
 
 ### Organisation of the code in the files
 
