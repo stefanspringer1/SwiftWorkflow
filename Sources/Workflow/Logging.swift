@@ -150,7 +150,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     public var itemPositionInfo: String? = nil
     
     /// The whole chain of the effectuation IDs aka "step IDs",
-    /// including the current effectuation ID.
+    /// including the current one.
     public var effectuationIDStack: [String]? = nil
     
     /// The time of the event.
