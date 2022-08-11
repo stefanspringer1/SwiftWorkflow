@@ -131,7 +131,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// Teh message type.
     public let type: MessageType
 
-    /// The process ID for embedding in a complex processign scenario.
+    /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
     
     /// The application prefix informing about teh application being executed.
