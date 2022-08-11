@@ -16,7 +16,9 @@ For (parallel) processing of several work items, [Swift Async Algorithms](https:
 
 For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData).
 
-The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.
+The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^2] 
+
+[^2] But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
 
 The `import Workflow` and other imports are being dropped in the code samples.
 
@@ -263,9 +265,9 @@ A function representing a public interface to a step (a “library function”) 
 
 ---
 
-The tree-like pattern of steps that you are able to use in a workflow is a natural[^2] starting point to outsource some functionality of your workflow into an external package.
+The tree-like pattern of steps that you are able to use in a workflow is a natural[^3] starting point to outsource some functionality of your workflow into an external package.
 
-[^2]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
+[^3]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
 
 ### Organisation of the code in the files
 
