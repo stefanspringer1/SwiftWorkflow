@@ -100,7 +100,7 @@ public actor Execution {
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    info: [.en: ">> STEP \(effectuationID)"],
+                    fact: [.en: ">> STEP \(effectuationID)"],
                     effectuationIDStack: effectuationIDStack
                 ))
             }
@@ -111,7 +111,7 @@ public actor Execution {
                     type: .Progress,
                     processID: processID,
                     applicationPrefix: applicationPrefix,
-                    info: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
+                    fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
                     effectuationIDStack: effectuationIDStack
                 ))
             }
@@ -133,7 +133,7 @@ public actor Execution {
             type: message.type,
             processID: processID,
             applicationPrefix: applicationPrefix,
-            info: fillLocalizingMessage(message: message.info, with: arguments),
+            fact: fillLocalizingMessage(message: message.fact, with: arguments),
             solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
@@ -168,7 +168,7 @@ public actor Execution {
 struct ExecutionMessages: MessagesHolder {
     
     /// A standard message informing aboout the skipping of a step.
-    let skippingStep = Message(id: "skipping step", type: .Debug, info: [
+    let skippingStep = Message(id: "skipping step", type: .Debug, fact: [
         .en: "Skipping step $1 since it ran already, function: $2.",
         .fr: "L'étape $1 est ignorée car elle a déjà été exécutée, fonction $2.",
         .de: "Schritt $1 wird übersprungen, da er bereits gelaufen ist, Funktion $2.",
