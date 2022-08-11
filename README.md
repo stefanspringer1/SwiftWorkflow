@@ -263,7 +263,7 @@ A function representing a public interface to a step (a “library function”) 
 
 ---
 
-The recursive patterm of steps that you are able to use in a workflow is a natural[^2] starting point to outsource some functionality of your workflow into an external package.
+The tree-like pattern of steps that you are able to use in a workflow is a natural[^2] starting point to outsource some functionality of your workflow into an external package.
 
 [^2]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
 
