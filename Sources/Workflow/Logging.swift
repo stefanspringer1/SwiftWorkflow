@@ -149,8 +149,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// The information about the position in the work item.
     public var itemPositionInfo: String? = nil
     
-    /// The whole chain of the effectuation IDs aka "step IDs",
-    /// including the current one.
+    /// The hierarchy of the effectuation IDs aka "step IDs"
+    /// (i.e. the current one, the ID of the parent effectuation, etc.).
     public var effectuationIDStack: [String]? = nil
     
     /// The time of the event.
