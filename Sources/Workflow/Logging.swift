@@ -16,7 +16,7 @@ extension LoggingEvent {
             messageID: messageID,
             type: type,
             processID: processID,
-            applicationPrefix: applicationPrefix,
+            applicationName: applicationName,
             fact: fact,
             solution: solution,
             itemInfo: itemInfo,
@@ -103,7 +103,7 @@ public extension Logger {
     /// Logging the data that is to be composed into a `LoggingEvent`.
     func log(
         processID: String? = nil,
-        applicationPrefix: String,
+        applicationName: String,
         _ type: MessageType,
         _ fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,
@@ -114,7 +114,7 @@ public extension Logger {
             messageID: messageID,
             type: type,
             processID: processID,
-            applicationPrefix: applicationPrefix,
+            applicationName: applicationName,
             fact: fact,
             solution: solution,
             effectuationIDStack: effectuationIDStack
@@ -135,7 +135,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     public let processID: String?
     
     /// The application prefix informing about the application being executed.
-    public let applicationPrefix: String
+    public let applicationName: String
     
     /// The description of the fact.
     public let fact: LocalizingMessage
@@ -161,7 +161,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         messageID: MessageID? = nil,
         type: MessageType,
         processID: String? = nil,
-        applicationPrefix: String,
+        applicationName: String,
         fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,
         itemInfo: String? = nil,
@@ -172,7 +172,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         self.messageID = messageID
         self.type = type
         self.processID = processID
-        self.applicationPrefix = applicationPrefix
+        self.applicationName = applicationName
         self.fact = fact
         self.solution = solution
         self.itemInfo = itemInfo
@@ -194,7 +194,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A longer textual representation of the logging event used in the actual logging.
     public func descriptionForLogging(usingStepIndentation: Bool = false) -> String {
-        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationPrefix + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationIDStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
+        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationName + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationIDStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
         let messagePart2 = self.description + (self.effectuationIDStack?.isEmpty == false ? " (step path: " + self.effectuationIDStack!.joined(separator: " / ") + ")" : "")
         return messagePart1 + messagePart2 + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "") + (self.itemInfo != nil ? " [\(self.itemInfo!)]" : "")
     }
@@ -204,7 +204,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         case messageID
         case type
         case processID
-        case applicationPrefix
+        case applicationName
         case fact
         case solution
         case itemInfo
@@ -219,7 +219,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         try container.encode(messageID, forKey: .messageID)
         try container.encode(type, forKey: .type)
         try container.encode(processID, forKey: .processID)
-        try container.encode(applicationPrefix, forKey: .applicationPrefix)
+        try container.encode(applicationName, forKey: .applicationName)
         try container.encode(itemInfo, forKey: .itemInfo)
         try container.encode(itemPositionInfo, forKey: .itemPositionInfo)
         try container.encode(effectuationIDStack, forKey: .effectuationIDStack)
@@ -246,7 +246,7 @@ extension LoggingEvent: Decodable {
         self.messageID = try values.decode(String?.self, forKey: .messageID)
         self.type = try values.decode(MessageType.self, forKey: .type)
         self.processID = try values.decode(String.self, forKey: .processID)
-        self.applicationPrefix = try values.decode(String.self, forKey: .applicationPrefix)
+        self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
         self.itemPositionInfo = try values.decode(String?.self, forKey: .itemPositionInfo)
         self.effectuationIDStack = try values.decode([String]?.self, forKey: .effectuationIDStack)

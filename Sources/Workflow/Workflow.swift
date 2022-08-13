@@ -43,7 +43,7 @@ public actor Execution {
     var effectuationIDStack = [String]()
     var _logger: Logger
     var processID: String?
-    var applicationPrefix: String
+    var applicationName: String
     var itemInfo: String? = nil
     var _worseMessageType: MessageType = .Debug
     
@@ -54,10 +54,10 @@ public actor Execution {
     let debug: Bool
     let showSteps: Bool
     
-    public init (logger: Logger, processID: String? = nil, applicationPrefix: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
+    public init (logger: Logger, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
         self._logger = logger
         self.processID = processID
-        self.applicationPrefix = applicationPrefix
+        self.applicationName = applicationName
         self.itemInfo = itemInfo
         self.debug = debug
         self.showSteps = showSteps
@@ -99,7 +99,7 @@ public actor Execution {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
-                    applicationPrefix: applicationPrefix,
+                    applicationName: applicationName,
                     fact: [.en: ">> STEP \(effectuationID)"],
                     effectuationIDStack: effectuationIDStack
                 ))
@@ -110,7 +110,7 @@ public actor Execution {
                 await _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
-                    applicationPrefix: applicationPrefix,
+                    applicationName: applicationName,
                     fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
                     effectuationIDStack: effectuationIDStack
                 ))
@@ -132,7 +132,7 @@ public actor Execution {
             messageID: message.id,
             type: message.type,
             processID: processID,
-            applicationPrefix: applicationPrefix,
+            applicationName: applicationName,
             fact: fillLocalizingMessage(message: message.fact, with: arguments),
             solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
             itemInfo: itemInfo,

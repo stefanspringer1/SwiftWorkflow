@@ -338,9 +338,9 @@ The resolving of a job name and the call of the appropriate job is then done as 
 ```Swift
     if let jobFunction = jobRegistry[job]?.job {
         
-        let applicationPrefix = "SwiftWorkflowExampleProgram"
+        let applicationName = "SwiftWorkflowExampleProgram"
         let logger = PrintLogger()
-        let execution = Execution(logger: logger, applicationPrefix: applicationPrefix, showSteps: true)
+        let execution = Execution(logger: logger, applicationName: applicationName, showSteps: true)
         
         await jobFunction(
             execution,

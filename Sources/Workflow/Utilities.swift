@@ -30,13 +30,13 @@ extension Sequence {
 
 public extension URL {
     
-    func removeAsTemp(applicationPrefix: String, logger: Logger) async {
+    func removeAsTemp(applicationName: String, logger: Logger) async {
         do {
             if self.isDirectory {
                 var empty = true
                 try await FileManager.default.contentsOfDirectory(atPath: self.path).forEachAsync { file in
                     await logger.log(
-                        applicationPrefix: applicationPrefix,
+                        applicationName: applicationName,
                         .Warning,
                         [
                             .en: "file in temporary directory after processing: [\(file)]"
@@ -48,7 +48,7 @@ public extension URL {
                     try self.removeDirectorySafely()
                 } else {
                     await logger.log(
-                        applicationPrefix: applicationPrefix,
+                        applicationName: applicationName,
                         .Warning,
                         [
                             .en: "temporary directory [\(self.osPath)] is not empty after processing"
@@ -59,7 +59,7 @@ public extension URL {
         }
         catch {
             await logger.log(
-                applicationPrefix: applicationPrefix,
+                applicationName: applicationName,
                 .Warning,
                 [
                     .en: "error when deleting temporary directory [\(self.osPath)]: \(error.localizedDescription)"
