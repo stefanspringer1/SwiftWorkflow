@@ -46,6 +46,10 @@ It will be then usable in a Swift file after adding the following import:
 import Workflow
 ```
 
+## Related packages
+
+When working with [SwiftXML](https://github.com/stefanspringer1/SwiftXML) in the context of this workflow framework, you might include the [WorkflowUtilitiesForSwiftXML](https://github.com/stefanspringer1/WorkflowUtilitiesForSwiftXML).
+
 ## Motivation
 
 We think of a process consisting of several steps, each step fullfilling a certain piece of work. We first see what basic requirements we would like to postulate for those steps, and then how we could realize that in practice. Of course, some more important points will then be made.
