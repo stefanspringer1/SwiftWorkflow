@@ -432,6 +432,6 @@ The following features might be added in the future:
 
 - A pause/stop mechanism.
 - A mechanism for _pulling_ progress information (an according `Logger` implementation should suffice).
-- Customized tooling for easy parallel processing of several work items (using [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms)).
+- Customized tooling for easy parallel processing of several work items.
 - Tooling for giving an entry point for different types of data and using several job registries (each for one types of data) as a way to combine sevaral application under one umbrella.
 - A binding to the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html).
