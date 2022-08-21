@@ -183,7 +183,7 @@ func c_step(
 }
 ```
 
-Again, here `a_step` and `b_step` can be seen as requirements for the work done by `c_step`.
+Again, `a_step` and `b_step` can be seen here as requirements for the work done by `c_step`.
 
 When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.
 
