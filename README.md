@@ -184,7 +184,7 @@ Inside `b_step`, the step `a_step` is _not_ being executed, because `a_step` has
 ---
 **Convention**
 
-Requirements for a step are formulated by just calling the accordings steps, i.e. the steps that fullfill these requirements. (Those steps will not run again if they already have been run.)
+Requirements for a step are formulated by just calling the accordings steps inside this step, i.e. the steps are called that fullfill these requirements. (Those steps will not run again if they already have been run.)
 
 ---
 
