@@ -428,7 +428,7 @@ Note that we use a set of **message types** different from the one in the [Swift
 
 ### Working in asynchronous contexts
 
-In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Execution`.
+In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
 Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronous context.
 
