@@ -138,7 +138,8 @@ The call of the `effectuate` method of the execution, which should contain all o
 ---
 **Convention**
 
-A function representing a step uses a call to `Execution.effectuate` to wrap all its other statements. 
+- A function representing a step uses a call to `Execution.effectuate` to wrap all its other statements.
+- Use the function signature available via `#function` as the identifier in the call of the `effectuate` method.
 
 ---
 
