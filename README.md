@@ -8,7 +8,7 @@ Additionally, loggers are used that outlive the creation of executions. Part of 
 
 The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services, and is suitable for easy parallel processing of work items[^1]. Without suspension happening, those asynchronuous calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
-[^1]: See the last section on possible future directions.
+[^1]: For parallel processing, see the last section on possible future directions.
 
 This framework relies in part on some easy conventions to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^2] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
 
