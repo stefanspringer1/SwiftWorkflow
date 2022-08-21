@@ -18,7 +18,7 @@ For a quick start, just see the conventions (between horizontal rules) given bel
 
 The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^3]
 
-[^3] But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
+[^3]: But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
 
 The `import Workflow` and other imports are being dropped in the code samples.
 
