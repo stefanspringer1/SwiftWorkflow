@@ -110,7 +110,7 @@ An `Execution` has control over the steps, i.e. it can decide if a step actually
 
 ### Formulation of a step
 
-To give the `Execution` control over a function representing a step, its statements are to be wrapped inside a call to `Execution.effectuate`.
+To give an `Execution` control over a function representing a step, its statements are to be wrapped inside a call to `Execution.effectuate`.
 
 ---
 **Convention**
