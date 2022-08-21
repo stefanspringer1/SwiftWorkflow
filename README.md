@@ -64,7 +64,7 @@ We could make the following requirements for the organization of steps:
 - Some steps might stem from other packages.
 - A step might have as precondition that another step has already been executed before it can do some piece of work.
 - There should be an environment accessible inside the steps which can be used for logging (or other communication).
-- This environment should also have control over the execution of the steps, e.g. when there is a fatal error, the execution of the steps should stop.
+- This environment should also have control over the execution of the steps, e.g. when there is a fatal error, no more steps should be executed.
 
 But of course, we do not only have a tree-like structure of steps executing each-other, _somewhere_ real work has to be done. Doing real work should also be done inside a step, we do not want to invent another type of thing, so:
 
