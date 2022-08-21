@@ -181,6 +181,14 @@ func c_step(
 
 Inside `b_step`, the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.
 
+---
+**Convention**
+
+Requirements for a step are formulated by just calling the accordings steps, i.e. the steps that fullfill these requirements. (Those steps will not run again if they already have been run.)
+
+---
+
+
 But sometimes a certain other step is needed just before a certain point in the processing, no matter if it already has been run before. In that case, you can use the `force` method of the execution:
 
 ```Swift
@@ -202,6 +210,13 @@ func b_step(
 ```
 
 Now `a_step` always runs inside `b_step` (if `b_step` gets executed).
+
+---
+**Convention**
+
+Use the `Execution.force` method if a certain step has to be run at a certain point no matter if it already has been run before.
+
+---
 
 ### Working with steps in library packages
 
