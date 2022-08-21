@@ -6,19 +6,19 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services. Without suspension happening, those calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
+The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services, and is suitable for easy parallel processing of work items[^1]. Without suspension happening, those asynchronuous calls are about as fast as synchronuous calls, so the framework can be also used for simple straight-forward processing in the command line. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
-This framework relies in part on some easy conventions to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^1] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
+[^1]: See the last section on possible future directions.
 
-[^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with an appropriate ID, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
+This framework relies in part on some easy conventions to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety.[^2] So it does not define a process logic in a „traditional“ way, which would not allow such flexibility.
 
-For (parallel) processing of several work items, [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms) should provide easy solutions, but we might add some customized tooling in the future. See the section on future directions at the end about what else might be added in the future.
+[^2]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with an appropriate ID, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
 For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData).
 
-The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^2] 
+The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^3]
 
-[^2] But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
+[^3] But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
 
 The `import Workflow` and other imports are being dropped in the code samples.
 
@@ -183,9 +183,9 @@ func c_step(
 }
 ```
 
-Again, `a_step` and `b_step` can be seen here as requirements for the work done by `c_step`.[^3]
+Again, `a_step` and `b_step` can be seen here as requirements for the work done by `c_step`.[^4]
 
-[^3]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encounterd such a problem.
+[^4]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encounterd such a problem.
 
 When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.
 
