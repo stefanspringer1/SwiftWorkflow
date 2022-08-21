@@ -110,6 +110,15 @@ An `Execution` has control over the steps, i.e. it can decide if a step actually
 
 ### Formulation of a step
 
+To give the `Execution` control over a function representing a step, its statements are to be wrapped inside a call to `Execution.effectuate`.
+
+---
+**Convention**
+
+A function representing a step uses a call to `Execution.effectuate` to wrap all its other statements.
+
+---
+
 A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). An `ExecutionDatabase` keeps track of the steps run by using a unique identifier for each step. This uniqueness of the identifier has to be ensured by the the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature as the identifier. This way the identifiers are unique _inside each package_ (this is why the `ExecutionDatabase` is separated from the `Execution` instance, to be able to use a separate `ExecutionDatabase` in each package, more on packages below). The function identifier is available via the compiler directive `#function` inside the function. An `ExecutionDatabase` must not be shared between several `Excution` instances.
 
 ```Swift
@@ -126,19 +135,12 @@ func a_step(
 }
 ```
 
----
-**Convention**
-
-A function representing a step is a top-level function.
-
----
-
 The call of the `effectuate` method of the execution, which should contain all other instructions inside the step function, is (besides the naming scheme for steps) the second convention regarding steps. We say that `a_step` gets executed when we actually mean that its content inside its `effectuate` statement gets executed. It is the `effectuate` method that controls the execution of the steps.
 
 ---
 **Convention**
 
-- A function representing a step uses a call to `Execution.effectuate` to wrap all its other statements.
+- A function representing a step is a top-level function.
 - Use the function signature available via `#function` as the identifier in the call of the `effectuate` method.
 
 ---
