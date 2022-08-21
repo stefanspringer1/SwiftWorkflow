@@ -52,7 +52,7 @@ When working with [SwiftXML](https://github.com/stefanspringer1/SwiftXML) in the
 
 ## Motivation
 
-We think of a processing of a work item consisting of several steps, each step fullfilling a certain piece of work. We first see what basic requirements we would like to postulate for those steps, and then how we could realize that in practice. Of course, some more important points will then be made.
+We think of a processing of a work item consisting of several steps, each step fullfilling a certain piece of work. We first see what basic requirements we would like to postulate for those steps, and then how we could realize that in practice.
 
 ### Requirements for the execution of steps
 
