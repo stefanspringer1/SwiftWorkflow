@@ -119,7 +119,7 @@ A function representing a step uses a call to `Execution.effectuate` to wrap all
 
 ---
 
-We say that a step gets executed when we actually mean that the statements inside its call to `effectuate` get executed.
+We say that a step “gets executed” when we actually mean that the statements inside its call to `effectuate` get executed.
 
 A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). An `ExecutionDatabase` keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature as the identifier. This way the identifiers are unique _inside each package_ (this is why the `ExecutionDatabase` is separated from the `Execution` instance, to be able to use a separate `ExecutionDatabase` in each package; more on packages below). The function identifier is available via the compiler directive `#function` inside the function. An `ExecutionDatabase` must not be shared between several `Excution` instances.
 
