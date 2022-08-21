@@ -82,7 +82,7 @@ In addition, the steps will operate on some data to be processed, might use some
 
 ### Realization of steps
 
-When programming, we have a very common thing that fullfills most of the requirements above: _a function._ But when we think of just using functions as steps, two questions immediately arise:
+When programming, we have a very common concept that fullfills most of the requirements above: _a function._ But when we think of just using functions as steps, two questions immediately arise:
 
 - How do we fullfill the missing requirements?
 - How can we visually make clear in the code where a step gets executed?
