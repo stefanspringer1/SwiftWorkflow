@@ -6,7 +6,7 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework uses asynchronuous calls and as such fits very well into asynchronous settings like web services, and is suitable for easy parallel processing[^1] of work items. (Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.) Without suspension happening, those asynchronuous calls are about as fast as synchronous calls, so the framework can be also used for simple sequentially processing in the command line without much drawbacks.
+The framework uses asynchronous calls and as such fits very well into asynchronous settings like web services, and is suitable for easy parallel processing[^1] of work items. (Logging is also asynchronous, but there is an easy way to intermediately present synchronous logging to a block of code.) Without suspension happening, those asynchronous calls are about as fast as synchronous calls, so the framework can be also used for simple sequentially processing in the command line without much drawbacks.
 
 [^1]: For parallel processing, see the last section on possible future directions.
 
@@ -428,9 +428,9 @@ Note that we use a set of **message types** different from the one in the [Swift
 
 ### Working in asynchronous contexts
 
-In an asynchronuous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Execution`.
+In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Execution`.
 
-Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronuous context.
+Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronous context.
 
 ### Future directions
 
