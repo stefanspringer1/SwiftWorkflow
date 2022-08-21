@@ -6,7 +6,7 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services, and is suitable for easy parallel processing of work items[^1]. Without suspension happening, those asynchronuous calls are about as fast as synchronuous calls, so the framework can be also used for simple sequentially processing in the command line without loosing its efficiency. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
+The framework uses asynchronuous calls and as such fits very well into asynchronuous settings like web services, and is suitable for easy parallel processing of work items[^1]. Without suspension happening, those asynchronuous calls are about as fast as synchronuous calls, so the framework can be also used for simple sequentially processing in the command line without drawbacks. Logging is also asynchronuous, but there is an easy way to intermediately present synchronuous logging to a block of code.
 
 [^1]: For parallel processing, see the last section on possible future directions.
 
