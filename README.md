@@ -162,6 +162,8 @@ func b_step(
 }
 ```
 
+Here, the call to `a_step` can be seen as the formulation of a requirement for the work done by `b_step`.
+
 Let us take another step `c_step` which first calls `a_step`, and then `b_step`:
 
 ```Swift
