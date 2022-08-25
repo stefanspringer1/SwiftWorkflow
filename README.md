@@ -303,7 +303,7 @@ The tree-like pattern of steps that you are able to use in a workflow is a natur
 
 We think it a a sensible thing to use one file for one step. Together with the step data (which includes the error messages, see below), maybe an according library function, or a job function (see below), this "fits" very well a file in many case.
 
-We also prefer to use folders with scripts according to the calling structure as far as possible.
+We also prefer to use folders with scripts according to the calling structure as far as possible, and we like to use a prefix `_external_` for the names of folders and source files if the contained steps actually call external steps i.e. library functions as described above.
 
 ### Limitations
 
