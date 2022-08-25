@@ -40,7 +40,20 @@ As dependency of your product:
 .product(name: "Workflow", package: "SwiftWorkflow"),
 ```
 
-It will be then usable in a Swift file after adding the following import:
+As ths package demands as macOS at least version 10.15, add e.g. the following `platforms` entry to your `Package.swift`[^4]:
+
+```Swift
+let package = Package(
+    name: "MyPackage",
+    platforms: [
+        .macOS(.v10_15)
+    ],
+    ...
+```
+
+[^4]: This entry corresponds to a `@available(macOS 10.15.0, *)` that you would otherwise add to your functions (the `@available(macOS 10.15.0, *)` in not necessary if you add the `platforms` entry). The `*` is implicit in the `platforms` entry. There is no need to add according entries for Linux or Windows, there you just have to make sure to use an according Swift version.
+
+This package will be then usable in a Swift file after adding the following import:
 
 ```Swift
 import Workflow
@@ -187,9 +200,9 @@ func c_step(
 
 Again, `a_step` and `b_step` can be seen here as requirements for the work done by `c_step`.
 
-When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.[^4]
+When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.[^5]
 
-[^4]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encountered such a problem.
+[^5]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encountered such a problem.
 
 ---
 **Convention**
@@ -295,9 +308,9 @@ A function representing a public interface to a step (a “library function”) 
 
 ---
 
-The tree-like pattern of steps that you are able to use in a workflow is a natural[^5] starting point to outsource some functionality of your workflow into an external package.
+The tree-like pattern of steps that you are able to use in a workflow is a natural[^6] starting point to outsource some functionality of your workflow into an external package.
 
-[^5]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
+[^6]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
 
 ### Organisation of the code in the files
 
@@ -422,9 +435,9 @@ await collectingMessages(forExecution: execution) { logger in
 
 See the example project for more details.
 
-Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^6]
+Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^7]
 
-[^6]: But see the last section on possible future directions for a binding.
+[^7]: But see the last section on possible future directions for a binding.
 
 ### Working in asynchronous contexts
 
