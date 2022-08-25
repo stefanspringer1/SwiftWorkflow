@@ -53,7 +53,7 @@ let package = Package(
 
 [^4]: This entry corresponds to a `@available(macOS 10.15.0, *)` that you would otherwise add to your functions (the `@available(macOS 10.15.0, *)` in not necessary if you add the `platforms` entry). The `*` is implicit in the `platforms` entry. There is no need to add according entries for Linux or Windows, there you just have to make sure to use an according Swift version.
 
-This package will be then usable in a Swift file after adding the following import:
+The Workflow package will be then usable in a Swift file after adding the following import:
 
 ```Swift
 import Workflow
