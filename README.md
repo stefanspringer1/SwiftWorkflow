@@ -40,7 +40,13 @@ As dependency of your product:
 .product(name: "Workflow", package: "SwiftWorkflow"),
 ```
 
-As ths package demands as macOS at least version 10.15, add e.g. the following `platforms` entry to your `Package.swift`[^4]:
+The Workflow package will be then usable in a Swift file after adding the following import:
+
+```Swift
+import Workflow
+```
+
+If you use the workflows of the type introduced here on macOS, at least macOS version 10.15 is required; if an essential part of your application is the use of workflows of the type introduced here, instead of using many `@available(macOS 10.15.0, *)` annotations, you might as well add the following `platforms` entry to your `Package.swift` file[^4]:
 
 ```Swift
 let package = Package(
@@ -51,13 +57,7 @@ let package = Package(
     ...
 ```
 
-[^4]: This entry corresponds to a `@available(macOS 10.15.0, *)` that you would otherwise add to your functions (the `@available(macOS 10.15.0, *)` in not necessary if you add the `platforms` entry). The `*` is implicit in the `platforms` entry. There is no need to add according entries for Linux or Windows, there you just have to make sure to use an according Swift version.
-
-The Workflow package will be then usable in a Swift file after adding the following import:
-
-```Swift
-import Workflow
-```
+[^4]: But better do not use such a `platforms` entry when building a package that has other parts that could be independendly used on older macOS versions. On Linux or Windows, you just have to make sure to use an according Swift version.
 
 ## Related packages
 
