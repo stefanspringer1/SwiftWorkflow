@@ -6,6 +6,7 @@
 
 import Foundation
 import Utilities
+import ArgumentParser
 
 /// A store to keep track of the steps already run.
 ///
@@ -237,6 +238,31 @@ public enum MessageType: Comparable, Codable {
       case .Fatal: return "Fatal"
       case .Deadly: return "Deadly"
       }
+    }
+}
+
+// The message type to be used as argukentthat informs about the severity a message.
+public enum MessageTypeArgument: String, ExpressibleByArgument {
+    case debug
+    case progress
+    case info
+    case warning
+    case iteration
+    case error
+    case fatal
+    case deadly
+    
+    var messageType: MessageType {
+        switch self {
+        case .debug: return MessageType.Debug
+        case .progress: return MessageType.Progress
+        case .info: return MessageType.Info
+        case .warning: return MessageType.Warning
+        case .iteration: return MessageType.Iteration
+        case .error: return MessageType.Error
+        case .fatal: return MessageType.Fatal
+        case .deadly: return MessageType.Deadly
+        }
     }
 }
 
