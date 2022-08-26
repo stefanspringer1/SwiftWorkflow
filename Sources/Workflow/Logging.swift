@@ -65,7 +65,6 @@ public actor CollectingLogger: Logger {
     }
 }
 
-@available(macOS 10.15, *)
 public struct SimpleLoggingEvent {
     let message: Message
     let itemPositionInfo: String?
