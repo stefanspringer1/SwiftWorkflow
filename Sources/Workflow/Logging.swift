@@ -73,7 +73,6 @@ public struct SimpleLoggingEvent {
 }
 
 /// A logger just collecting simple logging events.
-@available(macOS 10.15, *)
 public class SynchronousCollectingLogger {
 
     private var _loggingEvents = [SimpleLoggingEvent]()
