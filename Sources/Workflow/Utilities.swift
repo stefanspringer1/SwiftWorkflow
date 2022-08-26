@@ -10,6 +10,7 @@ import Utilities
 
 extension Sequence {
     
+    @available(macOS 10.15, *)
     func forEachAsync (
         _ operation: (Element) async -> Void
     ) async {
@@ -18,6 +19,7 @@ extension Sequence {
         }
     }
     
+    @available(macOS 10.15, *)
     func forEachAsync (
         _ operation: (Element) async throws -> Void
     ) async rethrows {
@@ -30,6 +32,7 @@ extension Sequence {
 
 public extension URL {
     
+    @available(macOS 10.15, *)
     func removeAsTemp(applicationName: String, logger: Logger) async {
         do {
             if self.isDirectory {

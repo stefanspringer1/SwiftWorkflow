@@ -39,12 +39,14 @@ extension LocalizingMessage {
 }
 
 /// A logger, logging instances of `LoggingEvent`.
+@available(macOS 10.15, *)
 public protocol Logger {
     func log(_ event: LoggingEvent) async
     func close() async throws
 }
 
 /// A logger just collecting all logging events.
+@available(macOS 10.15, *)
 public actor CollectingLogger: Logger {
 
     private var _loggingEvents = [LoggingEvent]()
@@ -63,6 +65,7 @@ public actor CollectingLogger: Logger {
     }
 }
 
+@available(macOS 10.15, *)
 public struct SimpleLoggingEvent {
     let message: Message
     let itemPositionInfo: String?
@@ -70,6 +73,7 @@ public struct SimpleLoggingEvent {
 }
 
 /// A logger just collecting simple logging events.
+@available(macOS 10.15, *)
 public class SynchronousCollectingLogger {
 
     private var _loggingEvents = [SimpleLoggingEvent]()
@@ -86,18 +90,21 @@ public class SynchronousCollectingLogger {
     public var loggingEvents: [SimpleLoggingEvent] { _loggingEvents }
 }
 
+@available(macOS 10.15, *)
 public func collectingMessages(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) -> ()) async {
     let collectingLogger = SynchronousCollectingLogger()
     block(collectingLogger)
     await execution.log(collected: collectingLogger.loggingEvents)
 }
 
+@available(macOS 10.15, *)
 public func collectingMessages(forExecution execution: Execution, block: (_ logger: SynchronousCollectingLogger) throws -> ()) async throws {
     let collectingLogger = SynchronousCollectingLogger()
     try block(collectingLogger)
     await execution.log(collected: collectingLogger.loggingEvents)
 }
 
+@available(macOS 10.15, *)
 public extension Logger {
     
     /// Logging the data that is to be composed into a `LoggingEvent`.
@@ -269,6 +276,7 @@ let STEP_INDENTATION  = "  "
 
 /// This is a logger that can be used to "merge" several other loggers,
 /// i.e. all logging events are being distributed to all loggers.
+@available(macOS 10.15, *)
 public actor MultiLogger: Logger {
     
     public let loggers: [Logger]
@@ -292,6 +300,7 @@ public actor MultiLogger: Logger {
 
 /// A logger that adds a prefix to all message texts
 /// before forwarding it to the contained logger.
+@available(macOS 10.15, *)
 public actor PrefixedLogger: Logger {
     
     let prefix: String

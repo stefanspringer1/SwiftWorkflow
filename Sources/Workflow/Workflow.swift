@@ -39,6 +39,7 @@ public class ExecutionDatabase {
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
+@available(macOS 10.15, *)
 public actor Execution {
     var effectuationIDStack = [String]()
     var _logger: Logger
