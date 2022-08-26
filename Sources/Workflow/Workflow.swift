@@ -252,7 +252,7 @@ public enum MessageTypeArgument: String, ExpressibleByArgument {
     case fatal
     case deadly
     
-    var messageType: MessageType {
+    public var messageType: MessageType {
         switch self {
         case .debug: return MessageType.Debug
         case .progress: return MessageType.Progress
