@@ -61,7 +61,7 @@ let package = Package(
 
 ## Related packages
 
-When you actually need to log via an existing `LogHandler` according to [swift-log](https://github.com/apple/swift-log), use the `SwiftLogger` wrapper from [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
+When you need to log via an existing `LogHandler` according to [swift-log](https://github.com/apple/swift-log), you might use the `SwiftLogger` wrapper from [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
 
 When working with [SwiftXML](https://github.com/stefanspringer1/SwiftXML) in the context of this workflow framework, you might include the [WorkflowUtilitiesForSwiftXML](https://github.com/stefanspringer1/WorkflowUtilitiesForSwiftXML).
 
