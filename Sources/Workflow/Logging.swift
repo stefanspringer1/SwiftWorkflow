@@ -187,8 +187,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     }
     
     /// A textual representation of the step stack.
-    func effectuationIDStackToString () -> String {
-        return self.effectuationIDStack?.joined(separator: ", ") ?? ""
+    public var effectuationIDStackDescription: String {
+        return self.effectuationIDStack?.joined(separator: " / ") ?? ""
     }
     
     /// A short textual representation of the logging event.
@@ -200,7 +200,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// A longer textual representation of the logging event used in the actual logging.
     public func descriptionForLogging(usingStepIndentation: Bool = false) -> String {
         let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationName + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationIDStack?.count ?? 0) : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : ("!!!! ")))))
-        let messagePart2 = self.description + (self.effectuationIDStack?.isEmpty == false ? " (step path: " + self.effectuationIDStack!.joined(separator: " / ") + ")" : "")
+        let messagePart2 = self.description + (self.effectuationIDStack?.isEmpty == false ? " (step path: " + effectuationIDStackDescription + ")" : "")
         return messagePart1 + messagePart2 + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "") + (self.itemInfo != nil ? " [\(self.itemInfo!)]" : "")
     }
     
