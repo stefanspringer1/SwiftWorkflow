@@ -40,7 +40,6 @@ public class ExecutionDatabase {
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
-@available(macOS 10.15, *)
 public actor Execution {
     var effectuationIDStack = [String]()
     var _logger: Logger
@@ -86,19 +85,29 @@ public actor Execution {
         forceValues.removeLast()
     }
     
+    /// Force all contained work to be executed, even if already executed before.
+    fileprivate func execute(force: Bool, work: () -> ()) {
+        forceValues.append(force)
+        work()
+        forceValues.removeLast()
+    }
+    
+    public func force(work: () -> ()) {
+        execute(force: true, work: work)
+    }
+    
     public func force(work: () async -> ()) async {
         await execute(force: true, work: work)
     }
     
-    /// Executes only if the step did not execute before.
-    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
+    private func effectuateTest(_ executionDatabase: ExecutionDatabase, _ effectuationID: String) -> Bool {
         if stopped {
-            await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
+            self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
         else if !executionDatabase.started(effectuationID) || forceValues.last == true {
             effectuationIDStack.append(effectuationID)
             if showSteps {
-                await _logger.log(LoggingEvent(
+                _logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
                     applicationName: applicationName,
@@ -107,19 +116,39 @@ public actor Execution {
                 ))
             }
             executionDatabase.notifyStarting(effectuationID)
-            await execute(force: false, work: work)
-            if showSteps {
-                await _logger.log(LoggingEvent(
-                    type: .Progress,
-                    processID: processID,
-                    applicationName: applicationName,
-                    fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
-                    effectuationIDStack: effectuationIDStack
-                ))
-            }
-            effectuationIDStack.removeLast()
+            return true
         } else if debug {
-            await self.log(executionMessages.skippingStep, effectuationID, effectuationID)
+            self.log(executionMessages.skippingStep, effectuationID, effectuationID)
+        }
+        return false
+    }
+    
+    private func afterStep(_ effectuationID: String) {
+        if showSteps {
+            _logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
+                effectuationIDStack: effectuationIDStack
+            ))
+        }
+        effectuationIDStack.removeLast()
+    }
+    
+    /// Executes only if the step did not execute before.
+    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
+        if effectuateTest(executionDatabase, effectuationID) {
+            await execute(force: false, work: work)
+            afterStep(effectuationID)
+        }
+    }
+    
+    /// Executes only if the step did not execute before.
+    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () -> ()) {
+        if effectuateTest(executionDatabase, effectuationID) {
+            execute(force: false, work: work)
+            afterStep(effectuationID)
         }
     }
     
@@ -129,8 +158,8 @@ public actor Execution {
         message: Message,
         itemPositionInfo: String? = nil,
         arguments: [String]?
-    ) async -> () {
-        await log(event: LoggingEvent(
+    ) -> () {
+        log(event: LoggingEvent(
             messageID: message.id,
             type: message.type,
             processID: processID,
@@ -144,8 +173,8 @@ public actor Execution {
     }
     
     public func log(collected: [SimpleLoggingEvent]) async {
-        await collected.forEachAsync { simpleEvent in
-            await log(message: simpleEvent.message, itemPositionInfo: simpleEvent.itemPositionInfo, arguments: simpleEvent.arguments)
+        collected.forEach { simpleEvent in
+            log(message: simpleEvent.message, itemPositionInfo: simpleEvent.itemPositionInfo, arguments: simpleEvent.arguments)
         }
     }
     
@@ -155,14 +184,14 @@ public actor Execution {
         _ message: Message,
         itemPositionInfo: String? = nil,
         _ arguments: String...
-    ) async -> () {
-        await log(message: message, itemPositionInfo: itemPositionInfo, arguments: arguments)
+    ) -> () {
+        log(message: message, itemPositionInfo: itemPositionInfo, arguments: arguments)
     }
     
     /// Log a full `LoggingEvent` instance.
-    public func log(event: LoggingEvent) async -> () {
+    public func log(event: LoggingEvent) -> () {
         updateWorstMessageType(with: event.type)
-        await self._logger.log(event)
+        self._logger.log(event)
     }
 }
 

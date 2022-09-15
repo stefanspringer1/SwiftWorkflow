@@ -6,21 +6,19 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework uses asynchronous calls and as such fits very well into asynchronous settings like web services, and is suitable for easy parallel processing[^1] of work items. (Logging is also asynchronous, but there is an easy way to intermediately present synchronous logging to a block of code.) Without suspension happening, those asynchronous calls are about as fast as synchronous calls, so the framework can be also used for simple sequentially processing in the command line without much drawbacks.
+The framework can handle asynchronous calls and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `AsyncLogger` to do asynchronous logging under the hood. Some convenient loggers are predefined.
 
-[^1]: For parallel processing, see the last section on possible future directions.
+This framework relies in part on some easy conventions[^1] to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety. (So it does not define a process logic in a “traditional” way, which would not allow such flexibility.)
 
-This framework relies in part on some easy conventions[^2] to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety. (So it does not define a process logic in a “traditional” way, which would not allow such flexibility.)
-
-[^2]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with unique identifiers, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
+[^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with unique identifiers, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
 For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData).
 
 [WorkflowInVapor](https://github.com/stefanspringer1/WorkflowInVapor) is a simple [Vapor](https://vapor.codes) app using a workflow.
 
-The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^3]
+The API documentation is to be created by using DocC, e.g. in Xcode via „Product“ / „Build Documentation“.[^2]
 
-[^3]: But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
+[^2]: But note that in the current state of DocC, that documentation will not document any extensions, see the Swift issue [SR-15410](https://github.com/apple/swift-docc/issues/210).
 
 The `import Workflow` and other imports are being dropped in the code samples.
 
@@ -48,7 +46,7 @@ The Workflow package will be then usable in a Swift file after adding the follow
 import Workflow
 ```
 
-If you use the workflows of the type introduced here on macOS, at least macOS version 10.15 is required; if an essential part of your application is the use of workflows of the type introduced here, instead of using many `@available(macOS 10.15.0, *)` annotations, you might as well add the following `platforms` entry to your `Package.swift` file[^4]:
+If you use the workflows of the type introduced here on macOS, at least macOS version 10.15 is required; if an essential part of your application is the use of workflows of the type introduced here, instead of using many `@available(macOS 10.15.0, *)` annotations, you might as well add the following `platforms` entry to your `Package.swift` file[^3]:
 
 ```Swift
 let package = Package(
@@ -59,7 +57,7 @@ let package = Package(
     ...
 ```
 
-[^4]: But better do not use such a `platforms` entry when building a package that has other parts that could be independendly used on older macOS versions. On Linux or Windows, you just have to make sure to use an according Swift version.
+[^3]: But better do not use such a `platforms` entry when building a package that has other parts that could be independendly used on older macOS versions. On Linux or Windows, you just have to make sure to use an according Swift version.
 
 ## Related packages
 
@@ -147,8 +145,8 @@ func a_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
         print("working in step a")
         
@@ -171,10 +169,10 @@ func b_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
-        await a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
         
         print("working in step b")
     }
@@ -190,13 +188,13 @@ func c_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
-       await a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
-       await b_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+       a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+       b_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
         
-        print("working in step c")
+       print("working in step c")
         
     }
 }
@@ -204,9 +202,9 @@ func c_step(
 
 Again, `a_step` and `b_step` can be seen here as requirements for the work done by `c_step`.
 
-When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.[^5]
+When using `c_step`, inside `b_step` the step `a_step` is _not_ being executed, because `a_step` has already been excuted at that time. By default it is assumed that a step does some manipulation of the data, and calling a step  says "I want those manipulation done at this point". This is very common in complex processing scenarios and having this behaviour ensures that a step can be called in isolation and not just as part as a fixed, large processing pipeline, because it formulates itself which prerequisites it needs.[^4]
 
-[^5]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encountered such a problem.
+[^4]: Note that a bad formulation of your logic can get you in trouble with the order of the steps: If `a_step` should be executed before `b_step` and not after it, and when calling `c_step`, `b_step` has already been executed but not `a_step` (so, other than in our example, `a_step` is not given as a requirement for `b_step`), you will get the wrong order of execution. In practice, we never encountered such a problem.
 
 ---
 **Convention**
@@ -223,11 +221,11 @@ func b_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
-        await execution.force {
-            await a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        execution.force {
+            a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
         }
         
         print("working in step b")
@@ -264,18 +262,18 @@ As a public interface, we use another function which creates an `ExecutionDataba
 public func hello_lib(
     during execution: Execution,
     data: MyData
-) async {
-    await hello_step(during: execution, usingExecutionDatabase: ExecutionDatabase(), data: data)
+) {
+    hello_step(during: execution, usingExecutionDatabase: ExecutionDatabase(), data: data)
 }
 
 func hello_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
-        await execution.log(stepData.sayingHello, data.value)
+        execution.log(stepData.sayingHello, data.value)
         print("Hello \(data.value)!")
         
     }
@@ -289,10 +287,10 @@ func hello_external_step(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
-) async {
-    await execution.effectuate(executionDatabase, #function) {
+) {
+    execution.effectuate(executionDatabase, #function) {
         
-        await hello_lib(during: execution, data: data)
+        hello_lib(during: execution, data: data)
         
     }
 }
@@ -312,9 +310,9 @@ A function representing a public interface to a step (a “library function”) 
 
 ---
 
-The tree-like pattern of steps that you are able to use in a workflow is a natural[^6] starting point to outsource some functionality of your workflow into an external package.
+The tree-like pattern of steps that you are able to use in a workflow is a natural[^5] starting point to outsource some functionality of your workflow into an external package.
 
-[^6]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
+[^5]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
 
 ### Organisation of the code in the files
 
@@ -337,13 +335,13 @@ func helloAndBye_job(
     during execution: Execution,
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     file: URL
-) async {
+) {
     
     // get the data:
-    guard let data = await readData_step(during: execution, usingExecutionDatabase: executionDatabase, file: file) else { return }
+    guard let data = readData_step(during: execution, usingExecutionDatabase: executionDatabase, file: file) else { return }
     
     // start the processing of the data:
-    await helloAndBye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+    helloAndBye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
 }
 ```
 
@@ -366,7 +364,7 @@ typealias Job = (
     Execution,
     ExecutionDatabase,
     URL
-) async -> ()
+) -> ()
 ```
 
 In this case we like to use a "job registry" as follows (for the step data, see the section below):
@@ -389,7 +387,7 @@ The resolving of a job name and the call of the appropriate job is then done as 
         let logger = PrintLogger()
         let execution = Execution(logger: logger, applicationName: applicationName, showSteps: true)
         
-        await jobFunction(
+        jobFunction(
             execution,
             ExecutionDatabase(),
             URL(fileURLWithPath: path)
@@ -429,17 +427,9 @@ logging events to several other loggers (so actually several loggers are used at
 
 The same logger instances clearly should be used for all `Execution` instances. So you do not create loggers for each execution, but you create the loggers once and use them in each creation of an execution.
 
-If you need logging in a synchronous subcontext, use a call of `collectingErrors(forExecution:block:)` to be able to use a `SynchronousCollectingLogger` within the its closure argument:
-
-```Swift
-await collectingMessages(forExecution: execution) { logger in
-    // ...do something, use the SynchronousCollectingLogger "logger" 
-}
-```
-
 See the example project for more details.
 
-Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^7]
+Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^6]
 
 [^7]: But see the last section on possible future directions for a binding.
 
