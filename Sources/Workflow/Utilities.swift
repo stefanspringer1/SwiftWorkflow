@@ -32,42 +32,38 @@ extension Sequence {
 
 public extension URL {
     
-    @available(macOS 10.15, *)
-    func removeAsTemp(applicationName: String, logger: Logger) async {
+    func removeAsTemp(applicationName: String, execution: Execution) {
         do {
             if self.isDirectory {
                 var empty = true
-                try await FileManager.default.contentsOfDirectory(atPath: self.path).forEachAsync { file in
-                    logger.log(
-                        applicationName: applicationName,
-                        .Warning,
-                        [
-                            .en: "file in temporary directory after processing: [\(file)]"
+                try FileManager.default.contentsOfDirectory(atPath: self.path).forEach { file in
+                    execution.log(Message(
+                        id: "file in temporary directory after processing", type: .Warning,
+                        fact: [
+                            .en: "file in temporary directory after processing: [\(file)]",
                         ]
-                    )
+                    ))
                     empty = false
                 }
                 if empty {
                     try self.removeDirectorySafely()
                 } else {
-                    logger.log(
-                        applicationName: applicationName,
-                        .Warning,
-                        [
-                            .en: "temporary directory [\(self.osPath)] is not empty after processing"
+                    execution.log(Message(
+                        id: "temporary directory not empty after processing", type: .Warning,
+                        fact: [
+                            .en: "temporary directory [\(self.osPath)] is not empty after processing",
                         ]
-                    )
+                    ))
                 }
             }
         }
         catch {
-            logger.log(
-                applicationName: applicationName,
-                .Warning,
-                [
-                    .en: "error when deleting temporary directory [\(self.osPath)]: \(error.localizedDescription)"
+            execution.log(Message(
+                id: "error when deleting temporary directory", type: .Warning,
+                fact: [
+                    .en: "error when deleting temporary directory [\(self.osPath)]: \(error.localizedDescription)",
                 ]
-            )
+            ))
         }
     }
     
