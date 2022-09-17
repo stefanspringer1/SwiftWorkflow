@@ -6,7 +6,7 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework can handle asynchronous calls and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `ConcurrentLogger` to organise concurrent logging under the hood. Some convenient loggers are predefined.
+The framework can handle asynchronous calls and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `ConcurrentLogger` to organise concurrent logging under the hood. Some convenient loggers are predefined, some of them indeed extending extend `ConcurrentLogger`. (See their implementation to understand how to define your own logger.)
 
 This framework relies in part on some easy conventions[^1] to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety. (So it does not define a process logic in a “traditional” way, which would not allow such flexibility.)
 
@@ -470,7 +470,13 @@ See how the `async` keyword tells us exactly where work might get suspended. Thi
 
 [^8]: Using actors (with `async` methods) as loggers would also have _advantages_, e.g. making it easy to ensure that the actual logging has happened before continuing.
 
-You can easily define a logger that can be used concurrently by extending `ConcurrentLogger`. See the examples in the code base.
+To force an execution, use `execution.async.force` in asynchronous contexts instead of `execution.async.force`:
+
+```Swift
+await execution.async.force {
+    await bye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+}
+```
 
 In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
