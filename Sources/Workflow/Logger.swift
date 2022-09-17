@@ -53,7 +53,7 @@ public extension Logger {
         solution: LocalizingMessage? = nil,
         messageID: MessageID? = nil,
         effectuationIDStack: [String]? = nil
-    ) async {
+    ) {
         log(LoggingEvent(
             messageID: messageID,
             type: type,

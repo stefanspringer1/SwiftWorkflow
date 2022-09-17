@@ -38,7 +38,7 @@ public extension URL {
             if self.isDirectory {
                 var empty = true
                 try await FileManager.default.contentsOfDirectory(atPath: self.path).forEachAsync { file in
-                    await logger.log(
+                    logger.log(
                         applicationName: applicationName,
                         .Warning,
                         [
@@ -50,7 +50,7 @@ public extension URL {
                 if empty {
                     try self.removeDirectorySafely()
                 } else {
-                    await logger.log(
+                    logger.log(
                         applicationName: applicationName,
                         .Warning,
                         [
@@ -61,7 +61,7 @@ public extension URL {
             }
         }
         catch {
-            await logger.log(
+            logger.log(
                 applicationName: applicationName,
                 .Warning,
                 [
