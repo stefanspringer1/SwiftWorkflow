@@ -4,7 +4,7 @@ A simple framework for processing.
 
 The framework helps to define a complex processing of one “work item” that can be executed within an `Execution` environment. For each work item a separate `Execution` instance has to be created. If more than one work item is to be processed, then more than one `Execution` instance has to be used.
 
-Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. There is the implementation of a logger that just combines a number of given other loggers.
+Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. There is the implementation of a logger that just combines a number of other loggers that are given in its initialisation.
 
 The framework can also handle asynchronous calls (see the section about working in asynchronous contexts) and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `ConcurrentLogger` to organise concurrent logging under the hood. Some convenient loggers are predefined, some of them indeed extending `ConcurrentLogger`. (See their implementation to understand how to define your own logger.)
 
