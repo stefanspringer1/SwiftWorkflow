@@ -1,6 +1,10 @@
 import Foundation
 import Utilities
 
+#if !(os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    import FoundationNetworking // for URLRequest and URLSession
+#endif
+
 /// This is a logger that can be used to "merge" several other loggers,
 /// i.e. all logging events are being distributed to all loggers.
 public class MultiLogger: Logger {
