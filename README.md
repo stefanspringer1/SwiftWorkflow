@@ -466,7 +466,7 @@ func helloAndBye_step(
 }
 ```
 
-See how the `async` keyword tells us exactly where work might get suspended. This is one of the reasons why we took care that logging does not present itself asynchronous, although we have loggers that can be accessed concurrently: Having `async` loggers would lead to ubiquitous `async` functions (as function that calls an `async` function has itself to be an `async` function), but an await statement should express “this piece of work could be suspended, and for good reasons”.[^8]
+See how the `async` keyword tells us exactly where work might get suspended. This is one of the reasons why we took care that logging does not present itself asynchronous, although we can have loggers that can be accessed concurrently: Having `async` loggers would lead to ubiquitous `async` functions (as function that calls an `async` function has itself to be an `async` function), but an await statement should express “this piece of work could be suspended, and for good reasons”.[^8]
 
 [^8]: Using actors (with `async` methods) as loggers would also have _advantages_, e.g. making it easy to ensure that the actual logging has happened before continuing.
 
