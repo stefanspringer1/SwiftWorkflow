@@ -40,7 +40,8 @@ public class ExecutionDatabase {
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
-public actor Execution {
+public class Execution {
+    
     var effectuationIDStack = [String]()
     var _logger: Logger
     var processID: String?
@@ -55,6 +56,10 @@ public actor Execution {
     let debug: Bool
     let showSteps: Bool
     
+    var _async: AsyncEffectuation? = nil
+    
+    public var async: AsyncEffectuation { _async! }
+    
     public init (logger: Logger, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
         self._logger = logger
         self.processID = processID
@@ -62,6 +67,7 @@ public actor Execution {
         self.itemInfo = itemInfo
         self.debug = debug
         self.showSteps = showSteps
+        _async = AsyncEffectuation(execution: self)
     }
     
     private var force = false
@@ -79,25 +85,15 @@ public actor Execution {
     var forceValues = [Bool]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute(force: Bool, work: () async -> ()) async {
-        forceValues.append(force)
-        await work()
-        forceValues.removeLast()
-    }
-    
-    /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
         work()
         forceValues.removeLast()
     }
     
+    /// Executes always.
     public func force(work: () -> ()) {
         execute(force: true, work: work)
-    }
-    
-    public func force(work: () async -> ()) async {
-        await execute(force: true, work: work)
     }
     
     private func effectuateTest(_ executionDatabase: ExecutionDatabase, _ effectuationID: String) -> Bool {
@@ -137,18 +133,39 @@ public actor Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
-        if effectuateTest(executionDatabase, effectuationID) {
-            await execute(force: false, work: work)
-            afterStep(effectuationID)
-        }
-    }
-    
-    /// Executes only if the step did not execute before.
     public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () -> ()) {
         if effectuateTest(executionDatabase, effectuationID) {
             execute(force: false, work: work)
             afterStep(effectuationID)
+        }
+    }
+    
+    public actor AsyncEffectuation {
+        
+        private let execution: Execution
+        
+        init(execution: Execution) {
+            self.execution = execution
+        }
+        
+        /// Force all contained work to be executed, even if already executed before.
+        fileprivate func execute(force: Bool, work: () async -> ()) async {
+            execution.forceValues.append(force)
+            await work()
+            execution.forceValues.removeLast()
+        }
+        
+        /// Executes only if the step did not execute before.
+        public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
+            if execution.effectuateTest(executionDatabase, effectuationID) {
+                await execute(force: false, work: work)
+                execution.afterStep(effectuationID)
+            }
+        }
+        
+        /// Executes always.
+        public func force(work: () async -> ()) async {
+            await execute(force: true, work: work)
         }
     }
     
