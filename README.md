@@ -482,6 +482,10 @@ In an asynchronous setting, consider setting the logging level e.g. for a `Print
 
 Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronous context.
 
+### Binding to the Swift logging mechanism
+
+Our logging has e.g. different message levels (or log levels) than the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html), see the documentation of ths API. A binding is provided in the package [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
+
 ### Future directions
 
 The following features might be added in the future:
@@ -490,4 +494,3 @@ The following features might be added in the future:
 - A mechanism for _pulling_ progress information (an according `Logger` implementation should suffice).
 - Customized tooling for easy parallel processing of several work items.
 - Tooling for giving an entry point for different types of data and using several job registries (each for one types of data) as a way to combine sevaral application under one umbrella.
-- A binding to the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html).
