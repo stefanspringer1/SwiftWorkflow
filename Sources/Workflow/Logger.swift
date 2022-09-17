@@ -6,7 +6,7 @@ public protocol Logger {
     func close() throws
 }
 
-open class AsyncLogger: Logger {
+open class ConcurrentLogger: Logger {
 
     public let loggingLevel: MessageType
 

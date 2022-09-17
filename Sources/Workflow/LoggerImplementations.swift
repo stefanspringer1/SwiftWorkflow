@@ -25,7 +25,7 @@ public class MultiLogger: Logger {
 }
 
 /// A logger just collecting all logging events.
-public class CollectingLogger: AsyncLogger {
+public class CollectingLogger: ConcurrentLogger {
     
     private var loggingEvents: [LoggingEvent]! = [LoggingEvent]()
     
@@ -53,7 +53,7 @@ public class CollectingLogger: AsyncLogger {
 ///
 /// If `minEventType` defines the best message type that is to be printed
 /// (default value is `Info`).
-public class PrintLogger: AsyncLogger {
+public class PrintLogger: ConcurrentLogger {
     
     var stepIndentation: Bool
     let errorsToStandard: Bool
@@ -85,7 +85,7 @@ public class PrintLogger: AsyncLogger {
 }
 
 /// A logger writing ionto a file.
-public class FileLogger: AsyncLogger {
+public class FileLogger: ConcurrentLogger {
     
     public let path: String
     var writableFile: WritableFile
@@ -128,7 +128,7 @@ public class FileLogger: AsyncLogger {
 }
 
 /// A logger using a REST API to store the information.
-public class RESTLogger: AsyncLogger {
+public class RESTLogger: ConcurrentLogger {
     
     public override init(
         loggingLevel: MessageType = MessageType.Info

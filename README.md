@@ -6,13 +6,13 @@ The framework helps to define a complex processing of one “work item” that c
 
 Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. A logger can combine several other loggers.
 
-The framework can handle asynchronous calls and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `AsyncLogger` to do asynchronous logging under the hood. Some convenient loggers are predefined.
+The framework can handle asynchronous calls and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `ConcurrentLogger` to organise concurrent logging under the hood. Some convenient loggers are predefined.
 
 This framework relies in part on some easy conventions[^1] to make the logic of your processing more intelligible. At its core it is just “functions calling functions” and such gives you at once perfomance, flexibility, and type safety. (So it does not define a process logic in a “traditional” way, which would not allow such flexibility.)
 
 [^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with unique identifiers, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
-For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData).
+For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData). Code from that example is used below.
 
 [WorkflowInVapor](https://github.com/stefanspringer1/WorkflowInVapor) is a simple [Vapor](https://vapor.codes) app using a workflow.
 
@@ -434,6 +434,43 @@ Note that we use a set of **message types** different from the one in the [Swift
 [^7]: But see the last section on possible future directions for a binding.
 
 ### Working in asynchronous contexts
+
+A step might also be asynchronous, i.e. the caller might get suspended. Let's suppose that for some reason `bye_step` from above is async (maybe we are building a web application and `bye_step` has to fetch data from a database):
+
+```Swift
+func bye_step(
+    during execution: Execution,
+    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    data: MyData
+) async {
+    ...
+```
+
+Then `helloAndBye_step` which calls `bye_step` has to use `execution.async.effectuate` instead of just `execution.effectuate`:
+
+```Swift
+func helloAndBye_step(
+    during execution: Execution,
+    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    data: MyData
+) async {
+    await execution.async.effectuate(executionDatabase, #function) {
+        
+        execution.log(stepData.sayingHelloAndBye, data.value)
+        
+        trim_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        hello_external_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        await bye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        
+    }
+}
+```
+
+See how the `async` keyword tells us exactly where work might get suspended. This is one of the reasons why we took care that logging does not present itself asynchronous, although we have loggers that can be accessed concurrently: Having `async` loggers would lead to ubiquitous `async` functions (as function that calls an `async` function has itself to be an `async` function), but an await statement should express “this piece of work could be suspended, and for good reasons”.[^8]
+
+[^8]: Using actors (with `async` methods) as loggers would also have _advantages_, e.g. making it easy to ensure that the actual logging has happened before continuing.
+
+You can easily define a logger that can be used concurrently by extending `ConcurrentLogger`. See the examples in the code base.
 
 In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
