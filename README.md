@@ -488,7 +488,7 @@ The usual logging (when you are e.g. extending `ConcurrentLogger` because you wa
 
 ### Binding to the Swift logging mechanism
 
-Our logging has e.g. different message levels (or log levels) than the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html), see the documentation of ths API. A binding is provided in the package [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
+Our logging has e.g. different message levels (or log levels) than the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html), see the documentation of the APIs. A binding is provided in the package [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
 
 ### Future directions
 
