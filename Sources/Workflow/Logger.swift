@@ -16,9 +16,7 @@ open class ConcurrentLogger: Logger {
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(
-        loggingLevel: MessageType = .Debug
-    ) {
+    public init(loggingLevel: MessageType = .Debug) {
         self.loggingLevel = loggingLevel
         self.group = DispatchGroup()
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
@@ -36,6 +34,36 @@ open class ConcurrentLogger: Logger {
     
     public func close() {
         group.wait()
+        closeAction?()
+        closeAction = nil
+    }
+    
+}
+
+open class ConcurrentCrashLogger: Logger {
+
+    public let loggingLevel: MessageType
+
+    private let queue: DispatchQueue
+    
+    public var loggingAction: ((LoggingEvent) -> ())? = nil
+    public var closeAction: (() -> ())? = nil
+    
+    public init(loggingLevel: MessageType = .Debug) {
+        self.loggingLevel = loggingLevel
+        self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
+    }
+    
+    public func log(_ event: LoggingEvent) {
+        if event.type >= loggingLevel {
+            self.queue.sync {
+                self.loggingAction?(event)
+            }
+        }
+    }
+    
+    public func close() {
+
         closeAction?()
         closeAction = nil
     }

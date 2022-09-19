@@ -88,7 +88,7 @@ public class PrintLogger: ConcurrentLogger {
     
 }
 
-/// A logger writing ionto a file.
+/// A logger writing into a file.
 public class FileLogger: ConcurrentLogger {
     
     public let path: String
@@ -117,7 +117,7 @@ public class FileLogger: ConcurrentLogger {
                 }
             }
             catch {
-                print("copuld not log to \(path)", to: &StandardError.instance)
+                print("could not log to \(path)", to: &StandardError.instance)
             }
         }
         closeAction = {
@@ -125,7 +125,46 @@ public class FileLogger: ConcurrentLogger {
                 try self.writableFile.close()
             }
             catch {
-                print("copuld not log to \(path)", to: &StandardError.instance)
+                print("could not log to \(path)", to: &StandardError.instance)
+            }
+        }
+    }
+}
+
+/// A logger writing immediately into a file.
+public class FileCrashLogger: ConcurrentCrashLogger {
+    
+    public let path: String
+    var writableFile: WritableFile
+    
+    let stepIndentation: Bool
+    var messages = Set<String>()
+    
+    public init(
+        usingFile path: String,
+        stepIndentation: Bool,
+        loggingLevel: MessageType = MessageType.Info,
+        append: Bool = true
+    ) throws {
+        self.path = path
+        writableFile = try WritableFile(path: path, append: append)
+        self.stepIndentation = stepIndentation
+        super.init(loggingLevel: loggingLevel)
+        loggingAction = { event in
+            do {
+                try self.writableFile.write(event.descriptionForLogging(usingStepIndentation: stepIndentation).lineForLogfile())
+                try self.writableFile.flush()
+            }
+            catch {
+                print("could not log to \(path)", to: &StandardError.instance)
+            }
+        }
+        closeAction = {
+            do {
+                try self.writableFile.close()
+            }
+            catch {
+                print("could not log to \(path)", to: &StandardError.instance)
             }
         }
     }
@@ -134,9 +173,7 @@ public class FileLogger: ConcurrentLogger {
 /// A logger using a REST API to store the information.
 public class RESTLogger: ConcurrentLogger {
     
-    public override init(
-        loggingLevel: MessageType = MessageType.Info
-    ) {
+    public override init(loggingLevel: MessageType = MessageType.Info) {
         super.init(loggingLevel: loggingLevel)
         loggingAction = { event in
             let sem = DispatchSemaphore.init(value: 0)

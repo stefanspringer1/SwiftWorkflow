@@ -4,7 +4,7 @@ A simple framework for processing.
 
 The framework helps to define a complex processing of one “work item” that can be executed within an `Execution` environment. For each work item a separate `Execution` instance has to be created. If more than one work item is to be processed, then more than one `Execution` instance has to be used.
 
-Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. There is the implementation of a logger that just combines a number of other loggers that are given in its initialisation.
+Additionally, loggers are used that outlive the creation of executions. Part of an execution is always a logger; usually the same logger is used for many executions. There is the implementation of a logger that just combines a number of other loggers that are given in its initialisation. You can also use an additional “crash logger” to ensure that selected logging entries get logged also in the case of a crash. See the section on logging for more information.
 
 The framework can also handle asynchronous calls (see the section about working in asynchronous contexts) and as such fits very well into asynchronous settings like web services where you might e.g. get data from a database in an asynchronous way. Logging presents itself as a synchronous service, but you can easily extend `ConcurrentLogger` to organise concurrent logging under the hood. Some convenient loggers are predefined, some of them indeed extending `ConcurrentLogger`. (See their implementation to understand how to define your own logger.)
 
@@ -431,7 +431,11 @@ See the example project for more details.
 
 Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^6]
 
-[^7]: But see the last section on possible future directions for a binding.
+[^6]: But see the last section on possible future directions for a binding.
+
+The usual logging (when you are e.g. extending `ConcurrentLogger` to be able to log in concurrent contexts) is something that is designed not to get into the way of your processing and is meant to be efficient, i.e. no `await`´ keyword is necessary, events might be logged a little bit later, and when there is a crash, logging entries might get lost.[^7] The loss of logging entries in the case of a crash is less severe if you can reproduce the problem, but then you need enough information about how to reproduce it, e.g. you then want to know which work item has been worked on. So you might add a `crashLogger` when initializing an execution, and to implement one, you might want to extend the `ConcurrentCrashLogger`. When logging with a `ConcurrentCrashLogger` the caller has to wait until the logging of the log entry has been done, so when after the logging the application crashes, you still have this log entry. The `FileCrashLogger` is such an extension of `ConcurrentCrashLogger` to write such information into a file. But do not log too much to a `ConcurrentCrashLogger`, as this slows down your application. You additional log to a crash logger given to an execution by setting `addCrashInfo: true` in the call to `Execution.log(...)`. For testing porposes, you can also set `alwaysAddCrashInfo: true` in the initialisation of the `Execution`.
+
+[^7]: Of course, you should always log if processing a work item has been finished, else you might not determine a crash that happened!
 
 ### Working in asynchronous contexts
 

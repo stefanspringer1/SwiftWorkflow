@@ -43,16 +43,14 @@ public class ExecutionDatabase {
 public class Execution {
     
     var effectuationIDStack = [String]()
-    var _logger: Logger
+    let logger: Logger
+    let crashLogger: Logger?
     var processID: String?
     var applicationName: String
     var itemInfo: String? = nil
     var _worseMessageType: MessageType = .Debug
     
-    var logger: Logger {
-        get { _logger }
-    }
-    
+    let alwaysAddCrashInfo: Bool
     let debug: Bool
     let showSteps: Bool
     
@@ -60,11 +58,13 @@ public class Execution {
     
     public var async: AsyncEffectuation { _async! }
     
-    public init (logger: Logger, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, debug: Bool = false) {
-        self._logger = logger
+    public init (logger: Logger, crashLogger: Logger? = nil, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, alwaysAddCrashInfo: Bool = false, debug: Bool = false) {
+        self.logger = logger
+        self.crashLogger = crashLogger
         self.processID = processID
         self.applicationName = applicationName
         self.itemInfo = itemInfo
+        self.alwaysAddCrashInfo = alwaysAddCrashInfo
         self.debug = debug
         self.showSteps = showSteps
         _async = AsyncEffectuation(execution: self)
@@ -103,7 +103,7 @@ public class Execution {
         else if !executionDatabase.started(effectuationID) || forceValues.last == true {
             effectuationIDStack.append(effectuationID)
             if showSteps {
-                _logger.log(LoggingEvent(
+                logger.log(LoggingEvent(
                     type: .Progress,
                     processID: processID,
                     applicationName: applicationName,
@@ -121,7 +121,7 @@ public class Execution {
     
     private func afterStep(_ effectuationID: String) {
         if showSteps {
-            _logger.log(LoggingEvent(
+            logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
@@ -174,24 +174,33 @@ public class Execution {
     public func log(
         message: Message,
         itemPositionInfo: String? = nil,
+        addCrashInfo: Bool = false,
         arguments: [String]?
     ) -> () {
-        log(event: LoggingEvent(
-            messageID: message.id,
-            type: message.type,
-            processID: processID,
-            applicationName: applicationName,
-            fact: fillLocalizingMessage(message: message.fact, with: arguments),
-            solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
-            itemInfo: itemInfo,
-            itemPositionInfo: itemPositionInfo,
-            effectuationIDStack: effectuationIDStack
-        ))
+        log(
+            event: LoggingEvent(
+                messageID: message.id,
+                type: message.type,
+                processID: processID,
+                applicationName: applicationName,
+                fact: fillLocalizingMessage(message: message.fact, with: arguments),
+                solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
+                itemInfo: itemInfo,
+                itemPositionInfo: itemPositionInfo,
+                effectuationIDStack: effectuationIDStack
+            ),
+            addCrashInfo: addCrashInfo
+        )
     }
     
-    public func log(collected: [SimpleLoggingEvent]) async {
+    public func log(collected: [SimpleLoggingEvent], addCrashInfo: Bool = false) async {
         collected.forEach { simpleEvent in
-            log(message: simpleEvent.message, itemPositionInfo: simpleEvent.itemPositionInfo, arguments: simpleEvent.arguments)
+            log(
+                message: simpleEvent.message,
+                itemPositionInfo: simpleEvent.itemPositionInfo,
+                addCrashInfo: addCrashInfo,
+                arguments: simpleEvent.arguments
+            )
         }
     }
     
@@ -200,15 +209,19 @@ public class Execution {
     public func log(
         _ message: Message,
         itemPositionInfo: String? = nil,
+        addCrashInfo: Bool = false,
         _ arguments: String...
     ) -> () {
-        log(message: message, itemPositionInfo: itemPositionInfo, arguments: arguments)
+        log(message: message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, arguments: arguments)
     }
     
     /// Log a full `LoggingEvent` instance.
-    public func log(event: LoggingEvent) -> () {
+    public func log(event: LoggingEvent, addCrashInfo: Bool = false) -> () {
+        if addCrashInfo || alwaysAddCrashInfo {
+            self.crashLogger?.log(event)
+        }
+        self.logger.log(event)
         updateWorstMessageType(with: event.type)
-        self._logger.log(event)
     }
 }
 
