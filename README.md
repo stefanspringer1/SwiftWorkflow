@@ -417,26 +417,6 @@ message, e.g. if it informs about the progress or about a fatal error.
 
 See the example project for more details.
 
-### Logging
-
-Errors thrown should always be handled and the logging mechanism used.
-
-An execution can handle logging to a `Logger` (a protocol) instance. Several logger
-implementations are included, among others a logger that can be used to distribute
-logging events to several other loggers (so actually several loggers are used at once).
-
-The same logger instances clearly should be used for all `Execution` instances. So you do not create loggers for each execution, but you create the loggers once and use them in each creation of an execution.
-
-See the example project for more details.
-
-Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^6]
-
-[^6]: But see the last section on possible future directions for a binding.
-
-The usual logging (when you are e.g. extending `ConcurrentLogger` to be able to log in concurrent contexts) is something that is designed not to get into the way of your processing and is meant to be efficient, i.e. no `await`´ keyword is necessary, events might be logged a little bit later, and when there is a crash, logging entries might get lost.[^7] The loss of logging entries in the case of a crash is less severe if you can reproduce the problem, but then you need enough information about how to reproduce it, e.g. you then want to know which work item has been worked on. So you might add a `crashLogger` when initializing an execution, and to implement one, you might want to extend the `ConcurrentCrashLogger`. When logging with a `ConcurrentCrashLogger` the caller has to wait until the logging of the log entry has been done, so when after the logging the application crashes, you still have this log entry. The `FileCrashLogger` is such an extension of `ConcurrentCrashLogger` to write such information into a file. But do not log too much to a `ConcurrentCrashLogger`, as this slows down your application. You additional log to a crash logger given to an execution by setting `addCrashInfo: true` in the call to `Execution.log(...)`. For testing porposes, you can also set `alwaysAddCrashInfo: true` in the initialisation of the `Execution`.
-
-[^7]: Of course, you should always log if processing a work item has been finished, else you might not determine a crash that happened!
-
 ### Working in asynchronous contexts
 
 A step might also be asynchronous, i.e. the caller might get suspended. Let's suppose that for some reason `bye_step` from above is async (maybe we are building a web application and `bye_step` has to fetch data from a database):
@@ -485,6 +465,26 @@ await execution.async.force {
 In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
 Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronous context.
+
+### Logging
+
+Errors thrown should always be handled and the logging mechanism used.
+
+An execution can handle logging to a `Logger` (a protocol) instance. Several logger
+implementations are included, among others a logger that can be used to distribute
+logging events to several other loggers (so actually several loggers are used at once).
+
+The same logger instances clearly should be used for all `Execution` instances. So you do not create loggers for each execution, but you create the loggers once and use them in each creation of an execution.
+
+See the example project for more details.
+
+Note that we use a set of **message types** different from the one in the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html): E.g. we differentiate a “fatal” error when the processing of a work item cannot continue from a “deadly” error when the processing as a whole (not only for a certain work item) cannot continue. And we have a message type “Iteration” that should be used to inform about the start and the stop of the processing of a work item; we judge this information as being more important as warnings, therefore this separate message type.[^6]
+
+[^6]: But see the last section on possible future directions for a binding.
+
+The usual logging (when you are e.g. extending `ConcurrentLogger` to be able to log in concurrent contexts) is something that is designed not to get into the way of your processing and is meant to be efficient, i.e. no `await`´ keyword is necessary, events might be logged a little bit later, and when there is a crash, logging entries might get lost.[^7] The loss of logging entries in the case of a crash is less severe if you can reproduce the problem, but then you need enough information about how to reproduce it, e.g. you then want to know which work item has been worked on. So you might add a `crashLogger` when initializing an execution, and to implement one, you might want to extend the `ConcurrentCrashLogger`. When logging with a `ConcurrentCrashLogger` the caller has to wait until the logging of the log entry has been done, so when after the logging the application crashes, you still have this log entry. The `FileCrashLogger` is such an extension of `ConcurrentCrashLogger` to write such information into a file. But do not log too much to a `ConcurrentCrashLogger`, as this slows down your application. You additional log to a crash logger given to an execution by setting `addCrashInfo: true` in the call to `Execution.log(...)`. For testing porposes, you can also set `alwaysAddCrashInfo: true` in the initialisation of the `Execution`.
+
+[^7]: Of course, you should always log if processing a work item has been finished, else you might not determine a crash that happened!
 
 ### Binding to the Swift logging mechanism
 
