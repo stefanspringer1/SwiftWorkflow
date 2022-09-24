@@ -111,7 +111,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// A short textual representation of the logging event.
     public var description: String {
         let fullID = [effectuationIDStack?.last, messageID].joined(separator: " / ")
-        return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(fact[.en]?.trim() ?? "?")\(solution != nil ? " – soloution: \(solution?[.en]?.trim() ?? "?")" : "")"
+        return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – soloution: \(solution?[.en]?.trimming() ?? "?")" : "")"
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
@@ -192,7 +192,7 @@ let STEP_INDENTATION  = "  "
 /// Get a text into one line so it can be better used for printout when logging.
 extension String {
     func lineForLogfile() -> String {
-        return self.trim().replacingOccurrences(of: "\r", with: "").replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\n", with: "\\n")
+        return self.trimming().replacingOccurrences(of: "\r", with: "").replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\n", with: "\\n")
     }
 }
 
