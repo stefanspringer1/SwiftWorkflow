@@ -11,7 +11,7 @@ public class MultiLogger: Logger {
 
     public let loggers: [Logger]
     
-    public init(_ loggers: [Logger]) {
+    public init(_ loggers: Logger...) {
         self.loggers = loggers
     }
     
