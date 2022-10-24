@@ -29,7 +29,7 @@ The package is to be inlcuded as follows in another package: in `Package.swift` 
 The top-level dependency:
 
 ```Swift
-.package(url: "https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary", from: ...put the minimal version number here...),
+.package(url: "https://github.com/stefanspringer1/SwiftWorkflow", from: "...put the minimal version number here..."),
 ```
 
 (You might reference an exact version by defining e.g. `.exact("0.0.1")` instead.)
