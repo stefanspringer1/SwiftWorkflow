@@ -132,7 +132,7 @@ Such a message might be defined as follows:
 
 ```Swift
 let myError = Message(
-    id: "my error,
+    id: "my error",
     type: .Error,
     fact: [
         .en: "this is an error with this \"$1\" additional data",
