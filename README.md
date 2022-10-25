@@ -120,7 +120,7 @@ execution.force {
 }
 ```
 
-If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` (a step might also be an `async` function).
+If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 
 Call `execution.log(...)` to log a message:
 
