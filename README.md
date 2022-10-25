@@ -140,7 +140,7 @@ let myError = Message(
     )
 ```
 
-The texts `$1`, `$2`, ... are being replaced by arguments (strings) number 2, 3, ... in the call to `execution.log`.
+The texts `$1`, `$2`, ... are being replaced by arguments (of type `String`) number 2, 3, ... in the call to `execution.log`.
 
 ## Motivation
 
