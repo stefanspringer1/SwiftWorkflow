@@ -15,6 +15,10 @@ public class MultiLogger: Logger {
         self.loggers = loggers
     }
     
+    public init(withLoggers loggers: [Logger]) {
+        self.loggers = loggers
+    }
+    
     public func log(_ event: LoggingEvent) {
         loggers.forEach { logger in
             logger.log(event)
@@ -99,7 +103,7 @@ public class FileLogger: ConcurrentLogger {
     
     public init(
         usingFile path: String,
-        stepIndentation: Bool,
+        stepIndentation: Bool = false,
         loggingLevel: MessageType = MessageType.Info,
         append: Bool = true,
         blocking: Bool = true
