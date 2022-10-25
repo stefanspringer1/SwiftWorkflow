@@ -132,12 +132,12 @@ Such a message might be defined as follows:
 
 ```Swift
 let myError = Message(
-        id: "my error,
-        type: .Error,
-        fact: [
-            .en: "this is an error with this \"$1\" additional data",
-        ]
-    )
+    id: "my error,
+    type: .Error,
+    fact: [
+        .en: "this is an error with this \"$1\" additional data",
+    ]
+)
 ```
 
 The texts `$1`, `$2`, ... are being replaced by arguments (of type `String`) number 2, 3, ... in the call to `execution.log`.
