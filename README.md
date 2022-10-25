@@ -12,7 +12,7 @@ This framework relies in part on some easy conventions[^1] to make the logic of 
 
 [^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with unique identifiers, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
-This documentation contains some motivation. For a quick start, there is a short tutorial below. For more details, you might look at the conventions (between horizontal rules) given further below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData). Code from that example (maybe in modified form) is used below.
+This documentation contains some motivation. For a quick start, there is a tutorial below. For more details, you might look at the conventions (between horizontal rules) given further below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData). Code from that example (maybe in modified form) is used below.
 
 [WorkflowInVapor](https://github.com/stefanspringer1/WorkflowInVapor) is a simple [Vapor](https://vapor.codes) app using a workflow.
 
@@ -65,7 +65,7 @@ When you need to log via an existing `LogHandler` according to [swift-log](https
 
 When working with [SwiftXML](https://github.com/stefanspringer1/SwiftXML) in the context of this workflow framework, you might include the [WorkflowUtilitiesForSwiftXML](https://github.com/stefanspringer1/WorkflowUtilitiesForSwiftXML).
 
-## Short tutorial
+## Tutorial
 
 You first need a logger. A common use case is to print to standard out and standard error, and to also log into a file:
 
