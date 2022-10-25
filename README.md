@@ -135,7 +135,7 @@ let myError = Message(
     id: "my error",
     type: .Error,
     fact: [
-        .en: "this is an error with this \"$1\" additional data",
+        .en: "this is an error with additional data \"$1\"",
     ]
 )
 ```
