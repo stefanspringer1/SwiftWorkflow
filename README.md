@@ -12,7 +12,7 @@ This framework relies in part on some easy conventions[^1] to make the logic of 
 
 [^1]: One can remove the term “convention” entirely from the description and say that the processing is controlled by calls to the `effectuate` and `force` methods with unique identifiers, which implements a process management. The conventions are used for clarity and are not decisive from a conceptual point of view.
 
-For a quick start, just see the conventions (between horizontal rules) given below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData). Code from that example (maybe in modified form) is used below.
+This documentation contains some motivation. For a quick start, there is a short tutorial below. For more details, you might look at the conventions (between horizontal rules) given further below and look at some code samples. A complete example is given as [SwiftWorkflowExampleProgram](https://github.com/stefanspringer1/SwiftWorkflowExampleProgram), using some steps defined in the library [SwiftWorkflowExampleLibrary](https://github.com/stefanspringer1/SwiftWorkflowExampleLibrary). The common data format being read at each “entry point” (job) in that example (which could be e.g. an XML document in other cases) is defined in [SwiftWorkflowExampleData](https://github.com/stefanspringer1/SwiftWorkflowExampleData). Code from that example (maybe in modified form) is used below.
 
 [WorkflowInVapor](https://github.com/stefanspringer1/WorkflowInVapor) is a simple [Vapor](https://vapor.codes) app using a workflow.
 
@@ -64,6 +64,83 @@ let package = Package(
 When you need to log via an existing `LogHandler` according to [swift-log](https://github.com/apple/swift-log), you might use the `SwiftLogger` wrapper from [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
 
 When working with [SwiftXML](https://github.com/stefanspringer1/SwiftXML) in the context of this workflow framework, you might include the [WorkflowUtilitiesForSwiftXML](https://github.com/stefanspringer1/WorkflowUtilitiesForSwiftXML).
+
+## Short tutorial
+
+You first need a logger. A common use case is to print to standard out and standard error, and to also log into a file:
+
+```Swift
+let logger = MultiLogger(
+    PrintLogger(loggingLevel: .Info),
+    try FileLogger(usingFile: "my file")
+)
+```
+
+Then,for each work item that you want to process, use a new `Execution` object together with an :
+
+```Swift
+workItems.forEach { workItem in
+    let execution = Execution(logger: logger, applicationName: "My App")
+    let executionDatabase = ExecutionDatabase()
+    myWork_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+}
+```
+
+`workItem` is of any type you want (let's say, of type `WorkItem`), and the step you call (here: `myWork_step`) might have any other arguments, and the postfix `_step` is only for convention. Your step might be implemented as follows:
+
+```Swift
+func myWork_step(
+    during execution: Execution,
+    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    forWorkItem workItem: workItem
+) {
+    execution.effectuate(executionDatabase, #function) {
+        
+        // ... some other code...
+        
+        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+        
+        // ... some other code...
+        
+    }
+}
+```
+
+I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatzal error). Here, `#function` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
+
+Inside your step you might call other steps. In the example above, `myOther_step` has the same arguments as `myWork_step`, but in the general case, this does not have to be this way. On the contrary, our recommendation is to only give to each step the data that it really needs.
+
+If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step` at this point, use the following code:
+
+If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step`, use the following code:
+
+```Swift
+execution.force {
+    myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+}
+```
+
+If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` (a step might also be an `async` function).
+
+Call `execution.log(...)` to log a message:
+
+```Swift
+execution.log(myError, myData)
+```
+
+Such a message might be defined as follows:
+
+```Swift
+let myError = Message(
+        id: "my error,
+        type: .Error,
+        fact: [
+            .en: "this is an error with this \"$1\" additional data",
+        ]
+    )
+```
+
+The texts `$1`, `$2`, ... are being replaced by arguments (strings) number 2, 3, ... in the call to `execution.log`.
 
 ## Motivation
 
