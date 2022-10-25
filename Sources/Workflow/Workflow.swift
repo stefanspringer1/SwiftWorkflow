@@ -172,10 +172,10 @@ public class Execution {
     /// Log a `Message` instance. A full `LoggingEvent` instance will be created
     /// that contains the message.
     public func log(
-        message: Message,
+        _ message: Message,
         itemPositionInfo: String? = nil,
         addCrashInfo: Bool = false,
-        arguments: [String]?
+        withArguments arguments: [String]?
     ) -> () {
         log(
             event: LoggingEvent(
@@ -196,10 +196,10 @@ public class Execution {
     public func log(collected: [SimpleLoggingEvent], addCrashInfo: Bool = false) async {
         collected.forEach { simpleEvent in
             log(
-                message: simpleEvent.message,
+                simpleEvent.message,
                 itemPositionInfo: simpleEvent.itemPositionInfo,
                 addCrashInfo: addCrashInfo,
-                arguments: simpleEvent.arguments
+                withArguments: simpleEvent.arguments
             )
         }
     }
@@ -212,7 +212,7 @@ public class Execution {
         addCrashInfo: Bool = false,
         _ arguments: String...
     ) -> () {
-        log(message: message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, arguments: arguments)
+        log(message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, withArguments: arguments)
     }
     
     /// Log a full `LoggingEvent` instance.
