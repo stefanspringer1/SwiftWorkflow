@@ -76,7 +76,7 @@ let logger = MultiLogger(
 )
 ```
 
-Then, for each work item that you want to process, use a new `Execution` object together with an :
+Then, for each work item that you want to process (whatever your work items might be, maybe you have only one work item so you do not need a for loop), use a new `Execution` object together with an :
 
 ```Swift
 workItems.forEach { workItem in
