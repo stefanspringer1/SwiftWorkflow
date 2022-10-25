@@ -76,7 +76,7 @@ let logger = MultiLogger(
 )
 ```
 
-Then, for each work item that you want to process, use a new `Execution` object together with an :
+Then, for each work item that you want to process (whatever your work items might be, maybe you have only one work item so you do not need a for loop), use a new `Execution` object together with a new `ExecutionDatabase` instance:
 
 ```Swift
 workItems.forEach { workItem in
@@ -120,7 +120,7 @@ execution.force {
 }
 ```
 
-If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` (a step might also be an `async` function).
+If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 
 Call `execution.log(...)` to log a message:
 
@@ -132,12 +132,12 @@ Such a message might be defined as follows:
 
 ```Swift
 let myError = Message(
-        id: "my error,
-        type: .Error,
-        fact: [
-            .en: "this is an error with this \"$1\" additional data",
-        ]
-    )
+    id: "my error",
+    type: .Error,
+    fact: [
+        .en: "this is an error with additional info \"$1\"",
+    ]
+)
 ```
 
 The texts `$1`, `$2`, ... are being replaced by arguments (of type `String`) number 2, 3, ... in the call to `execution.log`.
