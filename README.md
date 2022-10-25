@@ -112,7 +112,6 @@ Inside your step you might call other steps. In the example above, `myOther_step
 
 If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step` at this point, use the following code:
 
-```
 If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step`, use the following code:
 
 ```Swift
@@ -123,7 +122,25 @@ execution.force {
 
 If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` (a step might also be an `async` function).
 
-Call `execution.log(...)` to log a message. See the section below on logging for how logging messages should be defined.
+Call `execution.log(...)` to log a message:
+
+```Swift
+execution.log(myError, myData)
+```
+
+Such a message might be defined as follows:
+
+```Swift
+let myError = Message(
+        id: "my error,
+        type: .Error,
+        fact: [
+            .en: "this is an error with this \"$1\" additional data",
+        ]
+    )
+```
+
+The texts `$1`, `$2`, ... are being replaced by arguments (strings) number 2, 3, ... in the call to `execution.log`.
 
 ## Motivation
 
