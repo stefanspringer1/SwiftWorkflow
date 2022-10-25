@@ -106,7 +106,7 @@ func myWork_step(
 }
 ```
 
-I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` can log and control the execution of your code (e.g. does not continue after a fatzal error). Here, `#function` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
+I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatzal error). Here, `#function` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
 
 Inside your step you might call other steps. In the example above, `myOther_step` has the same arguments as `myWork_step`, but in the general case, this does not have to be this way. On the contrary, our recommendation is to only give to each step the data that it really needs.
 
