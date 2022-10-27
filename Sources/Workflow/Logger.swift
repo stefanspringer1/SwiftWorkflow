@@ -3,10 +3,11 @@ import Foundation
 /// A logger, logging instances of `LoggingEvent`.
 public protocol Logger {
     func log(_ event: LoggingEvent)
+    func close() throws
 }
 
 open class ConcurrentLogger: Logger {
-
+    
     public let loggingLevel: MessageType
 
     private let group: DispatchGroup
@@ -35,18 +36,16 @@ open class ConcurrentLogger: Logger {
         }
     }
     
-    private func close() {
+    public func close() throws {
         group.enter()
         self.queue.async {
-            self.closeAction?()
-            self.closed = true
-            self.closeAction = nil
-            self.group.leave()
+            if !self.closed {
+                self.closeAction?()
+                self.closed = true
+                self.closeAction = nil
+                self.group.leave()
+            }
         }
-    }
-    
-    deinit {
-        close()
     }
     
 }
@@ -75,7 +74,7 @@ open class ConcurrentCrashLogger: Logger {
         }
     }
     
-    private func close() {
+    public func close() {
         self.queue.sync {
             if !closed {
                 closeAction?()
@@ -83,12 +82,8 @@ open class ConcurrentCrashLogger: Logger {
                 closeAction = nil
             }
         }
-        
     }
     
-    deinit {
-        close()
-    }
 }
 
 public extension Logger {

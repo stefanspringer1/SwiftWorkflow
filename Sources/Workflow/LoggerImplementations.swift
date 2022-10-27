@@ -24,6 +24,12 @@ public class MultiLogger: Logger {
             logger.log(event)
         }
     }
+    
+    public func close() throws {
+        try loggers.forEach { logger in
+            try logger.close()
+        }
+    }
 }
 
 /// A logger just collecting all logging events.
@@ -41,10 +47,6 @@ public class CollectingLogger: ConcurrentLogger {
     /// Get all collected message events.
     public func getLoggingEvents() throws -> [LoggingEvent] {
         return loggingEvents
-    }
-    
-    deinit {
-        loggingEvents.removeAll()
     }
 }
 
@@ -211,6 +213,8 @@ public class RESTLogger: ConcurrentLogger {
 
 /// A logger that adds a prefix to all message texts
 /// before forwarding it to the contained logger.
+/// The referenced loggers are being closed when the
+/// PrefixedLogger is being closed.
 public class PrefixedLogger: Logger {
     
     let prefix: String
@@ -223,5 +227,9 @@ public class PrefixedLogger: Logger {
     
     public func log(_ event: LoggingEvent) {
         logger.log(event.prefixed(with: prefix))
+    }
+    
+    public func close() throws {
+        try logger.close()
     }
 }
