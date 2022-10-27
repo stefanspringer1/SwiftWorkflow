@@ -38,7 +38,7 @@ open class ConcurrentLogger: Logger {
     
     public func close() throws {
         group.enter()
-        self.queue.async {
+        self.queue.sync {
             if !self.closed {
                 self.closeAction?()
                 self.closed = true
