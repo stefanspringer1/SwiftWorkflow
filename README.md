@@ -142,6 +142,12 @@ let myError = Message(
 
 The texts `$1`, `$2`, ... are being replaced by arguments (of type `String`) number 2, 3, ... in the call to `execution.log`.
 
+Do not forget to close your logger at the end of your program (so all messages are e.g. written):
+
+```Swift
+try logger.close()
+```
+
 ## Motivation
 
 We think of a processing of a work item consisting of several steps, each step fullfilling a certain piece of work. We first see what basic requirements we would like to postulate for those steps, and then how we could realize that in practice.
