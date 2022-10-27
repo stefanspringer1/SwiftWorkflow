@@ -9,7 +9,7 @@ import Utilities
 /// i.e. all logging events are being distributed to all loggers.
 public class MultiLogger: Logger {
 
-    public let loggers: [Logger]
+    public var loggers: [Logger]
     
     public init(_ loggers: Logger...) {
         self.loggers = loggers
@@ -22,12 +22,6 @@ public class MultiLogger: Logger {
     public func log(_ event: LoggingEvent) {
         loggers.forEach { logger in
             logger.log(event)
-        }
-    }
-    
-    public func close() throws {
-        try loggers.forEach { logger in
-            try logger.close()
         }
     }
 }
@@ -46,8 +40,11 @@ public class CollectingLogger: ConcurrentLogger {
     
     /// Get all collected message events.
     public func getLoggingEvents() throws -> [LoggingEvent] {
-        close()
         return loggingEvents
+    }
+    
+    deinit {
+        loggingEvents.removeAll()
     }
 }
 
@@ -226,9 +223,5 @@ public class PrefixedLogger: Logger {
     
     public func log(_ event: LoggingEvent) {
         logger.log(event.prefixed(with: prefix))
-    }
-    
-    public func close() throws {
-        try logger.close()
     }
 }

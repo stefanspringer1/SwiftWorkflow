@@ -3,7 +3,6 @@ import Foundation
 /// A logger, logging instances of `LoggingEvent`.
 public protocol Logger {
     func log(_ event: LoggingEvent)
-    func close() throws
 }
 
 open class ConcurrentLogger: Logger {
@@ -22,20 +21,32 @@ open class ConcurrentLogger: Logger {
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
     
+    private var closed = false
+    
     public func log(_ event: LoggingEvent) {
         if event.type >= loggingLevel {
             group.enter()
             self.queue.async {
-                self.loggingAction?(event)
+                if !self.closed {
+                    self.loggingAction?(event)
+                }
                 self.group.leave()
             }
         }
     }
     
-    public func close() {
-        group.wait()
-        closeAction?()
-        closeAction = nil
+    private func close() {
+        group.enter()
+        self.queue.async {
+            self.closeAction?()
+            self.closed = true
+            self.closeAction = nil
+            self.group.leave()
+        }
+    }
+    
+    deinit {
+        close()
     }
     
 }
@@ -54,6 +65,8 @@ open class ConcurrentCrashLogger: Logger {
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
     
+    private var closed = false
+    
     public func log(_ event: LoggingEvent) {
         if event.type >= loggingLevel {
             self.queue.sync {
@@ -62,12 +75,20 @@ open class ConcurrentCrashLogger: Logger {
         }
     }
     
-    public func close() {
-
-        closeAction?()
-        closeAction = nil
+    private func close() {
+        self.queue.sync {
+            if !closed {
+                closeAction?()
+                closed = true
+                closeAction = nil
+            }
+        }
+        
     }
     
+    deinit {
+        close()
+    }
 }
 
 public extension Logger {
