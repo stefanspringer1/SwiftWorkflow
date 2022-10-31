@@ -104,7 +104,7 @@ public class FileLogger: ConcurrentLogger {
         usingFile path: String,
         stepIndentation: Bool = false,
         loggingLevel: MessageType = MessageType.Info,
-        append: Bool = true,
+        append: Bool = false,
         blocking: Bool = true
     ) throws {
         self.path = path
