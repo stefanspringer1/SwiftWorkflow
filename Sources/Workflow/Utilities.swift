@@ -32,7 +32,8 @@ extension Sequence {
 
 public extension URL {
     
-    func removeAsTemp(applicationName: String, execution: Execution) {
+    /// To be used when the folder is a temporary directory.
+    func removeAsTemp(execution: Execution) {
         do {
             if self.isDirectory {
                 var empty = true
