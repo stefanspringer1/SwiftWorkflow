@@ -215,13 +215,20 @@ public class Execution {
         log(message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, withArguments: arguments)
     }
     
+    private let logGroup = DispatchGroup()
+    private let logQueue = DispatchQueue(label: "ExecutionLog", qos: .background)
+    
     /// Log a full `LoggingEvent` instance.
     public func log(event: LoggingEvent, addCrashInfo: Bool = false) -> () {
-        if addCrashInfo || alwaysAddCrashInfo {
-            self.crashLogger?.log(event)
+        logGroup.enter()
+        self.logQueue.async {
+            if addCrashInfo || self.alwaysAddCrashInfo {
+                self.crashLogger?.log(event)
+            }
+            self.logger.log(event)
+            self.updateWorstMessageType(with: event.type)
+            self.logGroup.leave()
         }
-        self.logger.log(event)
-        updateWorstMessageType(with: event.type)
     }
 }
 
