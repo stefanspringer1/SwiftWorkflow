@@ -569,6 +569,29 @@ The usual logging (when you are e.g. extending `ConcurrentLogger` because you wa
 
 [^8]: Of course, you should always log when the processing of a work item has been finished, else you might not determine a crash that happened. If you have a batch processing and remove the crash log after completion of your work, the existing of a crash file can indicate a crash.
 
+### Logging to an execution in a concurrent context
+
+In a concurrent context, use:
+
+- `execution.parallel` to create a copy of an `execution`.
+- `ExecutionDatabase()` to create a new execution database.
+
+Example:
+
+```Swift
+dispatchGroup.enter()
+dispatchQueue.async {
+    semaphore.wait()
+    myStep(
+        during: execution.parallel,
+        usingExecutionDatabase: ExecutionDatabase(),
+        theDate: theData
+    )
+    semaphore.signal()
+    disptachGroup.leave()
+}
+```
+
 ### Binding to the Swift logging mechanism
 
 Our logging has e.g. different message levels (or log levels) than the [Swift logging mechanism](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html), see the documentation of the APIs. A binding is provided in the package [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
