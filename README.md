@@ -592,7 +592,7 @@ dispatchQueue.async {
 }
 ```
 
-Note that the parallel steps are not registered in the execution database.
+Note that the parallel steps are not registered in the execution database. But the above code migth be part of anther step not executed in parallel, and that one will then be registered.
 
 ### Binding to the Swift logging mechanism
 
