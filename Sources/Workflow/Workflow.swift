@@ -58,7 +58,7 @@ public class Execution {
     
     public var async: AsyncEffectuation { _async! }
     
-    public var line: Execution {
+    public var parallel: Execution {
         Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, showSteps: showSteps, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
     }
     
