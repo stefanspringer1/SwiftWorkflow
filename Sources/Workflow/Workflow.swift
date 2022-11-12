@@ -42,7 +42,7 @@ public class ExecutionDatabase {
 /// - keeps global information for logging
 public class Execution {
     
-    var effectuationIDStack = [String]()
+    var effectuationIDStack: [String]
     let logger: Logger
     let crashLogger: Logger?
     var processID: String?
@@ -58,7 +58,12 @@ public class Execution {
     
     public var async: AsyncEffectuation { _async! }
     
-    public init (logger: Logger, crashLogger: Logger? = nil, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, alwaysAddCrashInfo: Bool = false, debug: Bool = false) {
+    public var line: Execution {
+        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, showSteps: showSteps, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
+    }
+    
+    public init (logger: Logger, crashLogger: Logger? = nil, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, alwaysAddCrashInfo: Bool = false, debug: Bool = false, effectuationIDStack: [String] = [String]()) {
+        self.effectuationIDStack = effectuationIDStack
         self.logger = logger
         self.crashLogger = crashLogger
         self.processID = processID
@@ -215,20 +220,13 @@ public class Execution {
         log(message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, withArguments: arguments)
     }
     
-    private let logGroup = DispatchGroup()
-    private let logQueue = DispatchQueue(label: "ExecutionLog", qos: .background)
-    
     /// Log a full `LoggingEvent` instance.
     public func log(event: LoggingEvent, addCrashInfo: Bool = false) -> () {
-        logGroup.enter()
-        self.logQueue.async {
-            if addCrashInfo || self.alwaysAddCrashInfo {
-                self.crashLogger?.log(event)
-            }
-            self.logger.log(event)
-            self.updateWorstMessageType(with: event.type)
-            self.logGroup.leave()
+        if addCrashInfo || alwaysAddCrashInfo {
+            self.crashLogger?.log(event)
         }
+        self.logger.log(event)
+        updateWorstMessageType(with: event.type)
     }
 }
 
