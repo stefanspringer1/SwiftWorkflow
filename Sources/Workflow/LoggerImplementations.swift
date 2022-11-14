@@ -11,12 +11,12 @@ public class MultiLogger: Logger {
 
     public var loggers: [Logger]
     
-    public init(_ loggers: Logger...) {
-        self.loggers = loggers
+    public init(_ loggers: Logger?...) {
+        self.loggers = loggers.compactMap{$0}
     }
     
-    public init(withLoggers loggers: [Logger]) {
-        self.loggers = loggers
+    public init(withLoggers loggers: [Logger?]) {
+        self.loggers = loggers.compactMap{$0}
     }
     
     public func log(_ event: LoggingEvent) {
