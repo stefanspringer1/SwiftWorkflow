@@ -52,14 +52,13 @@ public class Execution {
     
     let alwaysAddCrashInfo: Bool
     let debug: Bool
-    let showSteps: Bool
     
     var _async: AsyncEffectuation? = nil
     
     public var async: AsyncEffectuation { _async! }
     
     public var parallel: Execution {
-        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, showSteps: showSteps, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
+        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
     }
     
     public init (logger: Logger, crashLogger: Logger? = nil, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, alwaysAddCrashInfo: Bool = false, debug: Bool = false, effectuationIDStack: [String] = [String]()) {
@@ -71,7 +70,6 @@ public class Execution {
         self.itemInfo = itemInfo
         self.alwaysAddCrashInfo = alwaysAddCrashInfo
         self.debug = debug
-        self.showSteps = showSteps
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -107,15 +105,13 @@ public class Execution {
         }
         else if !executionDatabase.started(effectuationID) || forceValues.last == true {
             effectuationIDStack.append(effectuationID)
-            if showSteps {
-                logger.log(LoggingEvent(
-                    type: .Progress,
-                    processID: processID,
-                    applicationName: applicationName,
-                    fact: [.en: ">> STEP \(effectuationID)"],
-                    effectuationIDStack: effectuationIDStack
-                ))
-            }
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: ">> STEP \(effectuationID)"],
+                effectuationIDStack: effectuationIDStack
+            ))
             executionDatabase.notifyStarting(effectuationID)
             return true
         } else if debug {
@@ -125,15 +121,13 @@ public class Execution {
     }
     
     private func afterStep(_ effectuationID: String) {
-        if showSteps {
-            logger.log(LoggingEvent(
-                type: .Progress,
-                processID: processID,
-                applicationName: applicationName,
-                fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
-                effectuationIDStack: effectuationIDStack
-            ))
-        }
+        logger.log(LoggingEvent(
+            type: .Progress,
+            processID: processID,
+            applicationName: applicationName,
+            fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
+            effectuationIDStack: effectuationIDStack
+        ))
         effectuationIDStack.removeLast()
     }
     
