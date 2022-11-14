@@ -57,6 +57,10 @@ public class Execution {
     
     public var async: AsyncEffectuation { _async! }
     
+    public func closeLoggers() throws {
+        try logger.close()
+    }
+    
     public var parallel: Execution {
         Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
     }
