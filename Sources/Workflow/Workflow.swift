@@ -48,7 +48,6 @@ public class Execution {
     var processID: String?
     var applicationName: String
     var itemInfo: String? = nil
-    var _worseMessageType: MessageType = .Debug
     
     let alwaysAddCrashInfo: Bool
     let debug: Bool
