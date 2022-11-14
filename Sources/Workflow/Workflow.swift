@@ -272,11 +272,11 @@ public enum MessageType: Comparable, Codable {
     /// Information from the processing.
     case Info
     
-    /// Warnings from the processing.
-    case Warning
-    
     /// Information about the execution for a work item, e.g. starting.
     case Iteration
+    
+    /// Warnings from the processing.
+    case Warning
     
     /// Errors from the processing.
     case Error
