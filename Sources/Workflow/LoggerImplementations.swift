@@ -45,7 +45,7 @@ public class CollectingLogger: ConcurrentLogger {
     }
     
     /// Get all collected message events.
-    public func getLoggingEvents() throws -> [LoggingEvent] {
+    public func getLoggingEvents() -> [LoggingEvent] {
         return loggingEvents
     }
 }
