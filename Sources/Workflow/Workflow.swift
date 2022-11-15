@@ -123,12 +123,12 @@ public class Execution {
         return false
     }
     
-    private func afterStep(_ effectuationID: String) {
+    private func afterStep(_ effectuationID: String, secondsElapsed: Double) {
         logger.log(LoggingEvent(
             type: .Progress,
             processID: processID,
             applicationName: applicationName,
-            fact: [.en: stopped ? "<< ABORDED \(effectuationID)" : "<< DONE \(effectuationID)" ],
+            fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") \(effectuationID) (duration: \(secondsElapsed) seconds)" ],
             effectuationIDStack: effectuationIDStack
         ))
         effectuationIDStack.removeLast()
@@ -137,8 +137,9 @@ public class Execution {
     /// Executes only if the step did not execute before.
     public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () -> ()) {
         if effectuateTest(executionDatabase, effectuationID) {
+            let start = DispatchTime.now()
             execute(force: false, work: work)
-            afterStep(effectuationID)
+            afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
         }
     }
     
@@ -160,8 +161,9 @@ public class Execution {
         /// Executes only if the step did not execute before.
         public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
             if execution.effectuateTest(executionDatabase, effectuationID) {
+                let start = DispatchTime.now()
                 await execute(force: false, work: work)
-                execution.afterStep(effectuationID)
+                execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
             }
         }
         
