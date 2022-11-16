@@ -326,6 +326,30 @@ Use the `Execution.force` method if a certain step has to be run at a certain po
 
 ---
 
+### How to return values
+
+If the function representing your step is to return a value, this should to be an optional one:
+
+```Swift
+func my_step(
+    during execution: Execution,
+    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    data: MyData
+) -> String? {
+
+    var result: String? = nil
+
+    execution.effectuate(executionDatabase, #function) {
+        
+        ...
+            result = "my result"
+        ...
+    }
+    
+    return result
+}
+```
+
 ### Working with steps in library packages
 
 To to be able to judge if a function has already run by its function signature, the `ExecutionDatabase` instance has to be unique for each package (since the signatures of the top-level functions are only unique inside a specific package).
