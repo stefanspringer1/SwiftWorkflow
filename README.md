@@ -606,13 +606,23 @@ Example:
 dispatchGroup.enter()
 dispatchQueue.async {
     semaphore.wait()
+    let parallelExecution = execution.parallel
     myStep(
-        during: execution.parallel,
+        during: parallelExecution,
         usingExecutionDatabase: ExecutionDatabase(),
         theDate: theData
     )
+    ...remeber parallelExecution.worstMessageType...
     semaphore.signal()
     disptachGroup.leave()
+}
+```
+
+You need to update the worst message type after the parallel runs:
+
+```Swift
+...forEach { ...
+    execution.updateWorstMessageType(with: max(..., execution.worstMessageType)
 }
 ```
 
@@ -630,3 +640,4 @@ The following features might be added in the future:
 - A mechanism for _pulling_ progress information (an according `Logger` implementation should suffice).
 - Customized tooling for easy parallel processing of several work items.
 - Tooling for giving an entry point for different types of data and using several job registries (each for one types of data) as a way to combine sevaral application under one umbrella.
+- Making parellel execution easier to handle.

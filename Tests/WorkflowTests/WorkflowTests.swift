@@ -3,9 +3,18 @@ import XCTest
 
 final class WorkflowTests: XCTestCase {
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        //XCTAssertEqual(Workflow().text, "Hello, World!")
+        
+        let success = Message(
+            id: "error",
+            type: .Error,
+            fact: [
+                .en: "thsi is an error",
+            ]
+        )
+        
+        let logger = PrintLogger()
+        let execution = Execution(logger: logger, applicationName: "test")
+        execution.log(success)
+        print(execution.worstMessageType)
     }
 }
