@@ -291,16 +291,7 @@ public enum MessageType: Comparable, Codable {
     /// The description for the message type, which will be used
     /// when logging an event.
     public var description : String {
-      switch self {
-      case .Debug: return "Debug"
-      case .Progress: return "Progress"
-      case .Info: return "Info"
-      case .Iteration: return "Iteration"
-      case .Warning: return "Warning"
-      case .Error: return "Error"
-      case .Fatal: return "Fatal"
-      case .Deadly: return "Deadly"
-      }
+        String(describing: self)
     }
 }
 
