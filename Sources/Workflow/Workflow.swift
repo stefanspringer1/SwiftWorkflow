@@ -284,7 +284,7 @@ public enum MessageType: Comparable, Codable {
     /// then abandoned.
     case Fatal
     
-    /// A deadly erropr, i.e. not only the processing for one work item
+    /// A deadly error, i.e. not only the processing for one work item
     /// has to be abandoned, but the whole processing cannot continue.
     case Deadly
 
