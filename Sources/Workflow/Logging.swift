@@ -111,7 +111,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// A short textual representation of the logging event.
     public var description: String {
         let fullID = [effectuationIDStack?.last, messageID].joined(separator: " / ")
-        return "\(type.description):\(fullID != nil ? " \(fullID!):" : "") \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – soloution: \(solution?[.en]?.trimming() ?? "?")" : "")"
+        return "\(type):\(fullID != nil ? " \(fullID!):" : "") \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – soloution: \(solution?[.en]?.trimming() ?? "?")" : "")"
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
