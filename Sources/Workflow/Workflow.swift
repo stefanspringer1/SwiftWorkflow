@@ -287,7 +287,12 @@ public enum MessageType: Comparable, Codable {
     /// A deadly error, i.e. not only the processing for one work item
     /// has to be abandoned, but the whole processing cannot continue.
     case Deadly
-    
+
+    /// The description for the message type, which will be used
+    /// when logging an event.
+    public var description : String {
+        String(describing: self)
+    }
 }
 
 // The message type to be used as argument that informs about the severity a message.
