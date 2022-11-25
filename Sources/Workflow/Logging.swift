@@ -4,7 +4,7 @@
 import Foundation
 import Utilities
 
-#if !(os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+#if canImport(FoundationNetworking)
     import FoundationNetworking // for URLRequest and URLSession
 #endif
 
