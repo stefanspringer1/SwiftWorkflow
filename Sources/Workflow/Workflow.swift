@@ -243,20 +243,6 @@ struct ExecutionMessages: MessagesHolder {
 // An instance of `ExecutionMessages`.
 let executionMessages = ExecutionMessages()
 
-// An error with a description.
-public struct DescribingError: LocalizedError {
-    
-    private let message: String
-
-    public init(_ message: String) {
-        self.message = message
-    }
-    
-    public var errorDescription: String? {
-        return message
-    }
-}
-
 // The message type that informs about the severity a message.
 //
 // It conforms to `Comparable` so there is an order of severity.
