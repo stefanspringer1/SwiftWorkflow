@@ -110,12 +110,6 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A short textual representation of the logging event.
     public var description: String {
-        let fullID = [effectuationIDStack?.last, messageID].joined(separator: " / ")
-        return "\(type):\(fullID != nil ? " \(fullID!):" : "") \(shortDescription)"
-    }
-    
-    /// An even shorter textual representation of the logging event.
-    public var shortDescription: String {
         return "\(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
     }
     
