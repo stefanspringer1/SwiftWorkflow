@@ -75,9 +75,8 @@ public class Execution {
         }
     }
     
-    var _attached: [String:Any]? = nil
-    
-    public var attached: [String:Any] { _attached ?? { _attached = [String:Any](); return _attached! }() }
+    var _attached: Attachments? = nil
+    public var attached: Attachments { _attached ?? { _attached = Attachments(); return _attached! }() }
     
     var _async: AsyncEffectuation? = nil
     
