@@ -134,7 +134,15 @@ public class Execution {
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
+        if !force, let _beforeStepOperation {
+            operationCount += 1
+            _beforeStepOperation(operationCount, effectuationIDStack.last ?? "")
+        }
         work()
+        if !force, let _afterStepOperation{
+            operationCount += 1
+            _afterStepOperation(operationCount, effectuationIDStack.last ?? "")
+        }
         forceValues.removeLast()
     }
     
@@ -178,17 +186,9 @@ public class Execution {
     /// Executes only if the step did not execute before.
     public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () -> ()) {
         if effectuateTest(executionDatabase, effectuationID) {
-            if let _beforeStepOperation {
-                operationCount += 1
-                _beforeStepOperation(operationCount, effectuationIDStack.last ?? "")
-            }
             let start = DispatchTime.now()
             execute(force: false, work: work)
             afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
-            if let _afterStepOperation{
-                operationCount += 1
-                _afterStepOperation(operationCount, effectuationIDStack.last ?? "")
-            }
         }
     }
     
@@ -203,24 +203,24 @@ public class Execution {
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
+            if !force, let _beforeStepOperation = execution._beforeStepOperation {
+                execution.operationCount += 1
+                _beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+            }
             await work()
+            if !force, let _afterStepOperation = execution._afterStepOperation {
+                execution.operationCount += 1
+                _afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+            }
             execution.forceValues.removeLast()
         }
         
         /// Executes only if the step did not execute before.
         public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
             if execution.effectuateTest(executionDatabase, effectuationID) {
-                if let _beforeStepOperation = execution._beforeStepOperation {
-                    execution.operationCount += 1
-                    _beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
-                }
                 let start = DispatchTime.now()
                 await execute(force: false, work: work)
                 execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
-                if let _afterStepOperation = execution._afterStepOperation {
-                    execution.operationCount += 1
-                    _afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
-                }
             }
         }
         
