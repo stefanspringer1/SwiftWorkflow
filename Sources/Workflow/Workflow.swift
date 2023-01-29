@@ -134,12 +134,12 @@ public class Execution {
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
-        if let _beforeStepOperation {
+        if !force, let _beforeStepOperation {
             operationCount += 1
             _beforeStepOperation(operationCount, effectuationIDStack.last ?? "")
         }
         work()
-        if let _afterStepOperation{
+        if !force, let _afterStepOperation{
             operationCount += 1
             _afterStepOperation(operationCount, effectuationIDStack.last ?? "")
         }
@@ -204,12 +204,12 @@ public class Execution {
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
-            if let _beforeStepOperation = execution._beforeStepOperation {
+            if !force, let _beforeStepOperation = execution._beforeStepOperation {
                 execution.operationCount += 1
                 _beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
             }
             await work()
-            if let _afterStepOperation = execution._afterStepOperation {
+            if !force, let _afterStepOperation = execution._afterStepOperation {
                 execution.operationCount += 1
                 _afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
             }
