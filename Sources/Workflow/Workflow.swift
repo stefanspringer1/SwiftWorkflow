@@ -173,7 +173,9 @@ public class Execution {
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
+            execution.beforeStepOperation?()
             await work()
+            execution.afterStepOperation?()
             execution.forceValues.removeLast()
         }
         
