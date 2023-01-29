@@ -56,6 +56,10 @@ public class Execution {
     let beforeStepOperation: ((Int,String) -> ())?
     let afterStepOperation: ((Int,String) -> ())?
     
+    var _attached: [String:Any]? = nil
+    
+    public var attached: [String:Any] { _attached ?? { _attached = [String:Any](); return _attached! }() }
+    
     var _async: AsyncEffectuation? = nil
     
     public var async: AsyncEffectuation { _async! }
