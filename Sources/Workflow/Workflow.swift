@@ -42,6 +42,7 @@ public class ExecutionDatabase {
 /// - keeps global information for logging
 public class Execution {
     
+    var stepCount = 0
     var effectuationIDStack: [String]
     let logger: Logger
     let crashLogger: Logger?
@@ -52,8 +53,8 @@ public class Execution {
     let alwaysAddCrashInfo: Bool
     let debug: Bool
     
-    let beforeStepOperation: (() -> ())?
-    let afterStepOperation: (() -> ())?
+    let beforeStepOperation: ((Int,String) -> ())?
+    let afterStepOperation: ((Int,String) -> ())?
     
     var _async: AsyncEffectuation? = nil
     
@@ -77,8 +78,8 @@ public class Execution {
         alwaysAddCrashInfo: Bool = false,
         debug: Bool = false,
         effectuationIDStack: [String] = [String](),
-        beforeStepOperation: (() -> ())? = nil,
-        afterStepOperation: (() -> ())? = nil
+        beforeStepOperation: ((Int,String) -> ())? = nil,
+        afterStepOperation: ((Int,String) -> ())? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -110,9 +111,10 @@ public class Execution {
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
-        beforeStepOperation?()
+        stepCount += 1
+        beforeStepOperation?(stepCount, effectuationIDStack.last ?? "")
         work()
-        afterStepOperation?()
+        afterStepOperation?(stepCount, effectuationIDStack.last ?? "")
         forceValues.removeLast()
     }
     
@@ -173,9 +175,10 @@ public class Execution {
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
-            execution.beforeStepOperation?()
+            execution.stepCount += 1
+            execution.beforeStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
             await work()
-            execution.afterStepOperation?()
+            execution.afterStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
             execution.forceValues.removeLast()
         }
         
