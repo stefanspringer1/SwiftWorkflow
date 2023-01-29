@@ -52,6 +52,9 @@ public class Execution {
     let alwaysAddCrashInfo: Bool
     let debug: Bool
     
+    let beforeStepOperation: (() -> ())?
+    let afterStepOperation: (() -> ())?
+    
     var _async: AsyncEffectuation? = nil
     
     public var async: AsyncEffectuation { _async! }
@@ -64,7 +67,19 @@ public class Execution {
         Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
     }
     
-    public init (logger: Logger, crashLogger: Logger? = nil, processID: String? = nil, applicationName: String, itemInfo: String? = nil, showSteps: Bool = false, alwaysAddCrashInfo: Bool = false, debug: Bool = false, effectuationIDStack: [String] = [String]()) {
+    public init (
+        logger: Logger,
+        crashLogger: Logger? = nil,
+        processID: String? = nil,
+        applicationName: String,
+        itemInfo: String? = nil,
+        showSteps: Bool = false,
+        alwaysAddCrashInfo: Bool = false,
+        debug: Bool = false,
+        effectuationIDStack: [String] = [String](),
+        beforeStepOperation: (() -> ())? = nil,
+        afterStepOperation: (() -> ())? = nil
+    ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
         self.crashLogger = crashLogger
@@ -73,6 +88,8 @@ public class Execution {
         self.itemInfo = itemInfo
         self.alwaysAddCrashInfo = alwaysAddCrashInfo
         self.debug = debug
+        self.beforeStepOperation = beforeStepOperation
+        self.afterStepOperation = afterStepOperation
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -93,7 +110,9 @@ public class Execution {
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
+        beforeStepOperation?()
         work()
+        afterStepOperation?()
         forceValues.removeLast()
     }
     
