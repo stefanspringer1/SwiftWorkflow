@@ -42,7 +42,6 @@ public class ExecutionDatabase {
 /// - keeps global information for logging
 public class Execution {
     
-    var stepCount = 0
     var effectuationIDStack: [String]
     let logger: Logger
     let crashLogger: Logger?
@@ -74,6 +73,8 @@ public class Execution {
             _afterStepOperation = newValue
         }
     }
+    
+    var operationCount = 0
     
     var _attached: Attachments? = nil
     public var attached: Attachments { _attached ?? { _attached = Attachments(); return _attached! }() }
@@ -133,10 +134,16 @@ public class Execution {
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
-        stepCount += 1
-        _beforeStepOperation?(stepCount, effectuationIDStack.last ?? "")
+        if let _beforeStepOperation {
+            operationCount += 1
+            _beforeStepOperation(operationCount, effectuationIDStack.last ?? "")
+        }
         work()
-        _afterStepOperation?(stepCount, effectuationIDStack.last ?? "")
+        if let _afterStepOperation{
+            operationCount += 1
+            _afterStepOperation(operationCount, effectuationIDStack.last ?? "")
+        }
+        
         forceValues.removeLast()
     }
     
@@ -197,10 +204,15 @@ public class Execution {
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
-            execution.stepCount += 1
-            execution._beforeStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
+            if let _beforeStepOperation = execution._beforeStepOperation {
+                execution.operationCount += 1
+                _beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+            }
             await work()
-            execution._afterStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
+            if let _afterStepOperation = execution._afterStepOperation {
+                execution.operationCount += 1
+                _afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+            }
             execution.forceValues.removeLast()
         }
         
