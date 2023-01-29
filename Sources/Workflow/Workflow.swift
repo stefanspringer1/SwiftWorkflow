@@ -52,9 +52,9 @@ public class Execution {
     let alwaysAddCrashInfo: Bool
     let debug: Bool
     
-    var _beforeStepOperation: ((Int,String) -> ())?
+    var _beforeStepOperation: ((Int,String) -> Bool)?
     
-    public var beforeStepOperation: ((Int,String) -> ())? {
+    public var beforeStepOperation: ((Int,String) -> Bool)? {
         get {
             _beforeStepOperation
         }
@@ -63,9 +63,9 @@ public class Execution {
         }
     }
     
-    var _afterStepOperation: ((Int,String) -> ())?
+    var _afterStepOperation: ((Int,String) -> Bool)?
     
-    public var afterStepOperation: ((Int,String) -> ())? {
+    public var afterStepOperation: ((Int,String) -> Bool)? {
         get {
             _afterStepOperation
         }
@@ -101,8 +101,8 @@ public class Execution {
         alwaysAddCrashInfo: Bool = false,
         debug: Bool = false,
         effectuationIDStack: [String] = [String](),
-        beforeStepOperation: ((Int,String) -> ())? = nil,
-        afterStepOperation: ((Int,String) -> ())? = nil
+        beforeStepOperation: ((Int,String) -> Bool)? = nil,
+        afterStepOperation: ((Int,String) -> Bool)? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -136,12 +136,16 @@ public class Execution {
         forceValues.append(force)
         if !force, let _beforeStepOperation {
             operationCount += 1
-            _beforeStepOperation(operationCount, effectuationIDStack.last ?? "")
+            if !_beforeStepOperation(operationCount, effectuationIDStack.last ?? "") {
+                operationCount -= 1
+            }
         }
         work()
         if !force, let _afterStepOperation{
             operationCount += 1
-            _afterStepOperation(operationCount, effectuationIDStack.last ?? "")
+            if !_afterStepOperation(operationCount, effectuationIDStack.last ?? "") {
+                operationCount -= 1
+            }
         }
         forceValues.removeLast()
     }
@@ -205,12 +209,16 @@ public class Execution {
             execution.forceValues.append(force)
             if !force, let _beforeStepOperation = execution._beforeStepOperation {
                 execution.operationCount += 1
-                _beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+                if !_beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
+                    execution.operationCount -= 1
+                }
             }
             await work()
             if !force, let _afterStepOperation = execution._afterStepOperation {
                 execution.operationCount += 1
-                _afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "")
+                if !_afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
+                    execution.operationCount -= 1
+                }
             }
             execution.forceValues.removeLast()
         }
