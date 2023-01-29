@@ -53,8 +53,27 @@ public class Execution {
     let alwaysAddCrashInfo: Bool
     let debug: Bool
     
-    let beforeStepOperation: ((Int,String) -> ())?
-    let afterStepOperation: ((Int,String) -> ())?
+    var _beforeStepOperation: ((Int,String) -> ())?
+    
+    public var beforeStepOperation: ((Int,String) -> ())? {
+        get {
+            _beforeStepOperation
+        }
+        set {
+            _beforeStepOperation = newValue
+        }
+    }
+    
+    var _afterStepOperation: ((Int,String) -> ())?
+    
+    public var afterStepOperation: ((Int,String) -> ())? {
+        get {
+            _afterStepOperation
+        }
+        set {
+            _afterStepOperation = newValue
+        }
+    }
     
     var _attached: [String:Any]? = nil
     
@@ -93,8 +112,8 @@ public class Execution {
         self.itemInfo = itemInfo
         self.alwaysAddCrashInfo = alwaysAddCrashInfo
         self.debug = debug
-        self.beforeStepOperation = beforeStepOperation
-        self.afterStepOperation = afterStepOperation
+        self._beforeStepOperation = beforeStepOperation
+        self._afterStepOperation = afterStepOperation
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -116,9 +135,9 @@ public class Execution {
     fileprivate func execute(force: Bool, work: () -> ()) {
         forceValues.append(force)
         stepCount += 1
-        beforeStepOperation?(stepCount, effectuationIDStack.last ?? "")
+        _beforeStepOperation?(stepCount, effectuationIDStack.last ?? "")
         work()
-        afterStepOperation?(stepCount, effectuationIDStack.last ?? "")
+        _afterStepOperation?(stepCount, effectuationIDStack.last ?? "")
         forceValues.removeLast()
     }
     
@@ -180,9 +199,9 @@ public class Execution {
         fileprivate func execute(force: Bool, work: () async -> ()) async {
             execution.forceValues.append(force)
             execution.stepCount += 1
-            execution.beforeStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
+            execution._beforeStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
             await work()
-            execution.afterStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
+            execution._afterStepOperation?(execution.stepCount, execution.effectuationIDStack.last ?? "")
             execution.forceValues.removeLast()
         }
         
