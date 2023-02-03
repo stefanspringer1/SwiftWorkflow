@@ -110,7 +110,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A short textual representation of the logging event.
     public var description: String {
-        return "\(self.type):\(self.messageID != nil ? " [\(self.messageID ?? "")]": "") \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
+        return "\(self.type) \(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
