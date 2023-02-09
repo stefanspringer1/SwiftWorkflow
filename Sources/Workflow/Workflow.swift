@@ -156,6 +156,11 @@ public class Execution {
         execute(force: true, work: work)
     }
     
+    /// Make worse message type than `Error` to type `Error` in contained calls.
+    public func appease(work: () -> ()) {
+        execute(force: false, appease: true, work: work)
+    }
+    
     private func effectuateTest(_ executionDatabase: ExecutionDatabase, _ effectuationID: String) -> Bool {
         if stopped {
             self.log(executionMessages.skippingStep, effectuationID, effectuationID)
@@ -206,8 +211,8 @@ public class Execution {
         }
         
         /// Force all contained work to be executed, even if already executed before.
-        fileprivate func execute(force: Bool, work: () async -> ()) async {
-            execution.forceValues.append(force)
+        fileprivate func execute(force: Bool, appease: Bool = false, work: () async -> ()) async {
+            execution.forceValues.append(force); execution.appeaseValues.append(appease)
             if !force, let _beforeStepOperation = execution._beforeStepOperation {
                 execution.operationCount += 1
                 if !_beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
@@ -221,7 +226,7 @@ public class Execution {
                     execution.operationCount -= 1
                 }
             }
-            execution.forceValues.removeLast()
+            execution.forceValues.removeLast(); execution.appeaseValues.removeLast()
         }
         
         /// Executes only if the step did not execute before.
@@ -236,6 +241,11 @@ public class Execution {
         /// Executes always.
         public func force(work: () async -> ()) async {
             await execute(force: true, work: work)
+        }
+        
+        /// Make worse message type than `Error` to type `Error` in contained calls.
+        public func appease(work: () -> ()) async {
+            await execute(force: false, appease: true, work: work)
         }
     }
     
