@@ -353,7 +353,7 @@ public enum MessageType: Comparable, Codable {
     
     /// A program that has been called is lost (crashed or hanging). If the
     /// processing of a work item is done via program call, this message type
-    /// might be used to indicate the loss of teh according process.
+    /// might be used to indicate the loss of the according process.
     case Loss
     
     /// A deadly error, i.e. not only the processing for one work item
