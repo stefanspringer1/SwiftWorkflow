@@ -599,6 +599,24 @@ The error class is used when logging represents the point of view of the step or
 
 So the caller can execute the according code in `execution.appease { … }`. In side this code, any error worse than `Error` is set to `Error`. (The original error type is preserved as field `originalType` of the logging event.)
 
+So using an "external" step would actually be formulated as follows in most cases:
+
+```Swift
+func hello_external_step(
+    during execution: Execution,
+    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    data: MyData
+) {
+    execution.effectuate(executionDatabase, #function) {
+    
+        execution.appease {
+            hello_lib(during: execution, data: data)
+        }
+        
+    }
+}
+```
+
 ### Logging to an execution in a concurrent context
 
 In a concurrent context, use:
