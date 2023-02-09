@@ -363,9 +363,8 @@ public enum MessageType: Comparable, Codable {
     /// then abandoned.
     case Fatal
     
-    /// A program that has been called is lost (crashed or hanging). If the
-    /// processing of a work item is done via program call, this message type
-    /// might be used to indicate the loss of the according process.
+    /// The program or process that has been called to be in charge for
+    /// the whole processing of a work item is lost (crashed or hanging).
     case Loss
     
     /// A deadly error, i.e. not only the processing for one work item
