@@ -597,7 +597,7 @@ The usual logging (when you are e.g. extending `ConcurrentLogger` because you wa
 
 The error class is used when logging represents the point of view of the step or package. This might not coincide with the point of view of the whole application. Example: It is fatal for an image library if the desired image cannot be generated, but for the overall process it may only be a non-fatal error, an image is then simply missing.
 
-So the caller can execute the according code in `execution.appease { … }`. In side this code, any error worse than `Error` is set to `Error`. (The original error type is preserved as field `originalType` of the logging event.)
+So the caller can execute the according code in `execution.appease { … }`. In side this code, any error worse than `Error` is set to `Error`. Instead if this default `Error`, you can also specify the message type to which you want to appease via `execution.appease(to: …) { … }`. The original error type is preserved as field `originalType` of the logging event.
 
 So using an "external" step would actually be formulated as follows in most cases:
 

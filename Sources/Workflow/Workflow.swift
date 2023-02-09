@@ -130,11 +130,14 @@ public class Execution {
     }
 
     var forceValues = [Bool]()
-    var appeaseValues = [Bool]()
+    var appeaseTypes = [MessageType]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute(force: Bool, appease: Bool = false, work: () -> ()) {
-        forceValues.append(force); appeaseValues.append(appease)
+    fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () -> ()) {
+        forceValues.append(force)
+        if let appeaseType {
+            appeaseTypes.append(appeaseType)
+        }
         if !force, let _beforeStepOperation {
             operationCount += 1
             if !_beforeStepOperation(operationCount, effectuationIDStack.last ?? "") {
@@ -148,7 +151,10 @@ public class Execution {
                 operationCount -= 1
             }
         }
-        forceValues.removeLast(); appeaseValues.removeLast()
+        forceValues.removeLast()
+        if appeaseType != nil {
+            appeaseTypes.removeLast()
+        }
     }
     
     /// Executes always.
@@ -157,8 +163,8 @@ public class Execution {
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
-    public func appease(work: () -> ()) {
-        execute(force: false, appease: true, work: work)
+    public func appease(to appeaseType: MessageType? = .Error, work: () -> ()) {
+        execute(force: false, appeaseTo: appeaseType, work: work)
     }
     
     private func effectuateTest(_ executionDatabase: ExecutionDatabase, _ effectuationID: String) -> Bool {
@@ -211,8 +217,11 @@ public class Execution {
         }
         
         /// Force all contained work to be executed, even if already executed before.
-        fileprivate func execute(force: Bool, appease: Bool = false, work: () async -> ()) async {
-            execution.forceValues.append(force); execution.appeaseValues.append(appease)
+        fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async -> ()) async {
+            execution.forceValues.append(force)
+            if let appeaseType {
+                execution.appeaseTypes.append(appeaseType)
+            }
             if !force, let _beforeStepOperation = execution._beforeStepOperation {
                 execution.operationCount += 1
                 if !_beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
@@ -226,7 +235,10 @@ public class Execution {
                     execution.operationCount -= 1
                 }
             }
-            execution.forceValues.removeLast(); execution.appeaseValues.removeLast()
+            execution.forceValues.removeLast()
+            if appeaseType != nil {
+                execution.appeaseTypes.removeLast()
+            }
         }
         
         /// Executes only if the step did not execute before.
@@ -244,8 +256,8 @@ public class Execution {
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
-        public func appease(work: () -> ()) async {
-            await execute(force: false, appease: true, work: work)
+        public func appease(to appeaseType: MessageType? = .Error, work: () -> ()) async {
+            await execute(force: false, appeaseTo: appeaseType, work: work)
         }
     }
     
@@ -300,8 +312,8 @@ public class Execution {
         if addCrashInfo || alwaysAddCrashInfo {
             self.crashLogger?.log(event)
         }
-        if appeaseValues.last == true, event.type > .Error {
-            self.logger.log(event.withType(.Error))
+        if let appeaseType = appeaseTypes.last, event.type > appeaseType {
+            self.logger.log(event.withType(appeaseType))
         }
         else {
             self.logger.log(event)
