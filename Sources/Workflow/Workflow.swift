@@ -363,7 +363,7 @@ public enum MessageType: Comparable, Codable {
     /// then abandoned.
     case Fatal
     
-    /// The program or process that has been called to be in charge for
+    /// The program or process that has been startet to be in charge for
     /// the whole processing of a work item is lost (crashed or hanging).
     case Loss
     
