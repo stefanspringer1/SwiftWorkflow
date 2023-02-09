@@ -52,6 +52,9 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// The message type.
     public let type: MessageType
+    
+    /// The original message type.
+    public var originalType: MessageType?
 
     /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
@@ -79,9 +82,26 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// The time of the event.
     public var time: String
     
+    public func withType(_ newType: MessageType) -> LoggingEvent {
+        return LoggingEvent(
+            messageID: self.messageID,
+            type: newType,
+            originalType: self.type,
+            processID: self.processID,
+            applicationName: self.applicationName,
+            fact: self.fact,
+            solution: self.solution,
+            itemInfo: self.itemInfo,
+            itemPositionInfo: self.itemPositionInfo,
+            effectuationIDStack: self.effectuationIDStack,
+            time: self.time
+        )
+    }
+    
     public init(
         messageID: MessageID? = nil,
         type: MessageType,
+        originalType: MessageType? = nil,
         processID: String? = nil,
         applicationName: String,
         fact: LocalizingMessage,
@@ -93,6 +113,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     ) {
         self.messageID = messageID
         self.type = type
+        self.originalType = originalType
         self.processID = processID
         self.applicationName = applicationName
         self.fact = fact
@@ -110,7 +131,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A short textual representation of the logging event.
     public var description: String {
-        return "\(self.type)\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
+        return "\(self.type)\(self.originalType != nil ? " <- \(self.originalType!)" : "")\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
@@ -124,6 +145,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     enum CodingKeys: String, CodingKey {
         case messageID
         case type
+        case originalType
         case processID
         case applicationName
         case fact
@@ -139,6 +161,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(messageID, forKey: .messageID)
         try container.encode(type, forKey: .type)
+        try container.encode(originalType, forKey: .originalType)
         try container.encode(processID, forKey: .processID)
         try container.encode(applicationName, forKey: .applicationName)
         try container.encode(itemInfo, forKey: .itemInfo)
@@ -166,6 +189,7 @@ extension LoggingEvent: Decodable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.messageID = try values.decode(String?.self, forKey: .messageID)
         self.type = try values.decode(MessageType.self, forKey: .type)
+        self.originalType = try values.decode(MessageType.self, forKey: .originalType)
         self.processID = try values.decode(String.self, forKey: .processID)
         self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)

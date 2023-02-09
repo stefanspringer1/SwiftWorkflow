@@ -130,10 +130,11 @@ public class Execution {
     }
 
     var forceValues = [Bool]()
+    var appeaseValues = [Bool]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute(force: Bool, work: () -> ()) {
-        forceValues.append(force)
+    fileprivate func execute(force: Bool, appease: Bool = false, work: () -> ()) {
+        forceValues.append(force); appeaseValues.append(appease)
         if !force, let _beforeStepOperation {
             operationCount += 1
             if !_beforeStepOperation(operationCount, effectuationIDStack.last ?? "") {
@@ -147,7 +148,7 @@ public class Execution {
                 operationCount -= 1
             }
         }
-        forceValues.removeLast()
+        forceValues.removeLast(); appeaseValues.removeLast()
     }
     
     /// Executes always.
@@ -289,7 +290,12 @@ public class Execution {
         if addCrashInfo || alwaysAddCrashInfo {
             self.crashLogger?.log(event)
         }
-        self.logger.log(event)
+        if appeaseValues.last == true, event.type > .Error {
+            self.logger.log(event.withType(.Error))
+        }
+        else {
+            self.logger.log(event)
+        }
         updateWorstMessageType(with: event.type)
     }
 }
@@ -335,6 +341,11 @@ public enum MessageType: Comparable, Codable {
     /// then abandoned.
     case Fatal
     
+    /// A program that has been called is lost (crashed or hanging). If the
+    /// processing of a work item is done via program call, this message type
+    /// might be used to indicate the loss of teh according process.
+    case Loss
+    
     /// A deadly error, i.e. not only the processing for one work item
     /// has to be abandoned, but the whole processing cannot continue.
     case Deadly
@@ -350,6 +361,7 @@ public enum MessageTypeArgument: String, ExpressibleByArgument {
     case warning
     case error
     case fatal
+    case loss
     case deadly
     
     public var messageType: MessageType {
@@ -361,6 +373,7 @@ public enum MessageTypeArgument: String, ExpressibleByArgument {
         case .warning: return MessageType.Warning
         case .error: return MessageType.Error
         case .fatal: return MessageType.Fatal
+        case .loss: return MessageType.Loss
         case .deadly: return MessageType.Deadly
         }
     }
