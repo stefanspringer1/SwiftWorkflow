@@ -234,6 +234,10 @@ public struct Message {
         self.solution = solution
     }
     
+    public func setting(type newType: MessageType) -> Message {
+        return Message(id: id, type: newType, fact: fact, solution: solution)
+    }
+    
 }
 
 /// A collection of messages as a map from the message ID to the message.
