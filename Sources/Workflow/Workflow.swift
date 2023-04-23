@@ -79,9 +79,9 @@ public class Execution {
     var _attached: Attachments? = nil
     public var attached: Attachments { _attached ?? { _attached = Attachments(); return _attached! }() }
     
-    var _async: AsyncEffectuation? = nil
+    var _async: AsyncEffectuation!
     
-    public var async: AsyncEffectuation { _async! }
+    public var async: AsyncEffectuation { _async }
     
     public func closeLoggers() throws {
         try logger.close()
@@ -210,7 +210,7 @@ public class Execution {
     
     public actor AsyncEffectuation {
         
-        private let execution: Execution
+        private weak var execution: Execution!
         
         init(execution: Execution) {
             self.execution = execution
