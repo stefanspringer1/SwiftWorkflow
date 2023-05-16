@@ -168,6 +168,7 @@ public class Execution {
     
     /// Something optional. Should use module name as prefix.
     public func optionally(named optionName: String, work: () -> ()) {
+        print("optionally(name: \"\(optionName)\") / \(preventedOptionals ?? [])")
         if preventedOptionals?.contains(optionName) != true {
             execute(force: false, work: work)
         }
