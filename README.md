@@ -118,15 +118,15 @@ execution.force {
 }
 ```
 
-On the contrary, if you regard a step at a certain point or more generally a certain code block as something optional, use teh following code: 
+On the contrary, if you regard a step at a certain point or more generally a certain code block as something dispensible (i.e. the rest of the application does not suffer from inconsistencies if this part does not get executed), use the following code: 
 
 ```Swift
-execution.optionally(named: "module1:myOther_step") {
+execution.dispensible(named: "module1:myOther_step") {
         myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
 }
 ```
 
-You then might add `"module1:myOther_step"` to the set of texts in the argument `preventedOptionals` when initializing an `Execution` in order to prevent `myOther_step`  from being executed at this point. (It is recommended to add the module name as a prefix.)
+You then might add `"module1:myOther_step"` to the set of texts in the argument `dispenseWith` when initializing an `Execution` in order to prevent `myOther_step`  from being executed at this point. (It is recommended to add the module name as a prefix.)
 
 If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 

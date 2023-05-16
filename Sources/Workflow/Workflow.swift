@@ -54,7 +54,7 @@ public class Execution {
     
     var _beforeStepOperation: ((Int,String) -> Bool)?
     
-    let preventedOptions: Set<String>?
+    let dispenseWith: Set<String>?
     
     public var beforeStepOperation: ((Int,String) -> Bool)? {
         get {
@@ -105,7 +105,7 @@ public class Execution {
         effectuationIDStack: [String] = [String](),
         beforeStepOperation: ((Int,String) -> Bool)? = nil,
         afterStepOperation: ((Int,String) -> Bool)? = nil,
-        preventedOptions: Set<String>? = nil
+        dispenseWith: Set<String>? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -117,7 +117,7 @@ public class Execution {
         self.debug = debug
         self._beforeStepOperation = beforeStepOperation
         self._afterStepOperation = afterStepOperation
-        self.preventedOptions = preventedOptions
+        self.dispenseWith = dispenseWith
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -167,14 +167,14 @@ public class Execution {
     }
     
     /// Something optional. Should use module name as prefix.
-    public func optionally(named optionName: String, work: () -> ()) {
-        effectuationIDStack.append("option \"\(optionName)\"")
-        if preventedOptions?.contains(optionName) == true {
+    public func dispensible(named optionName: String, work: () -> ()) {
+        effectuationIDStack.append("dispensible part \"\(optionName)\"")
+        if dispenseWith?.contains(optionName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "OPTION \"\(optionName)\" DEACTIVATED"],
+                fact: [.en: "DISPENSIBLE PART \"\(optionName)\" DEACTIVATED"],
                 effectuationIDStack: effectuationIDStack
             ))
         } else {
@@ -182,7 +182,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> OPTION \"\(optionName)\""],
+                fact: [.en: ">> DISPENSIBLE PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
             execute(force: false, work: work)
@@ -190,7 +190,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< DONE OPTION \"\(optionName)\""],
+                fact: [.en: "<< DONE DISPENSIBLE PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
         }
@@ -291,14 +291,14 @@ public class Execution {
         }
         
         /// Something optional. Should use module name as prefix.
-        public func optionally(named optionName: String, work: () async -> ()) async {
-            execution.effectuationIDStack.append("option \"\(optionName)\"")
-            if execution.preventedOptions?.contains(optionName) == true {
+        public func dispensible(named optionName: String, work: () async -> ()) async {
+            execution.effectuationIDStack.append("dispensible part \"\(optionName)\"")
+            if execution.dispenseWith?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "OPTION \"\(optionName)\" DEACTIVATED"],
+                    fact: [.en: "DISPENSIBLE PART \"\(optionName)\" DEACTIVATED"],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             } else {
@@ -306,7 +306,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> OPTION \"\(optionName)\""],
+                    fact: [.en: ">> DISPENSIBLE PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
                 await execute(force: false, work: work)
@@ -314,7 +314,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< DONE OPTION \"\(optionName)\""],
+                    fact: [.en: "<< DONE DISPENSIBLE PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             }
