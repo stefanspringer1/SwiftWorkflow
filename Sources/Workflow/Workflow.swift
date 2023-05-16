@@ -174,7 +174,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "dispensable PART \"\(optionName)\" DEACTIVATED"],
+                fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
                 effectuationIDStack: effectuationIDStack
             ))
         } else {
@@ -182,7 +182,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> dispensable PART \"\(optionName)\""],
+                fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
             execute(force: false, work: work)
@@ -190,7 +190,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< DONE dispensable PART \"\(optionName)\""],
+                fact: [.en: "<< DONE DISPENSABLE PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
         }
@@ -298,7 +298,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "dispensable PART \"\(optionName)\" DEACTIVATED"],
+                    fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             } else {
@@ -306,7 +306,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> dispensable PART \"\(optionName)\""],
+                    fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
                 await execute(force: false, work: work)
@@ -314,7 +314,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< DONE dispensable PART \"\(optionName)\""],
+                    fact: [.en: "<< DONE DISPENSABLE PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             }
