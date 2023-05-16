@@ -168,7 +168,7 @@ public class Execution {
     
     /// Something optional. Should use module name as prefix.
     public func optionally(named optionName: String, work: () -> ()) {
-        effectuationIDStack.append("OPTION \"\(optionName)\"")
+        effectuationIDStack.append("option \"\(optionName)\"")
         if preventedOptions?.contains(optionName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -292,7 +292,7 @@ public class Execution {
         
         /// Something optional. Should use module name as prefix.
         public func optionally(named optionName: String, work: () async -> ()) async {
-            execution.effectuationIDStack.append("OPTION \"\(optionName)\"")
+            execution.effectuationIDStack.append("option \"\(optionName)\"")
             if execution.preventedOptions?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
