@@ -168,10 +168,23 @@ public class Execution {
     
     /// Something optional. Should use module name as prefix.
     public func optionally(named optionName: String, work: () -> ()) {
-        print("optionally(name: \"\(optionName)\") / \(preventedOptionals ?? [])")
+        logger.log(LoggingEvent(
+            type: .Progress,
+            processID: processID,
+            applicationName: applicationName,
+            fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+            effectuationIDStack: effectuationIDStack
+        ))
         if preventedOptionals?.contains(optionName) != true {
             execute(force: false, work: work)
         }
+        logger.log(LoggingEvent(
+            type: .Progress,
+            processID: processID,
+            applicationName: applicationName,
+            fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+            effectuationIDStack: effectuationIDStack
+        ))
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
@@ -269,9 +282,23 @@ public class Execution {
         
         /// Something optional. Should use module name as prefix.
         public func optionally(named optionName: String, work: () async -> ()) async {
+            execution.logger.log(LoggingEvent(
+                type: .Progress,
+                processID: execution.processID,
+                applicationName: execution.applicationName,
+                fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+                effectuationIDStack: execution.effectuationIDStack
+            ))
             if execution.preventedOptionals?.contains(optionName) != true {
                 await execute(force: false, work: work)
             }
+            execution.logger.log(LoggingEvent(
+                type: .Progress,
+                processID: execution.processID,
+                applicationName: execution.applicationName,
+                fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+                effectuationIDStack: execution.effectuationIDStack
+            ))
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
