@@ -168,6 +168,7 @@ public class Execution {
     
     /// Something optional. Should use module name as prefix.
     public func optionally(named optionName: String, work: () -> ()) {
+        effectuationIDStack.append("OPTION \"\(optionName)\"")
         if preventedOptions?.contains(optionName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -181,7 +182,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+                fact: [.en: ">> OPTION \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
             execute(force: false, work: work)
@@ -189,10 +190,11 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+                fact: [.en: "<< OPTION \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
         }
+        effectuationIDStack.removeLast()
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
@@ -290,6 +292,7 @@ public class Execution {
         
         /// Something optional. Should use module name as prefix.
         public func optionally(named optionName: String, work: () async -> ()) async {
+            execution.effectuationIDStack.append("OPTION \"\(optionName)\"")
             if execution.preventedOptions?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
@@ -303,7 +306,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+                    fact: [.en: ">> OPTION \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
                 await execute(force: false, work: work)
@@ -311,10 +314,11 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+                    fact: [.en: "<< OPTION \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             }
+            execution.effectuationIDStack.removeLast()
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
