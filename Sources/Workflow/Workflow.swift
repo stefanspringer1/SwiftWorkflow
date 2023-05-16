@@ -190,7 +190,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< OPTION \"\(optionName)\""],
+                fact: [.en: "<< DONE OPTION \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
         }
@@ -228,7 +228,7 @@ public class Execution {
             type: .Progress,
             processID: processID,
             applicationName: applicationName,
-            fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") \(effectuationID) (duration: \(secondsElapsed) seconds)" ],
+            fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(effectuationID) (duration: \(secondsElapsed) seconds)" ],
             effectuationIDStack: effectuationIDStack
         ))
         effectuationIDStack.removeLast()
@@ -314,7 +314,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< OPTION \"\(optionName)\""],
+                    fact: [.en: "<< DONE OPTION \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             }
