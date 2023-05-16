@@ -167,14 +167,14 @@ public class Execution {
     }
     
     /// Something optional. Should use module name as prefix.
-    public func dispensible(named optionName: String, work: () -> ()) {
-        effectuationIDStack.append("dispensible part \"\(optionName)\"")
+    public func dispensable(named optionName: String, work: () -> ()) {
+        effectuationIDStack.append("dispensable part \"\(optionName)\"")
         if dispenseWith?.contains(optionName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "DISPENSIBLE PART \"\(optionName)\" DEACTIVATED"],
+                fact: [.en: "dispensable PART \"\(optionName)\" DEACTIVATED"],
                 effectuationIDStack: effectuationIDStack
             ))
         } else {
@@ -182,7 +182,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> DISPENSIBLE PART \"\(optionName)\""],
+                fact: [.en: ">> dispensable PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
             execute(force: false, work: work)
@@ -190,7 +190,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< DONE DISPENSIBLE PART \"\(optionName)\""],
+                fact: [.en: "<< DONE dispensable PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
         }
@@ -291,14 +291,14 @@ public class Execution {
         }
         
         /// Something optional. Should use module name as prefix.
-        public func dispensible(named optionName: String, work: () async -> ()) async {
-            execution.effectuationIDStack.append("dispensible part \"\(optionName)\"")
+        public func dispensable(named optionName: String, work: () async -> ()) async {
+            execution.effectuationIDStack.append("dispensable part \"\(optionName)\"")
             if execution.dispenseWith?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "DISPENSIBLE PART \"\(optionName)\" DEACTIVATED"],
+                    fact: [.en: "dispensable PART \"\(optionName)\" DEACTIVATED"],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             } else {
@@ -306,7 +306,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> DISPENSIBLE PART \"\(optionName)\""],
+                    fact: [.en: ">> dispensable PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
                 await execute(force: false, work: work)
@@ -314,7 +314,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< DONE DISPENSIBLE PART \"\(optionName)\""],
+                    fact: [.en: "<< DONE dispensable PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
             }

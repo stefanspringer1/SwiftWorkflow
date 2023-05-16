@@ -118,10 +118,10 @@ execution.force {
 }
 ```
 
-On the contrary, if you regard a step at a certain point or more generally a certain code block as something dispensible (i.e. the rest of the application does not suffer from inconsistencies if this part does not get executed), use the following code: 
+On the contrary, if you regard a step at a certain point or more generally a certain code block as something dispensable (i.e. the rest of the application does not suffer from inconsistencies if this part does not get executed), use the following code: 
 
 ```Swift
-execution.dispensible(named: "module1:myOther_step") {
+execution.dispensable(named: "module1:myOther_step") {
         myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
 }
 ```
