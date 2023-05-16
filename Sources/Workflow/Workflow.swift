@@ -167,7 +167,7 @@ public class Execution {
     }
     
     /// Something optional. Should use module name as prefix.
-    public func optionally(preventWith optionName: String, work: () -> ()) {
+    public func optionally(named optionName: String, work: () -> ()) {
         if preventedOptionals?.contains(optionName) != true {
             execute(force: false, work: work)
         }
@@ -267,7 +267,7 @@ public class Execution {
         }
         
         /// Something optional. Should use module name as prefix.
-        public func optionally(preventWith optionName: String, work: () async -> ()) async {
+        public func optionally(named optionName: String, work: () async -> ()) async {
             if execution.preventedOptionals?.contains(optionName) != true {
                 await execute(force: false, work: work)
             }

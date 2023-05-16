@@ -121,7 +121,7 @@ execution.force {
 On the contrary, if you regard a step at a certain point or more generally a certain code block as something optional, use teh following code: 
 
 ```Swift
-execution.optionally(preventWith: "module1:myOther_step") {
+execution.optionally(named: "module1:myOther_step") {
         myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
 }
 ```
