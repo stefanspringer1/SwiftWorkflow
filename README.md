@@ -112,13 +112,21 @@ Inside your step you might call other steps. In the example above, `myOther_step
 
 If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step` at this point, use the following code:
 
-If you call `myOther_step` inside `myWork_step` as in the example above, `myOther_step` (or more precisely, the code inside it that is embraced in a `execution.effectuate` call) will not be executed if `myWork_step` has already been executed before during the same execution (of the work item). This way you can formulate prerequisites that should have been run before, but without getting the prerequisites executed multiple times. If you want to force the execution of `myOther_step`, use the following code:
-
 ```Swift
 execution.force {
     myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
 }
 ```
+
+On the contrary, if you regard a step at a certain point or more generally a certain code block as something optional, use teh following code: 
+
+```Swift
+execution.optionally(preventWith: "module1:myOther_step") {
+        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+}
+```
+
+You then might add `"module1:myOther_step"` to the set of texts in the argument `preventedOptionals` when initializing an `Execution` in order to prevent `myOther_step`  from being executed at this point. (It is recommended to add the module name as a prefix.)
 
 If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 

@@ -54,6 +54,8 @@ public class Execution {
     
     var _beforeStepOperation: ((Int,String) -> Bool)?
     
+    let preventedOptionals: Set<String>?
+    
     public var beforeStepOperation: ((Int,String) -> Bool)? {
         get {
             _beforeStepOperation
@@ -102,7 +104,8 @@ public class Execution {
         debug: Bool = false,
         effectuationIDStack: [String] = [String](),
         beforeStepOperation: ((Int,String) -> Bool)? = nil,
-        afterStepOperation: ((Int,String) -> Bool)? = nil
+        afterStepOperation: ((Int,String) -> Bool)? = nil,
+        preventedOptionals: Set<String>? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -114,6 +117,7 @@ public class Execution {
         self.debug = debug
         self._beforeStepOperation = beforeStepOperation
         self._afterStepOperation = afterStepOperation
+        self.preventedOptionals = preventedOptionals
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -160,6 +164,13 @@ public class Execution {
     /// Executes always.
     public func force(work: () -> ()) {
         execute(force: true, work: work)
+    }
+    
+    /// Something optional. Should use module name as prefix.
+    public func optionally(preventWith optionName: String, work: () -> ()) {
+        if preventedOptionals?.contains(optionName) != true {
+            execute(force: false, work: work)
+        }
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
@@ -253,6 +264,13 @@ public class Execution {
         /// Executes always.
         public func force(work: () async -> ()) async {
             await execute(force: true, work: work)
+        }
+        
+        /// Something optional. Should use module name as prefix.
+        public func optionally(preventWith optionName: String, work: () async -> ()) async {
+            if execution.preventedOptionals?.contains(optionName) != true {
+                await execute(force: false, work: work)
+            }
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
