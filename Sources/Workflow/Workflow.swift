@@ -54,7 +54,7 @@ public class Execution {
     
     var _beforeStepOperation: ((Int,String) -> Bool)?
     
-    let preventedOptionals: Set<String>?
+    let preventedOptions: Set<String>?
     
     public var beforeStepOperation: ((Int,String) -> Bool)? {
         get {
@@ -105,7 +105,7 @@ public class Execution {
         effectuationIDStack: [String] = [String](),
         beforeStepOperation: ((Int,String) -> Bool)? = nil,
         afterStepOperation: ((Int,String) -> Bool)? = nil,
-        preventedOptionals: Set<String>? = nil
+        preventedOptions: Set<String>? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -117,7 +117,7 @@ public class Execution {
         self.debug = debug
         self._beforeStepOperation = beforeStepOperation
         self._afterStepOperation = afterStepOperation
-        self.preventedOptionals = preventedOptionals
+        self.preventedOptions = preventedOptions
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -175,7 +175,7 @@ public class Execution {
             fact: [.en: ">> OPTIONAL \"\(optionName)\""],
             effectuationIDStack: effectuationIDStack
         ))
-        if preventedOptionals?.contains(optionName) != true {
+        if preventedOptions?.contains(optionName) != true {
             execute(force: false, work: work)
         }
         logger.log(LoggingEvent(
@@ -289,7 +289,7 @@ public class Execution {
                 fact: [.en: ">> OPTIONAL \"\(optionName)\""],
                 effectuationIDStack: execution.effectuationIDStack
             ))
-            if execution.preventedOptionals?.contains(optionName) != true {
+            if execution.preventedOptions?.contains(optionName) != true {
                 await execute(force: false, work: work)
             }
             execution.logger.log(LoggingEvent(
