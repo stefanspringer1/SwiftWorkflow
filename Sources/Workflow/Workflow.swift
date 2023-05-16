@@ -168,23 +168,31 @@ public class Execution {
     
     /// Something optional. Should use module name as prefix.
     public func optionally(named optionName: String, work: () -> ()) {
-        logger.log(LoggingEvent(
-            type: .Progress,
-            processID: processID,
-            applicationName: applicationName,
-            fact: [.en: ">> OPTIONAL \"\(optionName)\""],
-            effectuationIDStack: effectuationIDStack
-        ))
-        if preventedOptions?.contains(optionName) != true {
+        if preventedOptions?.contains(optionName) == true {
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: "OPTION \"\(optionName)\" DEACTIVATED"],
+                effectuationIDStack: effectuationIDStack
+            ))
+        } else {
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+                effectuationIDStack: effectuationIDStack
+            ))
             execute(force: false, work: work)
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+                effectuationIDStack: effectuationIDStack
+            ))
         }
-        logger.log(LoggingEvent(
-            type: .Progress,
-            processID: processID,
-            applicationName: applicationName,
-            fact: [.en: "<< OPTIONAL \"\(optionName)\""],
-            effectuationIDStack: effectuationIDStack
-        ))
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
@@ -282,23 +290,31 @@ public class Execution {
         
         /// Something optional. Should use module name as prefix.
         public func optionally(named optionName: String, work: () async -> ()) async {
-            execution.logger.log(LoggingEvent(
-                type: .Progress,
-                processID: execution.processID,
-                applicationName: execution.applicationName,
-                fact: [.en: ">> OPTIONAL \"\(optionName)\""],
-                effectuationIDStack: execution.effectuationIDStack
-            ))
-            if execution.preventedOptions?.contains(optionName) != true {
+            if execution.preventedOptions?.contains(optionName) == true {
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: "OPTION \"\(optionName)\" DEACTIVATED"],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
+            } else {
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: ">> OPTIONAL \"\(optionName)\""],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
                 await execute(force: false, work: work)
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: "<< OPTIONAL \"\(optionName)\""],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
             }
-            execution.logger.log(LoggingEvent(
-                type: .Progress,
-                processID: execution.processID,
-                applicationName: execution.applicationName,
-                fact: [.en: "<< OPTIONAL \"\(optionName)\""],
-                effectuationIDStack: execution.effectuationIDStack
-            ))
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
