@@ -134,7 +134,11 @@ execution.dispensable(named: "module1:myOther_step") {
 }
 ```
 
+The part can then be deactivated by adding the according name to the `dispensingWith` value in the initializer of the `Execution` instance.
+
 So with `execution.optional(named: ...) { ... }` you define a part that does not run in the normal case but can be activated, and with `execution.dispensable(named: ...) { ... }` you define a part that runs in the normal case but can be deactivated. It is recommended to add the module name to the part name as a prefix in both cases.
+
+An activated option can also be dispensed with („dispensing wins“).
 
 If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 
