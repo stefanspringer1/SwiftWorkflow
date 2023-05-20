@@ -118,6 +118,14 @@ execution.force {
 }
 ```
 
+There are also be named optional parts that can be activated by adding an according value to the `withOptions` value in the initializer of the `Execution` instance:
+
+```Swift
+execution.optional(named: "module1:myOther_step") {
+        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+}
+```
+
 On the contrary, if you regard a step at a certain point or more generally a certain code block as something dispensable (i.e. the rest of the application does not suffer from inconsistencies if this part does not get executed), use the following code: 
 
 ```Swift
@@ -126,7 +134,7 @@ execution.dispensable(named: "module1:myOther_step") {
 }
 ```
 
-You then might add `"module1:myOther_step"` to the set of texts in the argument `dispenseWith` when initializing an `Execution` in order to prevent `myOther_step`  from being executed at this point. (It is recommended to add the module name as a prefix.)
+So with `execution.optional(named: ...) { ... }` you define a part that does not run in the normal case but can be activated, and with `execution.dispensable(named: ...) { ... }` you define a part that runs in the normal case but can be deactivated. It is recommended to add the module name to the part name as a prefix in both cases.
 
 If your function contains `async` code (i.e. `await` is being used in the calls), use `execution.async.effectuate` instead of `execution.effectuate` or `execution.async.force` instead of `execution.force` (a step might also be an `async` function).
 

@@ -54,7 +54,8 @@ public class Execution {
     
     var _beforeStepOperation: ((Int,String) -> Bool)?
     
-    let dispenseWith: Set<String>?
+    let dispensedWith: Set<String>?
+    let activatedOptions: Set<String>?
     
     public var beforeStepOperation: ((Int,String) -> Bool)? {
         get {
@@ -105,7 +106,8 @@ public class Execution {
         effectuationIDStack: [String] = [String](),
         beforeStepOperation: ((Int,String) -> Bool)? = nil,
         afterStepOperation: ((Int,String) -> Bool)? = nil,
-        dispenseWith: Set<String>? = nil
+        withOptions activatedOptions: Set<String>? = nil,
+        dispensingWith: Set<String>? = nil
     ) {
         self.effectuationIDStack = effectuationIDStack
         self.logger = logger
@@ -117,7 +119,8 @@ public class Execution {
         self.debug = debug
         self._beforeStepOperation = beforeStepOperation
         self._afterStepOperation = afterStepOperation
-        self.dispenseWith = dispenseWith
+        self.activatedOptions = activatedOptions
+        self.dispensedWith = dispensingWith
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -166,10 +169,41 @@ public class Execution {
         execute(force: true, work: work)
     }
     
-    /// Something optional. Should use module name as prefix.
+    /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
+    public func optional(named optionName: String, work: () -> ()) {
+        effectuationIDStack.append("optional part \"\(optionName)\"")
+        if activatedOptions?.contains(optionName) != true || dispensedWith?.contains(optionName) == true {
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
+                effectuationIDStack: effectuationIDStack
+            ))
+        } else {
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
+                effectuationIDStack: effectuationIDStack
+            ))
+            execute(force: false, work: work)
+            logger.log(LoggingEvent(
+                type: .Progress,
+                processID: processID,
+                applicationName: applicationName,
+                fact: [.en: "<< DONE OPTIONAL PART \"\(optionName)\""],
+                effectuationIDStack: effectuationIDStack
+            ))
+        }
+        effectuationIDStack.removeLast()
+    }
+    
+    /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
     public func dispensable(named optionName: String, work: () -> ()) {
         effectuationIDStack.append("dispensable part \"\(optionName)\"")
-        if dispenseWith?.contains(optionName) == true {
+        if dispensedWith?.contains(optionName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
@@ -290,10 +324,41 @@ public class Execution {
             await execute(force: true, work: work)
         }
         
-        /// Something optional. Should use module name as prefix.
+        /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
+        public func optional(named optionName: String, work: () async -> ()) async {
+            execution.effectuationIDStack.append("optional part \"\(optionName)\"")
+            if execution.activatedOptions?.contains(optionName) != true || execution.dispensedWith?.contains(optionName) == true {
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
+            } else {
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
+                await execute(force: false, work: work)
+                execution.logger.log(LoggingEvent(
+                    type: .Progress,
+                    processID: execution.processID,
+                    applicationName: execution.applicationName,
+                    fact: [.en: "<< DONE OPTIONAL PART \"\(optionName)\""],
+                    effectuationIDStack: execution.effectuationIDStack
+                ))
+            }
+            execution.effectuationIDStack.removeLast()
+        }
+        
+        /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
         public func dispensable(named optionName: String, work: () async -> ()) async {
             execution.effectuationIDStack.append("dispensable part \"\(optionName)\"")
-            if execution.dispenseWith?.contains(optionName) == true {
+            if execution.dispensedWith?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
