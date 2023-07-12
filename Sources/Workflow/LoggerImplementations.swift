@@ -9,7 +9,7 @@ import Utilities
 /// i.e. all logging events are being distributed to all loggers.
 public class MultiLogger: Logger {
 
-    var _loggers: [Logger]
+    private var _loggers: [Logger]
     
     public var loggers: [Logger] { _loggers }
     
