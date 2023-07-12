@@ -9,24 +9,36 @@ import Utilities
 /// i.e. all logging events are being distributed to all loggers.
 public class MultiLogger: Logger {
 
-    public var loggers: [Logger]
+    var _loggers: [Logger]
+    
+    public var loggers: [Logger] { _loggers }
     
     public init(_ loggers: Logger?...) {
-        self.loggers = loggers.compactMap{$0}
+        self._loggers = loggers.compactMap{$0}
     }
     
     public init(withLoggers loggers: [Logger?]) {
-        self.loggers = loggers.compactMap{$0}
+        self._loggers = loggers.compactMap{$0}
+    }
+    
+    public func add(_ newLoggers: [Logger?]) {
+        for logger in newLoggers.compactMap({$0}) {
+            _loggers.append(logger)
+        }
+    }
+    
+    public func add(_ newLoggers: Logger?...) {
+        add(newLoggers)
     }
     
     public func log(_ event: LoggingEvent) {
-        loggers.forEach { logger in
+        _loggers.forEach { logger in
             logger.log(event)
         }
     }
     
     public func close() throws {
-        try loggers.forEach { logger in
+        try _loggers.forEach { logger in
             try logger.close()
         }
     }
