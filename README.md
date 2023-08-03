@@ -94,7 +94,7 @@ func myWork_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     forWorkItem workItem: workItem
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         // ... some other code...
         
@@ -106,7 +106,9 @@ func myWork_step(
 }
 ```
 
-I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). Here, `#function` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
+`#file` should denote the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) `<module-name>/<file-name>` (you might have to use the [upcoming feature flag](https://www.swift.org/blog/using-upcoming-feature-flags/) `ConciseMagicFile` for this, see the `Package.swift` file of this package).
+
+I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). Here, `"\(#function)@\(#file)"` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
 
 Inside your step you might call other steps. In the example above, `myOther_step` has the same arguments as `myWork_step`, but in the general case, this does not have to be this way. On the contrary, our recommendation is to only give to each step the data that it really needs.
 
@@ -241,7 +243,7 @@ A function representing a step uses a call to `Execution.effectuate` to wrap all
 
 We say that a step “gets executed” when we actually mean that the statements inside its call to `effectuate` get executed.
 
-A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). An `ExecutionDatabase` keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature as the identifier. This way the identifiers are unique _inside each package_ (this is why the `ExecutionDatabase` is separated from the `Execution` instance, to be able to use a separate `ExecutionDatabase` in each package; more on packages below). The function identifier is available via the compiler directive `#function` inside the function. An `ExecutionDatabase` must not be shared between several `Excution` instances.
+A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). An `ExecutionDatabase` keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature as the identifier. This way the identifiers are unique _inside each package_ (this is why the `ExecutionDatabase` is separated from the `Execution` instance, to be able to use a separate `ExecutionDatabase` in each package; more on packages below). The function identifier is available via the compiler directive `"\(#function)@\(#file)"` inside the function. An `ExecutionDatabase` must not be shared between several `Excution` instances.
 
 ```Swift
 func a_step(
@@ -249,7 +251,7 @@ func a_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, ""\(#function)@\(#file)"") {
         
         print("working in step a")
         
@@ -261,7 +263,7 @@ func a_step(
 **Convention**
 
 - A function representing a step is a top-level function.
-- Use the function signature available via `#function` as the identifier in the call of the `effectuate` method.
+- Use the function signature available via `"\(#function)@\(#file)"` as the identifier in the call of the `effectuate` method.
 
 ---
 
@@ -273,7 +275,7 @@ func b_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
         
@@ -292,7 +294,7 @@ func c_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
        a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
        b_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
@@ -325,7 +327,7 @@ func b_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         execution.force {
             a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
@@ -359,7 +361,7 @@ func my_step(
 
     var result: String? = nil
 
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         ...
             result = "my result"
@@ -398,7 +400,7 @@ func hello_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         execution.log(stepData.sayingHello, data.value)
         print("Hello \(data.value)!")
@@ -415,7 +417,7 @@ func hello_external_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         hello_lib(during: execution, data: data)
         
@@ -565,7 +567,7 @@ func helloAndBye_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) async {
-    await execution.async.effectuate(executionDatabase, #function) {
+    await execution.async.effectuate(executionDatabase, "\(#function)@\(#file)") {
         
         execution.log(stepData.sayingHelloAndBye, data.value)
         
@@ -627,7 +629,7 @@ func hello_external_step(
     usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, #function) {
+    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
     
         execution.appease {
             hello_lib(during: execution, data: data)

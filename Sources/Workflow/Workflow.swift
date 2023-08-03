@@ -11,7 +11,8 @@ import ArgumentParser
 /// A store to keep track of the steps already run.
 ///
 /// The signatures of the step function are used as unique
-/// identifier within package (use the `#function` compiler directive
+/// identifier within package (use the `"\(#function)@\(#file)"`
+/// with the compiler directives `#function` and `#file`
 /// to get the fnction name within the function). To be unique,
 /// step functions should be top-level functions.
 ///

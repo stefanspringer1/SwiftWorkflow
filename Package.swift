@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.8
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -25,7 +25,11 @@ let package = Package(
             name: "Workflow",
             dependencies: [
                 .product(name: "Utilities", package: "SwiftUtilities")
-            ]),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ConciseMagicFile"),
+            ]
+        ),
         .testTarget(
             name: "WorkflowTests",
             dependencies: ["Workflow"]),
