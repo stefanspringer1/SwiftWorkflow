@@ -8,40 +8,12 @@ import Foundation
 import Utilities
 import ArgumentParser
 
-/// A store to keep track of the steps already run.
-///
-/// The signatures of the step function are used as unique
-/// identifier within package (use the `"\(#function)@\(#file)"`
-/// with the compiler directives `#function` and `#file`
-/// to get the fnction name within the function). To be unique,
-/// step functions should be top-level functions.
-///
-/// When calling steps from another package, another
-/// `ExecutionDatabase` instance should be used. See
-/// the package documentation.
-public class ExecutionDatabase {
-    
-    private var functionsExecuted = Set<String>()
-    
-    public init() {}
-    
-    /// Notify the databases that a certain step is about
-    /// to be executed.
-    func notifyStarting(_ functionName: String) {
-        functionsExecuted.insert(functionName)
-    }
-    
-    /// Check if the excution of a step has
-    /// been started).
-    func started(_ functionName: String) -> Bool {
-        return functionsExecuted.contains(functionName)
-    }
-}
-
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
 public class Execution {
+    
+    private var executed = Set<String>()
     
     var effectuationIDStack: [String]
     let logger: Logger
@@ -237,11 +209,11 @@ public class Execution {
         execute(force: false, appeaseTo: appeaseType, work: work)
     }
     
-    private func effectuateTest(_ executionDatabase: ExecutionDatabase, _ effectuationID: String) -> Bool {
+    private func effectuateTest( _ effectuationID: String) -> Bool {
         if stopped {
             self.log(executionMessages.skippingStep, effectuationID, effectuationID)
         }
-        else if !executionDatabase.started(effectuationID) || forceValues.last == true {
+        else if !executed.contains(effectuationID) || forceValues.last == true {
             effectuationIDStack.append(effectuationID)
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -250,7 +222,7 @@ public class Execution {
                 fact: [.en: ">> STEP \(effectuationID)"],
                 effectuationIDStack: effectuationIDStack
             ))
-            executionDatabase.notifyStarting(effectuationID)
+            executed.insert(effectuationID)
             return true
         } else if debug {
             self.log(executionMessages.skippingStep, effectuationID, effectuationID)
@@ -270,8 +242,8 @@ public class Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () throws -> ()) rethrows {
-        if effectuateTest(executionDatabase, effectuationID) {
+    public func effectuate(_ effectuationID: String, work: () throws -> ()) rethrows {
+        if effectuateTest(effectuationID) {
             let start = DispatchTime.now()
             try execute(force: false, work: work)
             afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
@@ -312,8 +284,8 @@ public class Execution {
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async throws -> ()) async rethrows {
-            if execution.effectuateTest(executionDatabase, effectuationID) {
+        public func effectuate(_ effectuationID: String, work: () async throws -> ()) async rethrows {
+            if execution.effectuateTest(effectuationID) {
                 let start = DispatchTime.now()
                 try await execute(force: false, work: work)
                 execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))

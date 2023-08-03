@@ -76,13 +76,12 @@ let logger = MultiLogger(
 )
 ```
 
-Then, for each work item that you want to process (whatever your work items might be, maybe you have only one work item so you do not need a for loop), use a new `Execution` object together with a new `ExecutionDatabase` instance:
+Then, for each work item that you want to process (whatever your work items might be, maybe you have only one work item so you do not need a for loop), use a new `Execution` object:
 
 ```Swift
 workItems.forEach { workItem in
     let execution = Execution(logger: logger, applicationName: "My App")
-    let executionDatabase = ExecutionDatabase()
-    myWork_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+    myWork_step(during: execution, forWorkItem: workItem)
 }
 ```
 
@@ -91,14 +90,13 @@ workItems.forEach { workItem in
 ```Swift
 func myWork_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     forWorkItem workItem: workItem
 ) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
         
         // ... some other code...
         
-        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+        myOther_step(during: execution, forWorkItem: workItem)
         
         // ... some other code...
         
@@ -108,7 +106,7 @@ func myWork_step(
 
 `#file` should denote the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) `<module-name>/<file-name>` (you might have to use the [upcoming feature flag](https://www.swift.org/blog/using-upcoming-feature-flags/) `ConciseMagicFile` for this, see the `Package.swift` file of this package).
 
-I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). Here, `"\(#function)@\(#file)"` is used as a unique identifier for your step. The `ExecutionDatabase` is used to control the execution of your step; see the section on working with steps in library packages for why this `ExecutionDatabase` is separate from the `Execution` object.
+I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). Here, `"\(#function)@\(#file)"` is used as a unique identifier for your step.
 
 Inside your step you might call other steps. In the example above, `myOther_step` has the same arguments as `myWork_step`, but in the general case, this does not have to be this way. On the contrary, our recommendation is to only give to each step the data that it really needs.
 
@@ -116,7 +114,7 @@ If you call `myOther_step` inside `myWork_step` as in the example above, `myOthe
 
 ```Swift
 execution.force {
-    myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+    myOther_step(during: execution, forWorkItem: workItem)
 }
 ```
 
@@ -124,7 +122,7 @@ There are also be named optional parts that can be activated by adding an accord
 
 ```Swift
 execution.optional(named: "module1:myOther_step") {
-        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+        myOther_step(during: execution, forWorkItem: workItem)
 }
 ```
 
@@ -132,7 +130,7 @@ On the contrary, if you regard a step at a certain point or more generally a cer
 
 ```Swift
 execution.dispensable(named: "module1:myOther_step") {
-        myOther_step(during: execution, usingExecutionDatabase: executionDatabase, forWorkItem: workItem)
+        myOther_step(during: execution, forWorkItem: workItem)
 }
 ```
 
@@ -243,15 +241,14 @@ A function representing a step uses a call to `Execution.effectuate` to wrap all
 
 We say that a step “gets executed” when we actually mean that the statements inside its call to `effectuate` get executed.
 
-A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). An `ExecutionDatabase` keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature as the identifier. This way the identifiers are unique _inside each package_ (this is why the `ExecutionDatabase` is separated from the `Execution` instance, to be able to use a separate `ExecutionDatabase` in each package; more on packages below). The function identifier is available via the compiler directive `"\(#function)@\(#file)"` inside the function. An `ExecutionDatabase` must not be shared between several `Excution` instances.
+A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). The execution keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature plus the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) as the identifier by writing `\(#function)@\(#file)`. This way the identifiers are unique.
 
 ```Swift
 func a_step(
-    during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
+    during execution: Execution
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, ""\(#function)@\(#file)"") {
+    execution.effectuate(""\(#function)@\(#file)"") {
         
         print("working in step a")
         
@@ -272,12 +269,11 @@ Let us see how we call the step `a_step` inside another step `b_step`:
 ```Swift
 func b_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
         
-        a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        a_step(during: execution, data: data)
         
         print("working in step b")
     }
@@ -291,13 +287,12 @@ Let us take another step `c_step` which first calls `a_step`, and then `b_step`:
 ```Swift
 func c_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
         
-       a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
-       b_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+       a_step(during: execution, data: data)
+       b_step(during: execution, data: data)
         
        print("working in step c")
         
@@ -324,13 +319,12 @@ But sometimes a certain other step is needed just before a certain point in the 
 ```Swift
 func b_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
         
         execution.force {
-            a_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+            a_step(during: execution, data: data)
         }
         
         print("working in step b")
@@ -355,13 +349,12 @@ If the function representing your step is to return a value, this should to be a
 ```Swift
 func my_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) -> String? {
 
     var result: String? = nil
 
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
         
         ...
             result = "my result"
@@ -372,76 +365,9 @@ func my_step(
 }
 ```
 
-### Working with steps in library packages
+### Outsourcing functionality into a new package
 
-To to be able to judge if a function has already run by its function signature, the `ExecutionDatabase` instance has to be unique for each package (since the signatures of the top-level functions are only unique inside a specific package).
-
-So we use the following convention:
-
----
-**Convention**
-
-A function representing a step is not public.
-
----
-
-As a public interface, we use another function which creates an `ExecutionDatabase`:
-
-```Swift
-public func hello_lib(
-    during execution: Execution,
-    data: MyData
-) {
-    hello_step(during: execution, usingExecutionDatabase: ExecutionDatabase(), data: data)
-}
-
-func hello_step(
-    during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
-    data: MyData
-) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
-        
-        execution.log(stepData.sayingHello, data.value)
-        print("Hello \(data.value)!")
-        
-    }
-}
-```
-
-In the package that uses such a library function, the library function should then wrapped inside a step function as follows:
-
-```Swift
-func hello_external_step(
-    during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
-    data: MyData
-) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
-        
-        hello_lib(during: execution, data: data)
-        
-    }
-}
-```
-
-The `_external` infix is there to make the call hierarchy clear in the logs.
-
----
-**Convention**
-
-A function representing a public interface to a step (a “library function”) has the following properties:
-
-- it is public,
-- it has the postfix `_lib` in its name,
-- it does not take any `ExecutionDatabase`, but it creates one itself,
-- and it should be wrapped by a step function with the same name prefix and a second prefix (i.e. infix) `_external` in the package that uses the package with the library function.
-
----
-
-The tree-like pattern of steps that you are able to use in a workflow is a natural[^5] starting point to outsource some functionality of your workflow into an external package.
-
-[^5]: The term “natural” is from category theory where it decribes in a formal way that when you transform a structure to a certain other equivalent structure, you do not have to make a decision at any point.
+The tree-like pattern of steps that you are able to use in a workflow is a natural starting point to outsource some functionality of your workflow into an external package.
 
 ### Organisation of the code in the files
 
@@ -462,15 +388,14 @@ Steps as described should be flexible enough for the definition of a sequence of
 ```Swift
 func helloAndBye_job(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     file: URL
 ) {
     
     // get the data:
-    guard let data = readData_step(during: execution, usingExecutionDatabase: executionDatabase, file: file) else { return }
+    guard let data = readData_step(during: execution, file: file) else { return }
     
     // start the processing of the data:
-    helloAndBye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+    helloAndBye_step(during: execution, data: data)
 }
 ```
 
@@ -480,7 +405,7 @@ It is a good practice to always create a job for each step even if such a job is
 
 ### Using an execution just for logging
 
-An `Execution` can also be used without an `Executiondatabase`, just for logging. E.g. at the start of a programm when we first have to decide what job to be run and for what data, we can create an `Execution` instance just to make the logging streamlined.
+You might use an `Execution` instance just to make the logging streamlined.
 
 ### Jobs as starting point for the same kind of data
 
@@ -491,7 +416,6 @@ So a job looks e.g. as follows:
 ```Swift
 typealias Job = (
     Execution,
-    ExecutionDatabase,
     URL
 ) -> ()
 ```
@@ -518,7 +442,6 @@ The resolving of a job name and the call of the appropriate job is then done as 
         
         jobFunction(
             execution,
-            ExecutionDatabase(),
             URL(fileURLWithPath: path)
         )
     }
@@ -553,7 +476,6 @@ A step might also be asynchronous, i.e. the caller might get suspended. Let's su
 ```Swift
 func bye_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) async {
     ...
@@ -564,16 +486,15 @@ Then `helloAndBye_step` which calls `bye_step` has to use `execution.async.effec
 ```Swift
 func helloAndBye_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) async {
-    await execution.async.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    await execution.async.effectuate("\(#function)@\(#file)") {
         
         execution.log(stepData.sayingHelloAndBye, data.value)
         
-        trim_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
-        hello_external_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
-        await bye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+        trim_step(during: execution, data: data)
+        hello_external_step(during: execution, data: data)
+        await bye_step(during: execution, data: data)
         
     }
 }
@@ -587,7 +508,7 @@ To force an execution, use `execution.async.force` in asynchronous contexts inst
 
 ```Swift
 await execution.async.force {
-    await bye_step(during: execution, usingExecutionDatabase: executionDatabase, data: data)
+    await bye_step(during: execution, data: data)
 }
 ```
 
@@ -626,10 +547,9 @@ So using an "external" step would actually be formulated as follows in most case
 ```Swift
 func hello_external_step(
     during execution: Execution,
-    usingExecutionDatabase executionDatabase: ExecutionDatabase,
     data: MyData
 ) {
-    execution.effectuate(executionDatabase, "\(#function)@\(#file)") {
+    execution.effectuate("\(#function)@\(#file)") {
     
         execution.appease {
             hello_lib(during: execution, data: data)
@@ -641,10 +561,7 @@ func hello_external_step(
 
 ### Logging to an execution in a concurrent context
 
-In a concurrent context, use:
-
-- `execution.parallel` to create a copy of an `execution`.
-- `ExecutionDatabase()` to create a new execution database.
+In a concurrent context, use `execution.parallel` to create a copy of an `execution`.
 
 Example:
 
@@ -655,7 +572,6 @@ dispatchQueue.async {
     let parallelExecution = execution.parallel
     myStep(
         during: parallelExecution,
-        usingExecutionDatabase: ExecutionDatabase(),
         theDate: theData
     )
     ...remeber parallelExecution.worstMessageType...
