@@ -140,7 +140,7 @@ public class Execution {
     var appeaseTypes = [MessageType]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () -> ()) {
+    fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> ()) rethrows {
         forceValues.append(force)
         if let appeaseType {
             appeaseTypes.append(appeaseType)
@@ -151,7 +151,7 @@ public class Execution {
                 operationCount -= 1
             }
         }
-        work()
+        try work()
         if !force, let _afterStepOperation{
             operationCount += 1
             if !_afterStepOperation(operationCount, effectuationIDStack.last ?? "") {
@@ -269,10 +269,10 @@ public class Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () -> ()) {
+    public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () throws -> ()) rethrows {
         if effectuateTest(executionDatabase, effectuationID) {
             let start = DispatchTime.now()
-            execute(force: false, work: work)
+            try execute(force: false, work: work)
             afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
         }
     }
@@ -286,7 +286,7 @@ public class Execution {
         }
         
         /// Force all contained work to be executed, even if already executed before.
-        fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async -> ()) async {
+        fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> ()) async rethrows {
             execution.forceValues.append(force)
             if let appeaseType {
                 execution.appeaseTypes.append(appeaseType)
@@ -297,7 +297,7 @@ public class Execution {
                     execution.operationCount -= 1
                 }
             }
-            await work()
+            try await work()
             if !force, let _afterStepOperation = execution._afterStepOperation {
                 execution.operationCount += 1
                 if !_afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
@@ -311,10 +311,10 @@ public class Execution {
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async -> ()) async {
+        public func effectuate(_ executionDatabase: ExecutionDatabase, _ effectuationID: String, work: () async throws -> ()) async rethrows {
             if execution.effectuateTest(executionDatabase, effectuationID) {
                 let start = DispatchTime.now()
-                await execute(force: false, work: work)
+                try await execute(force: false, work: work)
                 execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
             }
         }
