@@ -344,26 +344,22 @@ Use the `Execution.force` method if a certain step has to be run at a certain po
 
 ### How to return values
 
-If the function representing your step is to return a value, this should to be an optional one:
+If the step is to return a value, this must to be an optional one:
 
 ```Swift
 func my_step(
     during execution: Execution,
     data: MyData
 ) -> String? {
-
-    var result: String? = nil
-
     execution.effectuate("\(#function)@\(#file)") {
-        
         ...
-            result = "my result"
+            return "my result"
         ...
     }
-    
-    return result
 }
 ```
+
+Note that the `effectuate` method returns the according value, so there is no need to set up any variable outside the `effectuate` call.
 
 ### Outsourcing functionality into a new package
 

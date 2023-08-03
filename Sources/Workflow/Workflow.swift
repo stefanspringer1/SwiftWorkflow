@@ -113,7 +113,7 @@ public class Execution {
     var appeaseTypes = [MessageType]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> ()) rethrows {
+    fileprivate func execute<T>(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
         forceValues.append(force)
         if let appeaseType {
             appeaseTypes.append(appeaseType)
@@ -124,7 +124,7 @@ public class Execution {
                 operationCount -= 1
             }
         }
-        try work()
+        let result = try work()
         if !force, let _afterStepOperation{
             operationCount += 1
             if !_afterStepOperation(operationCount, effectuationIDStack.last ?? "") {
@@ -135,15 +135,17 @@ public class Execution {
         if appeaseType != nil {
             appeaseTypes.removeLast()
         }
+        return result
     }
     
     /// Executes always.
-    public func force(work: () -> ()) {
-        execute(force: true, work: work)
+    public func force<T>(work: () throws -> T) rethrows -> T? {
+        try execute(force: true, work: work)
     }
     
     /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
-    public func optional(named optionName: String, work: () -> ()) {
+    public func optional<T>(named optionName: String, work: () throws -> T) rethrows -> T? {
+        let result: T?
         effectuationIDStack.append("optional part \"\(optionName)\"")
         if activatedOptions?.contains(optionName) != true || dispensedWith?.contains(optionName) == true {
             logger.log(LoggingEvent(
@@ -153,6 +155,7 @@ public class Execution {
                 fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
                 effectuationIDStack: effectuationIDStack
             ))
+            result = nil
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -161,7 +164,7 @@ public class Execution {
                 fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
-            execute(force: false, work: work)
+            result = try execute(force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
@@ -171,10 +174,12 @@ public class Execution {
             ))
         }
         effectuationIDStack.removeLast()
+        return result
     }
     
     /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
-    public func dispensable(named optionName: String, work: () -> ()) {
+    public func dispensable<T>(named optionName: String, work: () throws -> T) rethrows -> T? {
+        let result: T?
         effectuationIDStack.append("dispensable part \"\(optionName)\"")
         if dispensedWith?.contains(optionName) == true {
             logger.log(LoggingEvent(
@@ -184,6 +189,7 @@ public class Execution {
                 fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
                 effectuationIDStack: effectuationIDStack
             ))
+            result = nil
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -192,7 +198,7 @@ public class Execution {
                 fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
                 effectuationIDStack: effectuationIDStack
             ))
-            execute(force: false, work: work)
+            result = try execute(force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
@@ -202,11 +208,12 @@ public class Execution {
             ))
         }
         effectuationIDStack.removeLast()
+        return result
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
-    public func appease(to appeaseType: MessageType? = .Error, work: () -> ()) {
-        execute(force: false, appeaseTo: appeaseType, work: work)
+    public func appease<T>(to appeaseType: MessageType? = .Error, work: () throws -> T) rethrows -> T? {
+        try execute(force: false, appeaseTo: appeaseType, work: work)
     }
     
     private func effectuateTest( _ effectuationID: String) -> Bool {
@@ -242,11 +249,14 @@ public class Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate(_ effectuationID: String, work: () throws -> ()) rethrows {
+    public func effectuate<T>(_ effectuationID: String, work: () throws -> T) rethrows -> T? {
         if effectuateTest(effectuationID) {
             let start = DispatchTime.now()
-            try execute(force: false, work: work)
+            let result = try execute(force: false, work: work)
             afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
+            return result
+        } else {
+            return nil
         }
     }
     
@@ -259,7 +269,7 @@ public class Execution {
         }
         
         /// Force all contained work to be executed, even if already executed before.
-        fileprivate func execute(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> ()) async rethrows {
+        fileprivate func execute<T>(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> T) async rethrows -> T {
             execution.forceValues.append(force)
             if let appeaseType {
                 execution.appeaseTypes.append(appeaseType)
@@ -270,7 +280,7 @@ public class Execution {
                     execution.operationCount -= 1
                 }
             }
-            try await work()
+            let result = try await work()
             if !force, let _afterStepOperation = execution._afterStepOperation {
                 execution.operationCount += 1
                 if !_afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
@@ -281,25 +291,30 @@ public class Execution {
             if appeaseType != nil {
                 execution.appeaseTypes.removeLast()
             }
+            return result
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate(_ effectuationID: String, work: () async throws -> ()) async rethrows {
+        public func effectuate<T>(_ effectuationID: String, work: () async throws -> T) async rethrows -> T? {
             if execution.effectuateTest(effectuationID) {
                 let start = DispatchTime.now()
-                try await execute(force: false, work: work)
+                let result = try await execute(force: false, work: work)
                 execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
+                return result
+            } else {
+                return nil
             }
         }
         
         /// Executes always.
-        public func force(work: () async -> ()) async {
-            await execute(force: true, work: work)
+        public func force<T>(work: () async throws -> T) async rethrows -> T? {
+            try await execute(force: true, work: work)
         }
         
         /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
-        public func optional(named optionName: String, work: () async -> ()) async {
+        public func optional<T>(named optionName: String, work: () async throws -> T) async rethrows -> T? {
             execution.effectuationIDStack.append("optional part \"\(optionName)\"")
+            let result: T?
             if execution.activatedOptions?.contains(optionName) != true || execution.dispensedWith?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
@@ -308,6 +323,7 @@ public class Execution {
                     fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
+                result = nil
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
@@ -316,7 +332,7 @@ public class Execution {
                     fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
-                await execute(force: false, work: work)
+                result = try await execute(force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
@@ -326,10 +342,12 @@ public class Execution {
                 ))
             }
             execution.effectuationIDStack.removeLast()
+            return result
         }
         
         /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
-        public func dispensable(named optionName: String, work: () async -> ()) async {
+        public func dispensable<T>(named optionName: String, work: () async throws -> T) async rethrows -> T? {
+            let result: T?
             execution.effectuationIDStack.append("dispensable part \"\(optionName)\"")
             if execution.dispensedWith?.contains(optionName) == true {
                 execution.logger.log(LoggingEvent(
@@ -339,6 +357,7 @@ public class Execution {
                     fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
+                result = nil
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
@@ -347,7 +366,7 @@ public class Execution {
                     fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
                     effectuationIDStack: execution.effectuationIDStack
                 ))
-                await execute(force: false, work: work)
+                result = try await execute(force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
@@ -357,11 +376,12 @@ public class Execution {
                 ))
             }
             execution.effectuationIDStack.removeLast()
+            return result
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
-        public func appease(to appeaseType: MessageType? = .Error, work: () -> ()) async {
-            await execute(force: false, appeaseTo: appeaseType, work: work)
+        public func appease<T>(to appeaseType: MessageType? = .Error, work: () throws -> T) async rethrows -> T? {
+            try await execute(force: false, appeaseTo: appeaseType, work: work)
         }
     }
     
