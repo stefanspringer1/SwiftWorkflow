@@ -17,8 +17,8 @@ extension LoggingEvent {
             type: type,
             processID: processID,
             applicationName: applicationName,
-            fact: fact,
-            solution: solution,
+            fact: fact.prefixed(with: prefixText),
+            solution: solution?.prefixed(with: prefixText),
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
             effectuationIDStack: effectuationIDStack
