@@ -13,6 +13,11 @@ public struct StepID: Hashable, CustomStringConvertible {
     let scriptID: String
     let functionID: String
     
+    public init(scriptID: String, functionID: String) {
+        self.scriptID = scriptID
+        self.functionID = functionID
+    }
+    
     public var description: String { "\(functionID)@\(scriptID)" }
 }
 
