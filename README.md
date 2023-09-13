@@ -382,6 +382,14 @@ func my_step(
 }
 ```
 
+You can then check if (in the example) a `String` value is returned by e.g.:
+
+```Swift
+if case .success(let text) = my_step(during: execution:, data: MyData) {
+    print(text)
+}
+```
+
 ### Outsourcing functionality into a new package
 
 The tree-like pattern of steps that you are able to use in a workflow is a natural starting point to outsource some functionality of your workflow into an external package.
