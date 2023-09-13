@@ -537,6 +537,8 @@ await execution.async.force {
 }
 ```
 
+Note that the sub-steps of `bye_step` are _not_ automatically forced.
+
 In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
 Use `forEachAsync` from [SwiftUtilities](https://github.com/stefanspringer1/SwiftUtilities) instead of `forEach` when iterating through a sequence in an asynchronous context.
