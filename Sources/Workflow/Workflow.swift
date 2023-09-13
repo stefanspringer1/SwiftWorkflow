@@ -10,8 +10,8 @@ import ArgumentParser
 
 public struct StepID: Hashable, CustomStringConvertible {
     
-    let scriptID: String
-    let functionID: String
+    public let scriptID: String
+    public let functionID: String
     
     public init(scriptID: String, functionID: String) {
         self.scriptID = scriptID
