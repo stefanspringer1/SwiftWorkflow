@@ -92,7 +92,7 @@ func myWork_step(
     during execution: Execution,
     forWorkItem workItem: workItem
 ) {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         
         // ... some other code...
         
@@ -106,7 +106,7 @@ func myWork_step(
 
 `#file` should denote the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) `<module-name>/<file-name>` (you might have to use the [upcoming feature flag](https://www.swift.org/blog/using-upcoming-feature-flags/) `ConciseMagicFile` for this, see the `Package.swift` file of this package).
 
-I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). Here, `"\(#function)@\(#file)"` is used as a unique identifier for your step.
+I.e. you embrace the content of your function inside a `execution.effectuate` call so that the `Execution` instance can log and control the execution of your code (e.g. does not continue after a fatal error). the `StepID` instance is used as a unique identifier for your step.
 
 Inside your step you might call other steps. In the example above, `myOther_step` has the same arguments as `myWork_step`, but in the general case, this does not have to be this way. On the contrary, our recommendation is to only give to each step the data that it really needs.
 
@@ -248,7 +248,7 @@ func a_step(
     during execution: Execution
     data: MyData
 ) {
-    execution.effectuate(""\(#function)@\(#file)"") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         
         print("working in step a")
         
@@ -271,7 +271,7 @@ func b_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         
         a_step(during: execution, data: data)
         
@@ -289,7 +289,7 @@ func c_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         
        a_step(during: execution, data: data)
        b_step(during: execution, data: data)
@@ -321,7 +321,7 @@ func b_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         
         execution.force {
             a_step(during: execution, data: data)
@@ -351,15 +351,34 @@ func my_step(
     during execution: Execution,
     data: MyData
 ) -> String? {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
         ...
-            return "my result"
+        return "my result"
         ...
     }
 }
 ```
 
 Note that the `effectuate` method returns the according value, so there is no need to set up any variable outside the `effectuate` call.
+
+_The optionality must stem from the fact that the execution might be effectuated or not._ If the code within the `effectuate` call is itself is meant to return an optional value, this has to be done e.g. via the `Result` struct:
+
+```Swift
+func my_step(
+    during execution: Execution,
+    data: MyData
+) -> Result<String, ErrorWithDescription>? {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+        ...
+        var value: String?
+        ...
+        if let value {
+            return .success(value)
+        } else {
+            return .failure(ErrorWithDescription("the value is not set")))
+        }
+}
+```
 
 ### Outsourcing functionality into a new package
 
@@ -484,7 +503,7 @@ func helloAndBye_step(
     during execution: Execution,
     data: MyData
 ) async {
-    await execution.async.effectuate("\(#function)@\(#file)") {
+    await execution.async.effectuate(StepID(scriptID: #file, functionID: #function)) { {
         
         execution.log(stepData.sayingHelloAndBye, data.value)
         
@@ -545,7 +564,7 @@ func hello_external_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate("\(#function)@\(#file)") {
+    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
     
         execution.appease {
             hello_lib(during: execution, data: data)
