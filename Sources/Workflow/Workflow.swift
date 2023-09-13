@@ -674,6 +674,10 @@ public extension LocalizingMessage {
         }
         return newMessage
     }
+    
+    func filling(with arguments: String...) -> LocalizingMessage {
+        filling(with: arguments)
+    }
 }
 
 /// A message text can have placeholders $1, $2, ... which are
