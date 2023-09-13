@@ -506,8 +506,8 @@ public class Execution {
                 type: message.type,
                 processID: processID,
                 applicationName: applicationName,
-                fact: message.fact.filling(with: arguments),
-                solution: message.solution?.filling(with: arguments),
+                fact: message.fact.filling(withArguments: arguments),
+                solution: message.solution?.filling(withArguments: arguments),
                 itemInfo: itemInfo,
                 itemPositionInfo: itemPositionInfo,
                 effectuationStack: effectuationStack
@@ -664,32 +664,46 @@ public extension LocalizingMessage {
     
     /// Replaces the placeholders in all message texts of an instance of
     /// `LocalizingMessage` by the accordings arguments.
-     func filling(with arguments: [String]?) -> LocalizingMessage {
+     func filling(withArguments arguments: [String]?) -> LocalizingMessage {
         guard let arguments = arguments else {
             return self
         }
         var newMessage = [Language:String]()
         self.forEach{ language, text in
-            newMessage[language] = format(text, using: arguments)
+            newMessage[language] = text.filling(withArguments: arguments)
         }
         return newMessage
     }
     
-    func filling(with arguments: String...) -> LocalizingMessage {
-        filling(with: arguments)
+    /// Replaces the placeholders in all message texts of an instance of
+    /// `LocalizingMessage` by the accordings arguments.
+    func filling(withArguments arguments: String...) -> LocalizingMessage {
+        filling(withArguments: arguments)
     }
 }
 
-/// A message text can have placeholders $1, $2, ... which are
-/// replaced by the additional textual arguments of the `log`
-/// method. This function replaces the placeholders by those
-/// arguments.
-func format(_ _s: String, using arguments: [String]) -> String {
-    var i = 0
-    var s = _s
-    arguments.forEach { argument in
-        i += 1
-        s = s.replacingOccurrences(of: "$\(i)", with: argument)
+public extension String {
+    
+    /// A message text can have placeholders $1, $2, ... which are
+    /// replaced by the additional textual arguments of the `log`
+    /// method. This function replaces the placeholders by those
+    /// arguments.
+    func filling(withArguments arguments: [String]) -> String {
+        var i = 0
+        var s = self
+        arguments.forEach { argument in
+            i += 1
+            s = s.replacingOccurrences(of: "$\(i)", with: argument)
+        }
+        return s
     }
-    return s
+    
+    /// A message text can have placeholders $1, $2, ... which are
+    /// replaced by the additional textual arguments of the `log`
+    /// method. This function replaces the placeholders by those
+    /// arguments.
+    func filling(withArguments arguments: String...) -> String {
+        filling(withArguments: arguments)
+    }
+    
 }
