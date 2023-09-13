@@ -2,6 +2,7 @@ import XCTest
 @testable import Workflow
 
 final class WorkflowTests: XCTestCase {
+    
     func testExample() throws {
         
         let success = Message(
@@ -16,5 +17,45 @@ final class WorkflowTests: XCTestCase {
         let execution = Execution(logger: logger, applicationName: "test")
         execution.log(success)
         print(execution.worstMessageType)
+    }
+    
+    func testEffectuationCodable() throws {
+        
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        
+        // step:
+        do {
+            let effectuation: Effectuation = .step(step: StepID(scriptID: "script1", functionID: "function1"))
+            
+            let stepEffectuationEncoded = try encoder.encode(effectuation)
+            XCTAssertEqual(#"{"effectuation":"step function1@script1"}"#, String(decoding: stepEffectuationEncoded, as: UTF8.self))
+            
+            let stepEffectuationDecoded = try decoder.decode(Effectuation.self, from: stepEffectuationEncoded)
+            XCTAssertEqual(stepEffectuationDecoded.description, "step script1@function1")
+        }
+        
+        // optional part:
+        do {
+            let effectuation: Effectuation = .optionalPart(name: "optional part 1")
+            
+            let stepEffectuationEncoded = try encoder.encode(effectuation)
+            XCTAssertEqual(#"{"effectuation":"optional part \"optional part 1\""}"#, String(decoding: stepEffectuationEncoded, as: UTF8.self))
+            
+            let stepEffectuationDecoded = try decoder.decode(Effectuation.self, from: stepEffectuationEncoded)
+            XCTAssertEqual(stepEffectuationDecoded.description, #"optional part "optional part 1""#)
+        }
+        
+        // dispensable part:
+        do {
+            let effectuation: Effectuation = .dispensablePart(name: "dispensable part 1")
+            
+            let stepEffectuationEncoded = try encoder.encode(effectuation)
+            XCTAssertEqual(#"{"effectuation":"dispensable part \"dispensable part 1\""}"#, String(decoding: stepEffectuationEncoded, as: UTF8.self))
+            
+            let stepEffectuationDecoded = try decoder.decode(Effectuation.self, from: stepEffectuationEncoded)
+            XCTAssertEqual(stepEffectuationDecoded.description, #"dispensable part "dispensable part 1""#)
+        }
+        
     }
 }

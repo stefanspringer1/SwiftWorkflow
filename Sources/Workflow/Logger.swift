@@ -96,7 +96,7 @@ public extension Logger {
         _ fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,
         messageID: MessageID? = nil,
-        effectuationIDStack: [String]? = nil
+        effectuationStack: [Effectuation]? = nil
     ) {
         log(LoggingEvent(
             messageID: messageID,
@@ -105,7 +105,7 @@ public extension Logger {
             applicationName: applicationName,
             fact: fact,
             solution: solution,
-            effectuationIDStack: effectuationIDStack
+            effectuationStack: effectuationStack
         ))
     }
 }

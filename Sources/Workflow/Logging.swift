@@ -21,7 +21,7 @@ extension LoggingEvent {
             solution: solution?.prefixed(with: prefixText),
             itemInfo: itemInfo,
             itemPositionInfo: itemPositionInfo,
-            effectuationIDStack: effectuationIDStack
+            effectuationStack: effectuationStack
         )
     }
 }
@@ -77,7 +77,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     /// The hierarchy of the effectuation IDs aka "step IDs"
     /// (i.e. the current one, the ID of the parent effectuation, etc.,
     /// in reversed order i.e. beginning top-level).
-    public var effectuationIDStack: [String]? = nil
+    public var effectuationStack: [Effectuation]? = nil
     
     /// The time of the event.
     public var time: String
@@ -93,7 +93,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
             solution: self.solution,
             itemInfo: self.itemInfo,
             itemPositionInfo: self.itemPositionInfo,
-            effectuationIDStack: self.effectuationIDStack,
+            effectuationStack: self.effectuationStack,
             time: self.time
         )
     }
@@ -108,7 +108,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         solution: LocalizingMessage? = nil,
         itemInfo: String? = nil,
         itemPositionInfo: String? = nil,
-        effectuationIDStack: [String]? = nil,
+        effectuationStack: [Effectuation]? = nil,
         time: String = formattedTime()
     ) {
         self.messageID = messageID
@@ -120,13 +120,13 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         self.solution = solution
         self.itemInfo = itemInfo
         self.itemPositionInfo = itemPositionInfo
-        self.effectuationIDStack = effectuationIDStack
+        self.effectuationStack = effectuationStack
         self.time = time
     }
     
     /// A textual representation of the step stack.
-    public var effectuationIDStackDescription: String {
-        return self.effectuationIDStack?.joined(separator: " / ") ?? ""
+    public var effectuationStackDescription: String {
+        return self.effectuationStack?.map{ $0.description }.joined(separator: " / ") ?? ""
     }
     
     /// A short textual representation of the logging event.
@@ -136,8 +136,8 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
     
     /// A longer textual representation of the logging event used in the actual logging.
     public func descriptionForLogging(usingStepIndentation: Bool = false) -> String {
-        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationName + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationIDStack?.count ?? 0) : (type < .Warning ? "" : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : (type == .Deadly ? "\u{1F480}" : "? "))))))
-        let messagePart2 = self.description + (self.effectuationIDStack?.isEmpty == false ? " (step path: " + effectuationIDStackDescription + ")" : "")
+        let messagePart1 = (self.processID != nil ? "{\(processID!)} " : "") + self.applicationName + " (" + self.time + "):" + STEP_INDENTATION + (usingStepIndentation && type <= .Info ? String(repeating: STEP_INDENTATION, count: self.effectuationStack?.count ?? 0) : (type < .Warning ? "" : (type == .Warning ? "! " : (type == .Error ? "!! " : (type == .Fatal ? "!!! " : (type == .Deadly ? "\u{1F480}" : "? "))))))
+        let messagePart2 = self.description + (self.effectuationStack?.isEmpty == false ? " (step path: " + effectuationStackDescription + ")" : "")
         return messagePart1 + messagePart2 + (self.itemInfo != nil ? " [\(self.itemInfo!)]" : "")
     }
     
@@ -152,7 +152,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         case solution
         case itemInfo
         case itemPositionInfo
-        case effectuationIDStack
+        case effectuationStack
         case time
     }
     
@@ -166,7 +166,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         try container.encode(applicationName, forKey: .applicationName)
         try container.encode(itemInfo, forKey: .itemInfo)
         try container.encode(itemPositionInfo, forKey: .itemPositionInfo)
-        try container.encode(effectuationIDStack, forKey: .effectuationIDStack)
+        try container.encode(effectuationStack, forKey: .effectuationStack)
         try container.encode(time, forKey: .time)
 
         var languageContainerForInfo = container.nestedContainer(keyedBy: Language.self, forKey: .fact)
@@ -194,7 +194,7 @@ extension LoggingEvent: Decodable {
         self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
         self.itemPositionInfo = try values.decode(String?.self, forKey: .itemPositionInfo)
-        self.effectuationIDStack = try values.decode([String]?.self, forKey: .effectuationIDStack)
+        self.effectuationStack = try values.decode([Effectuation]?.self, forKey: .effectuationStack)
         self.time = try values.decode(String.self, forKey: .time)
         let fact = try values.nestedContainer(keyedBy: Language.self, forKey: .fact)
         self.fact = [Language.en: try fact.decode(String.self, forKey: .en),

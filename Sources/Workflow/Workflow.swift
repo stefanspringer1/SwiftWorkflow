@@ -8,14 +8,85 @@ import Foundation
 import Utilities
 import ArgumentParser
 
+public struct StepID: Hashable, CustomStringConvertible {
+    
+    let scriptID: String
+    let functionID: String
+    
+    public var description: String { "\(functionID)@\(scriptID)" }
+}
+
+public let stepPrefix = "step "
+public let dispensablePartPrefix = "dispensable part "
+public let optionalPartPrefix = "optional part "
+
+public enum Effectuation: CustomStringConvertible {
+    
+    case step(step: StepID)
+    case dispensablePart(name: String)
+    case optionalPart(name: String)
+    
+    enum PostTypeCodingError: Error {
+        case decoding(String)
+    }
+    
+    public var description: String {
+        switch self {
+        case .step(step: let step):
+            return "\(stepPrefix)\(step.description)"
+        case .dispensablePart(name: let id):
+            return "\(dispensablePartPrefix)\"\(id)\""
+        case .optionalPart(name: let id):
+            return "\(optionalPartPrefix)\"\(id)\""
+        }
+    }
+    
+}
+
+extension Effectuation: Codable {
+    
+    enum CodingKeys: CodingKey {
+        case effectuation
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(description, forKey: .effectuation)
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        let description = try values.decode(String.self, forKey: .effectuation)
+        if description.hasPrefix(stepPrefix) {
+            let stepDescription = description.dropFirst(stepPrefix.count)
+            if let atSign = stepDescription.firstIndex(of: "@") {
+                self = .step(step: StepID(scriptID: String(stepDescription[..<atSign]), functionID: String(stepDescription[atSign...].dropFirst())))
+                return
+            }
+        } else if description.hasPrefix(optionalPartPrefix) {
+            self = .optionalPart(name: String(description.dropFirst(optionalPartPrefix.count+1).dropLast()))
+            return
+        } else if description.hasPrefix(dispensablePartPrefix) {
+            self = .dispensablePart(name: String(description.dropFirst(dispensablePartPrefix.count+1).dropLast()))
+            return
+        }
+        throw PostTypeCodingError.decoding("Could not decode Effectuation form \(dump(values))")
+   }
+
+}
+
+public typealias OperationCount = Int
+public typealias AugmentOperationCount = Bool
+
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
 public class Execution {
     
-    private var executed = Set<String>()
+    private var executedSteps = Set<StepID>()
     
-    var effectuationIDStack: [String]
+    var effectuationStack: [Effectuation]
+    
     let logger: Logger
     let crashLogger: Logger?
     var processID: String?
@@ -25,12 +96,12 @@ public class Execution {
     let alwaysAddCrashInfo: Bool
     let debug: Bool
     
-    var _beforeStepOperation: ((Int,String) -> Bool)?
-    
     let dispensedWith: Set<String>?
     let activatedOptions: Set<String>?
     
-    public var beforeStepOperation: ((Int,String) -> Bool)? {
+    var _beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)?
+    
+    public var beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? {
         get {
             _beforeStepOperation
         }
@@ -39,9 +110,9 @@ public class Execution {
         }
     }
     
-    var _afterStepOperation: ((Int,String) -> Bool)?
+    var _afterStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)?
     
-    public var afterStepOperation: ((Int,String) -> Bool)? {
+    public var afterStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? {
         get {
             _afterStepOperation
         }
@@ -64,10 +135,10 @@ public class Execution {
     }
     
     public var parallel: Execution {
-        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationIDStack: effectuationIDStack)
+        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationStack: effectuationStack)
     }
     
-    public init (
+    private init (
         logger: Logger,
         crashLogger: Logger? = nil,
         processID: String? = nil,
@@ -76,13 +147,13 @@ public class Execution {
         showSteps: Bool = false,
         alwaysAddCrashInfo: Bool = false,
         debug: Bool = false,
-        effectuationIDStack: [String] = [String](),
-        beforeStepOperation: ((Int,String) -> Bool)? = nil,
-        afterStepOperation: ((Int,String) -> Bool)? = nil,
+        effectuationStack: [Effectuation] = [Effectuation](),
+        beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? = nil,
+        afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
-        dispensingWith: Set<String>? = nil
+        dispensingWith dispensedWith: Set<String>? = nil
     ) {
-        self.effectuationIDStack = effectuationIDStack
+        self.effectuationStack = effectuationStack
         self.logger = logger
         self.crashLogger = crashLogger
         self.processID = processID
@@ -93,8 +164,39 @@ public class Execution {
         self._beforeStepOperation = beforeStepOperation
         self._afterStepOperation = afterStepOperation
         self.activatedOptions = activatedOptions
-        self.dispensedWith = dispensingWith
+        self.dispensedWith = dispensedWith
         _async = AsyncEffectuation(execution: self)
+    }
+    
+    public convenience init (
+        logger: Logger,
+        crashLogger: Logger? = nil,
+        processID: String? = nil,
+        applicationName: String,
+        itemInfo: String? = nil,
+        showSteps: Bool = false,
+        alwaysAddCrashInfo: Bool = false,
+        debug: Bool = false,
+        beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? = nil,
+        afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
+        withOptions activatedOptions: Set<String>? = nil,
+        dispensingWith dispensedWith: Set<String>? = nil
+    ) {
+        self.init (
+            logger: logger,
+            crashLogger: crashLogger,
+            processID: processID,
+            applicationName: applicationName,
+            itemInfo: itemInfo,
+            showSteps: showSteps,
+            alwaysAddCrashInfo: alwaysAddCrashInfo,
+            debug: debug,
+            effectuationStack: [Effectuation](),
+            beforeStepOperation: beforeStepOperation,
+            afterStepOperation: afterStepOperation,
+            withOptions: activatedOptions,
+            dispensingWith: dispensedWith
+        )
     }
     
     private var force = false
@@ -113,21 +215,21 @@ public class Execution {
     var appeaseTypes = [MessageType]()
     
     /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute<T>(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
+    fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
         forceValues.append(force)
         if let appeaseType {
             appeaseTypes.append(appeaseType)
         }
-        if !force, let _beforeStepOperation {
+        if !force, let _beforeStepOperation, let step {
             operationCount += 1
-            if !_beforeStepOperation(operationCount, effectuationIDStack.last ?? "") {
+            if !_beforeStepOperation(operationCount, step) {
                 operationCount -= 1
             }
         }
         let result = try work()
-        if !force, let _afterStepOperation{
+        if !force, let _afterStepOperation, let step {
             operationCount += 1
-            if !_afterStepOperation(operationCount, effectuationIDStack.last ?? "") {
+            if !_afterStepOperation(operationCount, step) {
                 operationCount -= 1
             }
         }
@@ -140,20 +242,20 @@ public class Execution {
     
     /// Executes always.
     public func force<T>(work: () throws -> T) rethrows -> T? {
-        try execute(force: true, work: work)
+        try execute(step: nil, force: true, work: work)
     }
     
     /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
-    public func optional<T>(named optionName: String, work: () throws -> T) rethrows -> T? {
+    public func optional<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        effectuationIDStack.append("optional part \"\(optionName)\"")
-        if activatedOptions?.contains(optionName) != true || dispensedWith?.contains(optionName) == true {
+        effectuationStack.append(.optionalPart(name: partName))
+        if activatedOptions?.contains(partName) != true || dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
+                effectuationStack: effectuationStack
             ))
             result = nil
         } else {
@@ -161,33 +263,33 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                effectuationStack: effectuationStack
             ))
-            result = try execute(force: false, work: work)
+            result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< DONE OPTIONAL PART \"\(optionName)\""],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
+                effectuationStack: effectuationStack
             ))
         }
-        effectuationIDStack.removeLast()
+        effectuationStack.removeLast()
         return result
     }
     
     /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
-    public func dispensable<T>(named optionName: String, work: () throws -> T) rethrows -> T? {
+    public func dispensable<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        effectuationIDStack.append("dispensable part \"\(optionName)\"")
-        if dispensedWith?.contains(optionName) == true {
+        effectuationStack.append(.dispensablePart(name: partName))
+        if dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
+                effectuationStack: effectuationStack
             ))
             result = nil
         } else {
@@ -195,65 +297,65 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                effectuationStack: effectuationStack
             ))
-            result = try execute(force: false, work: work)
+            result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: "<< DONE DISPENSABLE PART \"\(optionName)\""],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
+                effectuationStack: effectuationStack
             ))
         }
-        effectuationIDStack.removeLast()
+        effectuationStack.removeLast()
         return result
     }
     
     /// Make worse message type than `Error` to type `Error` in contained calls.
     public func appease<T>(to appeaseType: MessageType? = .Error, work: () throws -> T) rethrows -> T? {
-        try execute(force: false, appeaseTo: appeaseType, work: work)
+        try execute(step: nil, force: false, appeaseTo: appeaseType, work: work)
     }
     
-    private func effectuateTest( _ effectuationID: String) -> Bool {
+    private func effectuateTest(forStep step: StepID) -> Bool {
         if stopped {
-            self.log(executionMessages.skippingStep, effectuationID, effectuationID)
+            self.log(executionMessages.skippingStep, step.description)
         }
-        else if !executed.contains(effectuationID) || forceValues.last == true {
-            effectuationIDStack.append(effectuationID)
+        else if !executedSteps.contains(step) || forceValues.last == true {
+            effectuationStack.append(.step(step: step))
             logger.log(LoggingEvent(
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> STEP \(effectuationID)"],
-                effectuationIDStack: effectuationIDStack
+                fact: [.en: ">> STEP \(step.description)"],
+                effectuationStack: effectuationStack
             ))
-            executed.insert(effectuationID)
+            executedSteps.insert(step)
             return true
         } else if debug {
-            self.log(executionMessages.skippingStep, effectuationID, effectuationID)
+            self.log(executionMessages.skippingStep, step.description, step.description)
         }
         return false
     }
     
-    private func afterStep(_ effectuationID: String, secondsElapsed: Double) {
+    private func after(step: StepID, secondsElapsed: Double) {
         logger.log(LoggingEvent(
             type: .Progress,
             processID: processID,
             applicationName: applicationName,
-            fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(effectuationID) (duration: \(secondsElapsed) seconds)" ],
-            effectuationIDStack: effectuationIDStack
+            fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(step) (duration: \(secondsElapsed) seconds)" ],
+            effectuationStack: effectuationStack
         ))
-        effectuationIDStack.removeLast()
+        effectuationStack.removeLast()
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate<T>(_ effectuationID: String, work: () throws -> T) rethrows -> T? {
-        if effectuateTest(effectuationID) {
+    public func effectuate<T>(_ step: StepID, work: () throws -> T) rethrows -> T? {
+        if effectuateTest(forStep: step) {
             let start = DispatchTime.now()
-            let result = try execute(force: false, work: work)
-            afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
+            let result = try execute(step: step, force: false, work: work)
+            after(step: step, secondsElapsed: elapsedSeconds(start: start))
             return result
         } else {
             return nil
@@ -269,21 +371,21 @@ public class Execution {
         }
         
         /// Force all contained work to be executed, even if already executed before.
-        fileprivate func execute<T>(force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> T) async rethrows -> T {
+        fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> T) async rethrows -> T {
             execution.forceValues.append(force)
             if let appeaseType {
                 execution.appeaseTypes.append(appeaseType)
             }
-            if !force, let _beforeStepOperation = execution._beforeStepOperation {
+            if !force, let _beforeStepOperation = execution._beforeStepOperation, let step {
                 execution.operationCount += 1
-                if !_beforeStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
+                if !_beforeStepOperation(execution.operationCount, step) {
                     execution.operationCount -= 1
                 }
             }
             let result = try await work()
-            if !force, let _afterStepOperation = execution._afterStepOperation {
+            if !force, let _afterStepOperation = execution._afterStepOperation, let step {
                 execution.operationCount += 1
-                if !_afterStepOperation(execution.operationCount, execution.effectuationIDStack.last ?? "") {
+                if !_afterStepOperation(execution.operationCount, step) {
                     execution.operationCount -= 1
                 }
             }
@@ -295,11 +397,11 @@ public class Execution {
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate<T>(_ effectuationID: String, work: () async throws -> T) async rethrows -> T? {
-            if execution.effectuateTest(effectuationID) {
+        public func effectuate<T>(step: StepID, work: () async throws -> T) async rethrows -> T? {
+            if execution.effectuateTest(forStep: step) {
                 let start = DispatchTime.now()
-                let result = try await execute(force: false, work: work)
-                execution.afterStep(effectuationID, secondsElapsed: elapsedSeconds(start: start))
+                let result = try await execute(step: step, force: false, work: work)
+                execution.after(step: step, secondsElapsed: elapsedSeconds(start: start))
                 return result
             } else {
                 return nil
@@ -308,20 +410,20 @@ public class Execution {
         
         /// Executes always.
         public func force<T>(work: () async throws -> T) async rethrows -> T? {
-            try await execute(force: true, work: work)
+            try await execute(step: nil, force: true, work: work)
         }
         
         /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
-        public func optional<T>(named optionName: String, work: () async throws -> T) async rethrows -> T? {
-            execution.effectuationIDStack.append("optional part \"\(optionName)\"")
+        public func optional<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
+            execution.effectuationStack.append(.optionalPart(name: partName))
             let result: T?
-            if execution.activatedOptions?.contains(optionName) != true || execution.dispensedWith?.contains(optionName) == true {
+            if execution.activatedOptions?.contains(partName) != true || execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "OPTIONAL PART \"\(optionName)\" NOT ACTIVATED"],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
+                    effectuationStack: execution.effectuationStack
                 ))
                 result = nil
             } else {
@@ -329,33 +431,33 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> OPTIONAL PART \"\(optionName)\""],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                    effectuationStack: execution.effectuationStack
                 ))
-                result = try await execute(force: false, work: work)
+                result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< DONE OPTIONAL PART \"\(optionName)\""],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
+                    effectuationStack: execution.effectuationStack
                 ))
             }
-            execution.effectuationIDStack.removeLast()
+            execution.effectuationStack.removeLast()
             return result
         }
         
         /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
-        public func dispensable<T>(named optionName: String, work: () async throws -> T) async rethrows -> T? {
+        public func dispensable<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
             let result: T?
-            execution.effectuationIDStack.append("dispensable part \"\(optionName)\"")
-            if execution.dispensedWith?.contains(optionName) == true {
+            execution.effectuationStack.append(.dispensablePart(name: partName))
+            if execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "DISPENSABLE PART \"\(optionName)\" DEACTIVATED"],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
+                    effectuationStack: execution.effectuationStack
                 ))
                 result = nil
             } else {
@@ -363,25 +465,25 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> DISPENSABLE PART \"\(optionName)\""],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                    effectuationStack: execution.effectuationStack
                 ))
-                result = try await execute(force: false, work: work)
+                result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: "<< DONE DISPENSABLE PART \"\(optionName)\""],
-                    effectuationIDStack: execution.effectuationIDStack
+                    fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
+                    effectuationStack: execution.effectuationStack
                 ))
             }
-            execution.effectuationIDStack.removeLast()
+            execution.effectuationStack.removeLast()
             return result
         }
         
         /// Make worse message type than `Error` to type `Error` in contained calls.
         public func appease<T>(to appeaseType: MessageType? = .Error, work: () throws -> T) async rethrows -> T? {
-            try await execute(force: false, appeaseTo: appeaseType, work: work)
+            try await execute(step: nil, force: false, appeaseTo: appeaseType, work: work)
         }
     }
     
@@ -403,7 +505,7 @@ public class Execution {
                 solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
                 itemInfo: itemInfo,
                 itemPositionInfo: itemPositionInfo,
-                effectuationIDStack: effectuationIDStack
+                effectuationStack: effectuationStack
             ),
             addCrashInfo: addCrashInfo
         )
