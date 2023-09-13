@@ -506,8 +506,8 @@ public class Execution {
                 type: message.type,
                 processID: processID,
                 applicationName: applicationName,
-                fact: fillLocalizingMessage(message: message.fact, with: arguments),
-                solution: fillLocalizingMessage(optionalMessage: message.solution, with: arguments),
+                fact: message.fact.filling(with: arguments),
+                solution: message.solution?.filling(with: arguments),
                 itemInfo: itemInfo,
                 itemPositionInfo: itemPositionInfo,
                 effectuationStack: effectuationStack
@@ -660,6 +660,22 @@ public typealias MessageText = String
 /// message text.
 public typealias LocalizingMessage = [Language:MessageText]
 
+public extension LocalizingMessage {
+    
+    /// Replaces the placeholders in all message texts of an instance of
+    /// `LocalizingMessage` by the accordings arguments.
+     func filling(with arguments: [String]?) -> LocalizingMessage {
+        guard let arguments = arguments else {
+            return self
+        }
+        var newMessage = [Language:String]()
+        self.forEach{ language, text in
+            newMessage[language] = format(text, using: arguments)
+        }
+        return newMessage
+    }
+}
+
 /// A message text can have placeholders $1, $2, ... which are
 /// replaced by the additional textual arguments of the `log`
 /// method. This function replaces the placeholders by those
@@ -672,26 +688,4 @@ func format(_ _s: String, using arguments: [String]) -> String {
         s = s.replacingOccurrences(of: "$\(i)", with: argument)
     }
     return s
-}
-
-/// Replaces the placeholders in all message texts of an instance of
-/// `LocalizingMessage` by the accordings arguments.
-public func fillLocalizingMessage(message: LocalizingMessage, with arguments: [String]?) -> LocalizingMessage {
-    guard let arguments = arguments else {
-        return message
-    }
-    var newMessage = [Language:String]()
-    message.forEach{ language, text in
-        newMessage[language] = format(text, using: arguments)
-    }
-    return newMessage
-}
-
-/// Replaces the placeholders in all message texts of an instance of
-/// `LocalizingMessage` by the accordings arguments.
-public func fillLocalizingMessage(optionalMessage _message: LocalizingMessage?, with arguments: [String]?) -> LocalizingMessage? {
-    guard let message = _message else {
-        return nil
-    }
-    return fillLocalizingMessage(message: message, with: arguments)
 }
