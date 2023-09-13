@@ -692,8 +692,8 @@ public extension String {
         var i = 0
         var s = self
         arguments.forEach { argument in
-            i += 1
             s = s.replacingOccurrences(of: "$\(i)", with: argument)
+            i += 1
         }
         return s
     }
