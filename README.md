@@ -155,12 +155,12 @@ let myError = Message(
     id: "my error",
     type: .Error,
     fact: [
-        .en: "this is an error with additional info \"$1\"",
+        .en: "this is an error with additional info \"$0\"",
     ]
 )
 ```
 
-The texts `$1`, `$2`, ... are being replaced by arguments (of type `String`) number 2, 3, ... in the call to `execution.log`.
+The texts `$0`, `$1`, ... are being replaced by arguments (of type `String`) in their order in the call to `execution.log`.
 
 Do not forget to close your logger at the end of your program (so all messages are e.g. written):
 
