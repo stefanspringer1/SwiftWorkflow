@@ -250,6 +250,11 @@ public class Execution {
         try execute(step: nil, force: true, work: work)
     }
     
+    /// Executes always if in a forced context.
+    public func inheritForced<T>(work: () throws -> T) rethrows -> T? {
+        try execute(step: nil, force: forceValues.last == true, work: work)
+    }
+    
     /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
     public func optional<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
@@ -416,6 +421,11 @@ public class Execution {
         /// Executes always.
         public func force<T>(work: () async throws -> T) async rethrows -> T? {
             try await execute(step: nil, force: true, work: work)
+        }
+        
+        /// Executes always if in a forced context.
+        public func inheritForced<T>(work: () throws -> T) async rethrows -> T? {
+            try await execute(step: nil, force: execution.forceValues.last == true, work: work)
         }
         
         /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.

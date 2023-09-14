@@ -337,7 +337,25 @@ func b_step(
 
 Now `a_step` always runs inside `b_step` (if `b_step` gets executed).
 
-Note that the sub-teps of `a_step` are _not_ automatically forced.
+Note that any sub-steps of a forced step are _not_ automatically forced. But you can pass a forced execution onto a sub-step by calling it inside `inheritForced`:
+
+```Swift
+func b_step(
+    during execution: Execution,
+    data: MyData
+) {
+    execution.effectuate(checking: StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
+        
+        execution.inheritForced {
+            // this execution of a_step is forced if the current execution of b_step has been forced:
+            a_step(during: execution, data: data)
+        }
+        
+        print("working in step b")
+        
+    }
+}
+```
 
 ---
 **Convention**
