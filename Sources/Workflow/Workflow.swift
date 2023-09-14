@@ -356,7 +356,7 @@ public class Execution {
     }
     
     /// Executes only if the step did not execute before.
-    public func effectuate<T>(_ step: StepID, work: () throws -> T) rethrows -> T? {
+    public func effectuate<T>(checking step: StepID, work: () throws -> T) rethrows -> T? {
         if effectuateTest(forStep: step) {
             let start = DispatchTime.now()
             let result = try execute(step: step, force: false, work: work)
@@ -402,7 +402,7 @@ public class Execution {
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate<T>(step: StepID, work: () async throws -> T) async rethrows -> T? {
+        public func effectuate<T>(checking step: StepID, work: () async throws -> T) async rethrows -> T? {
             if execution.effectuateTest(forStep: step) {
                 let start = DispatchTime.now()
                 let result = try await execute(step: step, force: false, work: work)
