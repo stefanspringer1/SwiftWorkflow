@@ -337,6 +337,8 @@ func b_step(
 
 Now `a_step` always runs inside `b_step` (if `b_step` gets executed).
 
+Note that the sub-teps of `a_step` are _not_ automatically forced.
+
 ---
 **Convention**
 
@@ -529,15 +531,13 @@ See how the `async` keyword tells us exactly where work might get suspended. Thi
 
 [^6]: Using actors (with `async` methods) as loggers would also have _advantages_, e.g. making it easy to ensure that the actual logging has happened before continuing.
 
-To force an execution, use `execution.async.force` in asynchronous contexts instead of `execution.async.force`:
+To force an execution, use `execution.async.force` in asynchronous contexts instead of `execution.force`:
 
 ```Swift
 await execution.async.force {
     await bye_step(during: execution, data: data)
 }
 ```
-
-Note that the sub-steps of `bye_step` are _not_ automatically forced.
 
 In an asynchronous setting, consider setting the logging level e.g. for a `PrintLogger` to `Warning` or `Iteration`.
 
