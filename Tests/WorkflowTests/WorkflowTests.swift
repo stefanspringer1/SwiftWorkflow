@@ -26,7 +26,7 @@ final class WorkflowTests: XCTestCase {
         
         // step:
         do {
-            let effectuation: Effectuation = .step(step: StepID(scriptID: "script1", functionID: "function1"))
+            let effectuation: Effectuation = .step(step: StepID(crossModuleFileDesignation: "script1", functionSignature: "function1"))
             
             let stepEffectuationEncoded = try encoder.encode(effectuation)
             XCTAssertEqual(#"{"effectuation":"step function1@script1"}"#, String(decoding: stepEffectuationEncoded, as: UTF8.self))

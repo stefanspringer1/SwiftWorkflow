@@ -10,15 +10,15 @@ import ArgumentParser
 
 public struct StepID: Hashable, CustomStringConvertible {
     
-    public let scriptID: String
-    public let functionID: String
+    public let crossModuleFileDesignation: String
+    public let functionSignature: String
     
-    public init(scriptID: String, functionID: String) {
-        self.scriptID = scriptID
-        self.functionID = functionID
+    public init(crossModuleFileDesignation: String, functionSignature: String) {
+        self.crossModuleFileDesignation = crossModuleFileDesignation
+        self.functionSignature = functionSignature
     }
     
-    public var description: String { "\(functionID)@\(scriptID)" }
+    public var description: String { "\(functionSignature)@\(crossModuleFileDesignation)" }
 }
 
 public let stepPrefix = "step "
@@ -65,7 +65,7 @@ extension Effectuation: Codable {
         if description.hasPrefix(stepPrefix) {
             let stepDescription = description.dropFirst(stepPrefix.count)
             if let atSign = stepDescription.firstIndex(of: "@") {
-                self = .step(step: StepID(scriptID: String(stepDescription[..<atSign]), functionID: String(stepDescription[atSign...].dropFirst())))
+                self = .step(step: StepID(crossModuleFileDesignation: String(stepDescription[..<atSign]), functionSignature: String(stepDescription[atSign...].dropFirst())))
                 return
             }
         } else if description.hasPrefix(optionalPartPrefix) {

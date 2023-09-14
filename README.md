@@ -92,7 +92,7 @@ func myWork_step(
     during execution: Execution,
     forWorkItem workItem: workItem
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         
         // ... some other code...
         
@@ -250,7 +250,7 @@ func a_step(
     during execution: Execution
     data: MyData
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         
         print("working in step a")
         
@@ -273,7 +273,7 @@ func b_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         
         a_step(during: execution, data: data)
         
@@ -291,7 +291,7 @@ func c_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         
        a_step(during: execution, data: data)
        b_step(during: execution, data: data)
@@ -323,7 +323,7 @@ func b_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         
         execution.force {
             a_step(during: execution, data: data)
@@ -353,7 +353,7 @@ func my_step(
     during execution: Execution,
     data: MyData
 ) -> String? {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         ...
         return "my result"
         ...
@@ -370,7 +370,7 @@ func my_step(
     during execution: Execution,
     data: MyData
 ) -> Result<String, ErrorWithDescription>? {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
         ...
         var value: String?
         ...
@@ -513,7 +513,7 @@ func helloAndBye_step(
     during execution: Execution,
     data: MyData
 ) async {
-    await execution.async.effectuate(StepID(scriptID: #file, functionID: #function)) { {
+    await execution.async.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) { {
         
         execution.log(stepData.sayingHelloAndBye, data.value)
         
@@ -576,7 +576,7 @@ func hello_external_step(
     during execution: Execution,
     data: MyData
 ) {
-    execution.effectuate(StepID(scriptID: #file, functionID: #function)) {
+    execution.effectuate(StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
     
         execution.appease {
             hello_lib(during: execution, data: data)
