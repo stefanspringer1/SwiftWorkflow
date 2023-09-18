@@ -40,6 +40,14 @@ As dependency of your product:
 .product(name: "Workflow", package: "SwiftWorkflow"),
 ```
 
+As long as the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) is not yet the default for your Swift version, you need to enable it via the follwoing [upcoming feature flag](https://www.swift.org/blog/using-upcoming-feature-flags/) for your target:
+
+```Swift
+swiftSettings: [
+    .enableUpcomingFeature("ConciseMagicFile"),
+]
+```
+
 The Workflow package will be then usable in a Swift file after adding the following import:
 
 ```Swift
@@ -243,11 +251,11 @@ A function representing a step uses a call to `Execution.effectuate` to wrap all
 
 We say that a step “gets executed” when we actually mean that the statements inside its call to `effectuate` get executed.
 
-A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). The execution keeps track of the steps run by using _a unique identifier for each step._ This uniqueness of the identifier has to be ensured by the developer of the steps. An easy way to ensure unique identifiers is to a) using only top-level functions as steps, and b) using the function signature plus the [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md) as the identifier by writing `\(#function)@\(#file)`. This way the identifiers are unique.
+A step fullfilling "task a" is to be formulated as follows. In the example below, `data` is the instance of a class being changed during the execution (of cource, our steps could also return a value, and different interacting steps can have different arguments). The execution keeps track of the steps run by using _a unique identifier for each step._ An instance of `StepID` is used as such an identifier, which contains a) a designation for the file that is unique across modules (using [concise magic file name](https://github.com/apple/swift-evolution/blob/main/proposals/0274-magic-file.md)), and b) using the function signature which is unique when using only top-level functions as steps.
 
 ```Swift
 func a_step(
-    during execution: Execution
+    during execution: Execution,
     data: MyData
 ) {
     execution.effectuate(checking: StepID(crossModuleFileDesignation: #file, functionSignature: #function)) {
