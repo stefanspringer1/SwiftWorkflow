@@ -47,7 +47,7 @@ public extension URL {
                     empty = false
                 }
                 if empty {
-                    try self.removeDirectorySafely()
+                    try self.removeSafely()
                 } else {
                     execution.log(Message(
                         id: "temporary directory not empty after processing", type: .Warning,
