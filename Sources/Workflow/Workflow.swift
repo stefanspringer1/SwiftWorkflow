@@ -88,6 +88,8 @@ public typealias AugmentOperationCount = Bool
 /// - keeps global information for logging
 public class Execution {
     
+    public let applicationName: String
+    
     private var executedSteps = Set<StepID>()
     
     var effectuationStack: [Effectuation]
@@ -95,7 +97,6 @@ public class Execution {
     let logger: Logger
     let crashLogger: Logger?
     var processID: String?
-    var applicationName: String
     var itemInfo: String? = nil
     
     let alwaysAddCrashInfo: Bool
