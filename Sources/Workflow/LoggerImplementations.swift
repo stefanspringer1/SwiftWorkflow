@@ -8,7 +8,7 @@ import Utilities
 /// This is a logger that can be used to "merge" several other loggers,
 /// i.e. all logging events are being distributed to all loggers.
 public class MultiLogger: Logger {
-
+    
     private var _loggers: [Logger]
     
     public var loggers: [Logger] { _loggers }

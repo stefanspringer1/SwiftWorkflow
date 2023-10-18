@@ -6,9 +6,13 @@ public protocol Logger {
     func close() throws
 }
 
-open class ConcurrentLogger: Logger {
+public protocol WithLoggingLevel {
+    var loggingLevel: MessageType { get set }
+}
+
+open class ConcurrentLogger: Logger, WithLoggingLevel {
     
-    public let loggingLevel: MessageType
+    public var loggingLevel: MessageType
 
     private let group: DispatchGroup
     private let queue: DispatchQueue
@@ -50,9 +54,9 @@ open class ConcurrentLogger: Logger {
     
 }
 
-open class ConcurrentCrashLogger: Logger {
+open class ConcurrentCrashLogger: Logger, WithLoggingLevel {
 
-    public let loggingLevel: MessageType
+    public var loggingLevel: MessageType
 
     private let queue: DispatchQueue
     
