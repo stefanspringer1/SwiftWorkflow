@@ -253,9 +253,9 @@ public class Execution {
     
     /// After execution, disremember what has been executed.
     public func disremember<T>(work: () throws -> T) rethrows -> T? {
-        let oldEffectuationStack = effectuationStack
+        let oldExecutedSteps = executedSteps
         let result = try execute(step: nil, force: false, work: work)
-        effectuationStack = oldEffectuationStack
+        executedSteps = oldExecutedSteps
         return result
     }
     
@@ -434,9 +434,9 @@ public class Execution {
         
         /// After execution, disremember what has been executed.
         public func disremember<T>(work: () throws -> T) async rethrows -> T? {
-            let oldEffectuationStack = execution.effectuationStack
+            let oldExecutedSteps = execution.executedSteps
             let result = try await execute(step: nil, force: false, work: work)
-            execution.effectuationStack = oldEffectuationStack
+            execution.executedSteps = oldExecutedSteps
             return result
         }
         
