@@ -251,6 +251,14 @@ public class Execution {
         try execute(step: nil, force: true, work: work)
     }
     
+    /// After execution, disremember what has been executed.
+    public func disremember<T>(work: () throws -> T) rethrows -> T? {
+        let oldEffectuationStack = effectuationStack
+        let result = try execute(step: nil, force: false, work: work)
+        effectuationStack = oldEffectuationStack
+        return result
+    }
+    
     /// Executes always if in a forced context.
     public func inheritForced<T>(work: () throws -> T) rethrows -> T? {
         try execute(step: nil, force: forceValues.last == true, work: work)
@@ -422,6 +430,14 @@ public class Execution {
         /// Executes always.
         public func force<T>(work: () async throws -> T) async rethrows -> T? {
             try await execute(step: nil, force: true, work: work)
+        }
+        
+        /// After execution, disremember what has been executed.
+        public func disremember<T>(work: () throws -> T) async rethrows -> T? {
+            let oldEffectuationStack = execution.effectuationStack
+            let result = try await execute(step: nil, force: false, work: work)
+            execution.effectuationStack = oldEffectuationStack
+            return result
         }
         
         /// Executes always if in a forced context.

@@ -128,6 +128,14 @@ execution.force {
 }
 ```
 
+You can also disremember what is executed with the following call:
+
+```Swift
+execution.disremember {
+    myOther_step(during: execution, forWorkItem: workItem)
+}
+```
+
 There are also be named optional parts that can be activated by adding an according value to the `withOptions` value in the initializer of the `Execution` instance:
 
 ```Swift
