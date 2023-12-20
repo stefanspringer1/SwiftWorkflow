@@ -644,8 +644,8 @@ dispatchQueue.async {
 You need to update the worst message type after the parallel runs:
 
 ```Swift
-...forEach { ...
-    execution.updateWorstMessageType(with: max(..., execution.worstMessageType)
+for ... in ... {
+    execution.updateWorstMessageType(with: max(..., execution.worstMessageType))
 }
 ```
 
