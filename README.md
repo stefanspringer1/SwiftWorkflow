@@ -87,7 +87,7 @@ let logger = MultiLogger(
 Then, for each work item that you want to process (whatever your work items might be, maybe you have only one work item so you do not need a for loop), use a new `Execution` object:
 
 ```Swift
-workItems.forEach { workItem in
+for each workItem in workItems {
     let execution = Execution(logger: logger, applicationName: "My App")
     myWork_step(during: execution, forWorkItem: workItem)
 }
