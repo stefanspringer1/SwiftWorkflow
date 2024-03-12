@@ -83,6 +83,30 @@ extension Effectuation: Codable {
 public typealias OperationCount = Int
 public typealias AugmentOperationCount = Bool
 
+open class WorstMessageTypeHolder {
+    
+    private var _worstMessageType: MessageType = .Info
+    
+    var worstMessageType: MessageType { _worstMessageType }
+
+    private let group: DispatchGroup
+    private let queue: DispatchQueue
+    
+    public init() {
+        self.group = DispatchGroup()
+        self.queue = DispatchQueue(label: "WorstMessageTypeHolder", qos: .default)
+    }
+    
+    public func updateWorstMessageType(with messageType: MessageType) {
+        group.enter()
+        self.queue.async {
+            self._worstMessageType = max(self._worstMessageType, messageType)
+            self.group.leave()
+        }
+    }
+    
+}
+
 /// Manages the execution of steps. In particular
 /// - prevents double execution of steps
 /// - keeps global information for logging
@@ -141,11 +165,12 @@ public class Execution {
     }
     
     public var parallel: Execution {
-        Execution(logger: logger, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationStack: effectuationStack)
+        Execution(logger: logger, worstMessageTypeHolder: worstMessageTypeHolder, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationStack: effectuationStack)
     }
     
     private init (
         logger: Logger,
+        worstMessageTypeHolder: WorstMessageTypeHolder? = nil,
         crashLogger: Logger? = nil,
         processID: String? = nil,
         applicationName: String,
@@ -161,6 +186,7 @@ public class Execution {
     ) {
         self.effectuationStack = effectuationStack
         self.logger = logger
+        self.worstMessageTypeHolder = worstMessageTypeHolder ?? WorstMessageTypeHolder()
         self.crashLogger = crashLogger
         self.processID = processID
         self.applicationName = applicationName
@@ -207,16 +233,16 @@ public class Execution {
     
     private var force = false
     
-    private var _worstMessageType = MessageType.Info
+    private let worstMessageTypeHolder: WorstMessageTypeHolder
     
-    public var stopped: Bool { _worstMessageType >= .Fatal }
+    public var stopped: Bool { worstMessageTypeHolder.worstMessageType >= .Fatal }
     
-    public var worstMessageType: MessageType { _worstMessageType }
+    public var worstMessageType: MessageType { worstMessageTypeHolder.worstMessageType }
     
     public func updateWorstMessageType(with messageType: MessageType) {
-        _worstMessageType = max(_worstMessageType, messageType)
+        worstMessageTypeHolder.updateWorstMessageType(with: messageType)
     }
-
+    
     var forceValues = [Bool]()
     var appeaseTypes = [MessageType]()
     
