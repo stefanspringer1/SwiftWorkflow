@@ -87,8 +87,6 @@ open class WorstMessageTypeHolder {
     
     private var _worstMessageType: MessageType = .Info
     
-    var worstMessageType: MessageType { _worstMessageType }
-
     private let group: DispatchGroup
     private let queue: DispatchQueue
     
@@ -103,6 +101,16 @@ open class WorstMessageTypeHolder {
             self._worstMessageType = max(self._worstMessageType, messageType)
             self.group.leave()
         }
+    }
+    
+    var worstMessageType: MessageType {
+        var result: MessageType = .Info
+        group.enter()
+        self.queue.sync {
+            result = _worstMessageType
+            self.group.leave()
+        }
+        return result
     }
     
 }
