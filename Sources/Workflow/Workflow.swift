@@ -248,7 +248,7 @@ public class Execution {
     public var worstMessageType: MessageType { worstMessageTypeHolder.worstMessageType }
     
     public func updateWorstMessageType(with messageType: MessageType) {
-        worstMessageTypeHolder.updateWorstMessageType(with: messageType)
+        worstMessageTypeHolder.updateWorstMessageType(with: min(appeaseTypes.last ?? .Deadly, messageType))
     }
     
     var forceValues = [Bool]()
