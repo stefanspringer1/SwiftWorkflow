@@ -14,8 +14,8 @@ open class ConcurrentLogger: Logger, WithLoggingLevel {
     
     public var loggingLevel: MessageType
 
-    private let group: DispatchGroup
-    private let queue: DispatchQueue
+    internal let group: DispatchGroup
+    internal let queue: DispatchQueue
     
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil

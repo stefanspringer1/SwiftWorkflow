@@ -58,7 +58,13 @@ public class CollectingLogger: ConcurrentLogger {
     
     /// Get all collected message events.
     public func getLoggingEvents() -> [LoggingEvent] {
-        return loggingEvents
+        var loggingEvents: [LoggingEvent]? = nil
+        group.enter()
+        self.queue.async {
+            loggingEvents = self.loggingEvents
+            self.group.leave()
+        }
+        return loggingEvents!
     }
 }
 
