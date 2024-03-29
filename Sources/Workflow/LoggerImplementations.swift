@@ -60,7 +60,7 @@ public class CollectingLogger: ConcurrentLogger {
     public func getLoggingEvents() -> [LoggingEvent] {
         var loggingEvents: [LoggingEvent]? = nil
         group.enter()
-        self.queue.asyncAndWait {
+        self.queue.sync {
             loggingEvents = self.loggingEvents
             self.group.leave()
         }
