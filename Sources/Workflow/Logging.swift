@@ -106,7 +106,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable {
         applicationName: String,
         fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,
-        itemInfo: String? = nil,
+        itemInfo: String?,
         itemPositionInfo: String? = nil,
         effectuationStack: [Effectuation]? = nil,
         time: String = formattedTime()

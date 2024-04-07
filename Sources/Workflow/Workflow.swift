@@ -308,6 +308,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
             result = nil
@@ -317,6 +318,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
             result = try execute(step: nil, force: false, work: work)
@@ -325,6 +327,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
         }
@@ -342,6 +345,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
             result = nil
@@ -351,6 +355,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
             result = try execute(step: nil, force: false, work: work)
@@ -359,6 +364,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
         }
@@ -382,6 +388,7 @@ public class Execution {
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> STEP \(step.description)"],
+                itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
             executedSteps.insert(step)
@@ -398,6 +405,7 @@ public class Execution {
             processID: processID,
             applicationName: applicationName,
             fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(step) (duration: \(secondsElapsed) seconds)" ],
+            itemInfo: itemInfo,
             effectuationStack: effectuationStack
         ))
         effectuationStack.removeLast()
@@ -489,6 +497,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
                 result = nil
@@ -498,6 +507,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
                 result = try await execute(step: nil, force: false, work: work)
@@ -506,6 +516,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
             }
@@ -523,6 +534,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
                 result = nil
@@ -532,6 +544,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
                 result = try await execute(step: nil, force: false, work: work)
@@ -540,6 +553,7 @@ public class Execution {
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
+                    itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
             }

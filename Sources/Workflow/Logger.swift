@@ -99,6 +99,8 @@ public extension Logger {
         _ type: MessageType,
         _ fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,
+        itemInfo: String? = nil,
+        itemPositionInfo: String? = nil,
         messageID: MessageID? = nil,
         effectuationStack: [Effectuation]? = nil
     ) {
@@ -109,6 +111,8 @@ public extension Logger {
             applicationName: applicationName,
             fact: fact,
             solution: solution,
+            itemInfo: itemInfo,
+            itemPositionInfo: itemPositionInfo,
             effectuationStack: effectuationStack
         ))
     }
