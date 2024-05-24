@@ -6,13 +6,30 @@ public protocol Logger {
     func close() throws
 }
 
-public protocol WithLoggingLevel {
+public protocol WithLoggingFilter {
     var loggingLevel: MessageType { get set }
+    var logProgress: Bool { get set }
 }
 
-open class ConcurrentLogger: Logger, WithLoggingLevel {
+public extension WithLoggingFilter {
+    
+    func filter(event: LoggingEvent) -> LoggingEvent? {
+        if event.type == .Progress {
+            if logProgress {
+                return event
+            }
+        } else if event.type >= loggingLevel {
+            return event
+        }
+        return nil
+    }
+    
+}
+
+open class ConcurrentLogger: Logger, WithLoggingFilter {
     
     public var loggingLevel: MessageType
+    public var logProgress: Bool
 
     internal let group: DispatchGroup
     internal let queue: DispatchQueue
@@ -20,8 +37,9 @@ open class ConcurrentLogger: Logger, WithLoggingLevel {
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug) {
+    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
         self.loggingLevel = loggingLevel
+        self.logProgress = logProgress
         self.group = DispatchGroup()
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
@@ -29,7 +47,7 @@ open class ConcurrentLogger: Logger, WithLoggingLevel {
     private var closed = false
     
     public func log(_ event: LoggingEvent) {
-        if event.type >= loggingLevel {
+        if let event = filter(event: event) {
             group.enter()
             self.queue.async {
                 if !self.closed {
@@ -54,24 +72,26 @@ open class ConcurrentLogger: Logger, WithLoggingLevel {
     
 }
 
-open class ConcurrentCrashLogger: Logger, WithLoggingLevel {
-
+open class ConcurrentCrashLogger: Logger, WithLoggingFilter {
+    
     public var loggingLevel: MessageType
+    public var logProgress: Bool
 
     private let queue: DispatchQueue
     
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug) {
+    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
         self.loggingLevel = loggingLevel
+        self.logProgress = logProgress
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
     
     private var closed = false
     
     public func log(_ event: LoggingEvent) {
-        if event.type >= loggingLevel {
+        if let event = filter(event: event) {
             self.queue.sync {
                 self.loggingAction?(event)
             }

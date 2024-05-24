@@ -49,8 +49,8 @@ public class CollectingLogger: ConcurrentLogger {
     
     private var loggingEvents: [LoggingEvent]! = [LoggingEvent]()
     
-    public override init(loggingLevel: MessageType = .Debug) {
-        super.init(loggingLevel: loggingLevel)
+    public override init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
+        super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             self.loggingEvents.append(event)
         }
@@ -85,12 +85,13 @@ public class PrintLogger: ConcurrentLogger {
     
     public init(
         loggingLevel: MessageType = .Debug,
+        logProgress: Bool = true,
         stepIndentation: Bool = true,
         errorsToStandard: Bool = false
     ) {
         self.stepIndentation = stepIndentation
         self.errorsToStandard = errorsToStandard
-        super.init(loggingLevel: loggingLevel)
+        super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             let message = event.descriptionForLogging(usingStepIndentation: stepIndentation)
             switch event.type {
@@ -122,13 +123,14 @@ public class FileLogger: ConcurrentLogger {
         usingFile path: String,
         stepIndentation: Bool = false,
         loggingLevel: MessageType = MessageType.Info,
+        logProgress: Bool = true,
         append: Bool = false,
         blocking: Bool = true
     ) throws {
         self.path = path
         writableFile = try WritableFile(path: path, append: append, blocking: blocking)
         self.stepIndentation = stepIndentation
-        super.init(loggingLevel: loggingLevel)
+        super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             do {
                 try self.writableFile.reopen()
@@ -165,12 +167,13 @@ public class FileCrashLogger: ConcurrentCrashLogger {
         usingFile path: String,
         stepIndentation: Bool,
         loggingLevel: MessageType = MessageType.Info,
+        logProgress: Bool = true,
         append: Bool = true
     ) throws {
         self.path = path
         writableFile = try WritableFile(path: path, append: append)
         self.stepIndentation = stepIndentation
-        super.init(loggingLevel: loggingLevel)
+        super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             do {
                 try self.writableFile.write(event.descriptionForLogging(usingStepIndentation: stepIndentation).lineForLogfile())
@@ -194,8 +197,8 @@ public class FileCrashLogger: ConcurrentCrashLogger {
 /// A logger using a REST API to store the information.
 public class RESTLogger: ConcurrentLogger {
     
-    public override init(loggingLevel: MessageType = MessageType.Info) {
-        super.init(loggingLevel: loggingLevel)
+    public override init(loggingLevel: MessageType = MessageType.Info, logProgress: Bool = true) {
+        super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             let sem = DispatchSemaphore.init(value: 0)
             let encoder = JSONEncoder()

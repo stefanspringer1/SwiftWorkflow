@@ -8,7 +8,7 @@ import Foundation
 import Utilities
 import ArgumentParser
 
-public struct StepID: Hashable, CustomStringConvertible {
+public struct StepID: Hashable, CustomStringConvertible, Sendable {
     
     public let crossModuleFileDesignation: String
     public let functionSignature: String
@@ -25,7 +25,7 @@ public let stepPrefix = "step "
 public let dispensablePartPrefix = "dispensable part "
 public let optionalPartPrefix = "optional part "
 
-public enum Effectuation: CustomStringConvertible {
+public enum Effectuation: CustomStringConvertible, Sendable {
     
     case step(step: StepID)
     case dispensablePart(name: String)
@@ -645,7 +645,7 @@ let executionMessages = ExecutionMessages()
 // The message type that informs about the severity a message.
 //
 // It conforms to `Comparable` so there is an order of severity.
-public enum MessageType: Comparable, Codable {
+public enum MessageType: Comparable, Codable, Sendable {
     
     /// Debugging information.
     case Debug
@@ -676,7 +676,7 @@ public enum MessageType: Comparable, Codable {
     /// A deadly error, i.e. not only the processing for one work item
     /// has to be abandoned, but the whole processing cannot continue.
     case Deadly
-    
+
 }
 
 // The message type to be used as argument that informs about the severity a message.
@@ -693,15 +693,15 @@ public enum MessageTypeArgument: String, ExpressibleByArgument {
     
     public var messageType: MessageType {
         switch self {
-        case .debug: return MessageType.Debug
-        case .progress: return MessageType.Progress
-        case .info: return MessageType.Info
-        case .iteration: return MessageType.Iteration
-        case .warning: return MessageType.Warning
-        case .error: return MessageType.Error
-        case .fatal: return MessageType.Fatal
-        case .loss: return MessageType.Loss
-        case .deadly: return MessageType.Deadly
+        case .debug: MessageType.Debug
+        case .progress: MessageType.Progress
+        case .info: MessageType.Info
+        case .iteration: MessageType.Iteration
+        case .warning: MessageType.Warning
+        case .error: MessageType.Error
+        case .fatal: MessageType.Fatal
+        case .loss: MessageType.Loss
+        case .deadly: MessageType.Deadly
         }
     }
 }
@@ -720,9 +720,9 @@ public enum Language: Comparable, CodingKey {
     
     public var description : String {
       switch self {
-          case .de: return "de"
-          case .en: return "en"
-          case .fr: return "fr"
+          case .de: "de"
+          case .en: "en"
+          case .fr: "fr"
         }
     }
 }

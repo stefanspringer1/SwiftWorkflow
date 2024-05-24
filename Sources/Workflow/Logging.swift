@@ -45,7 +45,7 @@ public struct SimpleLoggingEvent {
 }
 
 /// A logging event.
-public struct LoggingEvent: CustomStringConvertible, Encodable {
+public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     
     /// The message ID (can be any text).
     public var messageID: MessageID? = nil

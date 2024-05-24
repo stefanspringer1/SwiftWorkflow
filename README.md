@@ -79,7 +79,7 @@ You first need a logger. A common use case is to print to standard out and stand
 
 ```Swift
 let logger = MultiLogger(
-    PrintLogger(loggingLevel: .Info),
+    PrintLogger(loggingLevel: .Info, logProgress: true),
     try FileLogger(usingFile: "my file")
 )
 ```
@@ -527,6 +527,8 @@ When logging, only the messages declared in the step data should be used.
 A message is a collection of texts with the language as keys, so you can define
 the message text in different languages. The message also defines the type of the
 message, e.g. if it informs about the progress or about a fatal error.
+
+The message types (of type `MessageType`, e.g. `Info` or `Warning`) have a strict order, so you can choose the minimal level for a message to be logged. But the message type `Progress` is special: if progress should be logged is defined by an additional parameter.
 
 See the example project for more details.
 
