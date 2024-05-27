@@ -37,7 +37,7 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
+    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = false) {
         self.loggingLevel = loggingLevel
         self.logProgress = logProgress
         self.group = DispatchGroup()
@@ -82,7 +82,7 @@ open class ConcurrentCrashLogger: Logger, WithLoggingFilter {
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
+    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = false) {
         self.loggingLevel = loggingLevel
         self.logProgress = logProgress
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)

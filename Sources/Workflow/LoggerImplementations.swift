@@ -49,7 +49,7 @@ public class CollectingLogger: ConcurrentLogger {
     
     private var loggingEvents: [LoggingEvent]! = [LoggingEvent]()
     
-    public override init(loggingLevel: MessageType = .Debug, logProgress: Bool = true) {
+    public override init(loggingLevel: MessageType = .Debug, logProgress: Bool = false) {
         super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             self.loggingEvents.append(event)
@@ -85,7 +85,7 @@ public class PrintLogger: ConcurrentLogger {
     
     public init(
         loggingLevel: MessageType = .Debug,
-        logProgress: Bool = true,
+        logProgress: Bool = false,
         stepIndentation: Bool = true,
         errorsToStandard: Bool = false
     ) {
@@ -123,7 +123,7 @@ public class FileLogger: ConcurrentLogger {
         usingFile path: String,
         stepIndentation: Bool = false,
         loggingLevel: MessageType = MessageType.Info,
-        logProgress: Bool = true,
+        logProgress: Bool = false,
         append: Bool = false,
         blocking: Bool = true
     ) throws {
@@ -167,7 +167,7 @@ public class FileCrashLogger: ConcurrentCrashLogger {
         usingFile path: String,
         stepIndentation: Bool,
         loggingLevel: MessageType = MessageType.Info,
-        logProgress: Bool = true,
+        logProgress: Bool = false,
         append: Bool = true
     ) throws {
         self.path = path
@@ -197,7 +197,7 @@ public class FileCrashLogger: ConcurrentCrashLogger {
 /// A logger using a REST API to store the information.
 public class RESTLogger: ConcurrentLogger {
     
-    public override init(loggingLevel: MessageType = MessageType.Info, logProgress: Bool = true) {
+    public override init(loggingLevel: MessageType = MessageType.Info, logProgress: Bool = false) {
         super.init(loggingLevel: loggingLevel, logProgress: logProgress)
         loggingAction = { event in
             let sem = DispatchSemaphore.init(value: 0)
