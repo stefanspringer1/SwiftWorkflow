@@ -8,14 +8,14 @@ public protocol Logger {
 
 public protocol WithLoggingFilter {
     var loggingLevel: MessageType { get set }
-    var logProgress: Bool { get set }
+    var progressLogging: Bool { get set }
 }
 
 public extension WithLoggingFilter {
     
     func filter(event: LoggingEvent) -> LoggingEvent? {
         if event.type == .Progress {
-            if logProgress {
+            if progressLogging {
                 return event
             }
         } else if event.type >= loggingLevel {
@@ -29,7 +29,7 @@ public extension WithLoggingFilter {
 open class ConcurrentLogger: Logger, WithLoggingFilter {
     
     public var loggingLevel: MessageType
-    public var logProgress: Bool
+    public var progressLogging: Bool
 
     internal let group: DispatchGroup
     internal let queue: DispatchQueue
@@ -37,9 +37,9 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = false) {
+    public init(loggingLevel: MessageType = .Debug, progressLogging: Bool = false) {
         self.loggingLevel = loggingLevel
-        self.logProgress = logProgress
+        self.progressLogging = progressLogging
         self.group = DispatchGroup()
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
@@ -75,16 +75,16 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
 open class ConcurrentCrashLogger: Logger, WithLoggingFilter {
     
     public var loggingLevel: MessageType
-    public var logProgress: Bool
+    public var progressLogging: Bool
 
     private let queue: DispatchQueue
     
     public var loggingAction: ((LoggingEvent) -> ())? = nil
     public var closeAction: (() -> ())? = nil
     
-    public init(loggingLevel: MessageType = .Debug, logProgress: Bool = false) {
+    public init(loggingLevel: MessageType = .Debug, progressLogging: Bool = false) {
         self.loggingLevel = loggingLevel
-        self.logProgress = logProgress
+        self.progressLogging = progressLogging
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
     

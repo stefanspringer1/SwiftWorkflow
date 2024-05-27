@@ -79,7 +79,7 @@ You first need a logger. A common use case is to print to standard out and stand
 
 ```Swift
 let logger = MultiLogger(
-    PrintLogger(loggingLevel: .Info, logProgress: true),
+    PrintLogger(loggingLevel: .Info, progressLogging: true),
     try FileLogger(usingFile: "my file")
 )
 ```
