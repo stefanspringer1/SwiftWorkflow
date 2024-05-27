@@ -401,9 +401,11 @@ public class Execution {
     
     /// Logging some work (that is not a step) as progress.
     public func progress<T>(_ description: String, work: () throws -> T) rethrows -> T? {
+        operationCount += 1
         self.log(Message(id: "progress: starting \"\(description)\"", type: .Progress, fact: [.en: "STARTING \"\(description)\""]))
         let result = try work()
         self.log(Message(id: "progress: done \"\(description)\"", type: .Progress, fact: [.en: "DONE \"\(description)\""]))
+        operationCount -= 1
         return result
     }
     
