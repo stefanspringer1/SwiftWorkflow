@@ -24,12 +24,14 @@ public struct StepID: Hashable, CustomStringConvertible, Sendable {
 public let stepPrefix = "step "
 public let dispensablePartPrefix = "dispensable part "
 public let optionalPartPrefix = "optional part "
+public let describedPartPrefix = "doing "
 
 public enum Effectuation: CustomStringConvertible, Sendable {
     
     case step(step: StepID)
     case dispensablePart(name: String)
     case optionalPart(name: String)
+    case describedPart(description: String)
     
     enum PostTypeCodingError: Error {
         case decoding(String)
@@ -43,6 +45,8 @@ public enum Effectuation: CustomStringConvertible, Sendable {
             return "\(dispensablePartPrefix)\"\(id)\""
         case .optionalPart(name: let id):
             return "\(optionalPartPrefix)\"\(id)\""
+        case .describedPart(description: let description):
+            return "\(describedPartPrefix)\"\(description)\""
         }
     }
     
@@ -400,12 +404,12 @@ public class Execution {
     }
     
     /// Logging some work (that is not a step) as progress.
-    public func progress<T>(_ description: String, work: () throws -> T) rethrows -> T? {
-        operationCount += 1
-        self.log(Message(id: "progress: starting \"\(description)\"", type: .Progress, fact: [.en: "STARTING \"\(description)\""]))
+    public func doing<T>(_ description: String, work: () throws -> T) rethrows -> T? {
+        effectuationStack.append(.describedPart(description: description))
+        self.log(Message(id: "starting \"\(description)\"", type: .Progress, fact: [.en: "STARTING \"\(description)\""]))
         let result = try work()
-        self.log(Message(id: "progress: done \"\(description)\"", type: .Progress, fact: [.en: "DONE \"\(description)\""]))
-        operationCount -= 1
+        self.log(Message(id: "done \"\(description)\"", type: .Progress, fact: [.en: "DONE \"\(description)\""]))
+        effectuationStack.removeLast()
         return result
     }
     
