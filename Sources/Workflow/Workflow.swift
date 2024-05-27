@@ -321,7 +321,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
                 itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
@@ -358,7 +358,7 @@ public class Execution {
                 type: .Progress,
                 processID: processID,
                 applicationName: applicationName,
-                fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
                 itemInfo: itemInfo,
                 effectuationStack: effectuationStack
             ))
@@ -406,7 +406,7 @@ public class Execution {
     /// Logging some work (that is not a step) as progress.
     public func doing<T>(withID id: String? = nil, _ description: String, work: () throws -> T) rethrows -> T? {
         effectuationStack.append(.describedPart(description: description))
-        self.log(Message(id: id, type: .Progress, fact: [.en: "DOING \(description)"]))
+        self.log(Message(id: id, type: .Progress, fact: [.en: "START DOING \(description)"]))
         let result = try work()
         self.log(Message(id: id, type: .Progress, fact: [.en: "DONE DOING \(description)"]))
         effectuationStack.removeLast()
@@ -520,7 +520,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> OPTIONAL PART \"\(partName)\""],
+                    fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
@@ -557,7 +557,7 @@ public class Execution {
                     type: .Progress,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
-                    fact: [.en: ">> DISPENSABLE PART \"\(partName)\""],
+                    fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
                     effectuationStack: execution.effectuationStack
                 ))
