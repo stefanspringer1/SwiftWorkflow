@@ -406,9 +406,9 @@ public class Execution {
     /// Logging some work (that is not a step) as progress.
     public func doing<T>(withID id: String? = nil, _ description: String, work: () throws -> T) rethrows -> T? {
         effectuationStack.append(.describedPart(description: description))
-        self.log(Message(id: id, type: .Progress, fact: [.en: "DOING \"\(description)\""]))
+        self.log(Message(id: id, type: .Progress, fact: [.en: "DOING \(description)"]))
         let result = try work()
-        self.log(Message(id: id, type: .Progress, fact: [.en: "DONE DOING \"\(description)\""]))
+        self.log(Message(id: id, type: .Progress, fact: [.en: "DONE DOING \(description)"]))
         effectuationStack.removeLast()
         return result
     }
