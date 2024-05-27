@@ -404,11 +404,11 @@ public class Execution {
     }
     
     /// Logging some work (that is not a step) as progress.
-    public func doing<T>(_ description: String, work: () throws -> T) rethrows -> T? {
+    public func doing<T>(withID id: String? = nil, _ description: String, work: () throws -> T) rethrows -> T? {
         effectuationStack.append(.describedPart(description: description))
-        self.log(Message(id: "DOING \"\(description)\"", type: .Progress, fact: [.en: "STARTING \"\(description)\""]))
+        self.log(Message(id: id, type: .Progress, fact: [.en: "DOING \"\(description)\""]))
         let result = try work()
-        self.log(Message(id: "DONE DOING \"\(description)\"", type: .Progress, fact: [.en: "DONE \"\(description)\""]))
+        self.log(Message(id: id, type: .Progress, fact: [.en: "DONE DOING \"\(description)\""]))
         effectuationStack.removeLast()
         return result
     }
