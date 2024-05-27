@@ -400,10 +400,10 @@ public class Execution {
     }
     
     /// Logging some work (that is not a step) as progress.
-    public func progress<T>(withID id: String, withDescription description: String? = nil, work: () throws -> T) rethrows -> T? {
-        self.log(Message(id: id, type: .Progress, fact: [.en: "STARTING \(id)\(description?.prepending(" (").appending(")") ?? "")"]))
+    public func progress<T>(_ description: String, work: () throws -> T) rethrows -> T? {
+        self.log(Message(id: "progress: starting \"\(description)\"", type: .Progress, fact: [.en: "STARTING \"\(description)\""]))
         let result = try work()
-        self.log(Message(id: id, type: .Progress, fact: [.en: "DONE \(id)\(description?.prepending(" (").appending(")") ?? "")"]))
+        self.log(Message(id: "progress: done \"\(description)\"", type: .Progress, fact: [.en: "DONE \"\(description)\""]))
         return result
     }
     
