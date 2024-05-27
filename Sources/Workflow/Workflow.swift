@@ -399,6 +399,14 @@ public class Execution {
         return false
     }
     
+    /// Logging some work (that is not a step) as progress.
+    public func progress<T>(withID id: String, withDescription description: String? = nil, work: () throws -> T) rethrows -> T? {
+        self.log(Message(id: id, type: .Progress, fact: [.en: "STARTING \(id)\(description?.prepending(" (").appending(")") ?? "")"]))
+        let result = try work()
+        self.log(Message(id: id, type: .Progress, fact: [.en: "DONE \(id)\(description?.prepending(" (").appending(")") ?? "")"]))
+        return result
+    }
+    
     private func after(step: StepID, secondsElapsed: Double) {
         logger.log(LoggingEvent(
             type: .Progress,
