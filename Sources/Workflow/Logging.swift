@@ -238,6 +238,10 @@ public struct Message {
         return Message(id: id, type: newType, fact: fact, solution: solution)
     }
     
+    public func Messagefilling(withArguments arguments: [String]?) -> Message {
+        return Message(id: id, type: type, fact: fact.filling(withArguments: arguments), solution: solution?.filling(withArguments: arguments))
+   }
+    
 }
 
 /// A collection of messages as a map from the message ID to the message.
