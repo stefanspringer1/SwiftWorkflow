@@ -351,6 +351,7 @@ public class Execution {
         if activatedOptions?.contains(partName) != true || dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
@@ -361,6 +362,7 @@ public class Execution {
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
@@ -370,6 +372,7 @@ public class Execution {
             result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
@@ -388,6 +391,7 @@ public class Execution {
         if dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
@@ -398,6 +402,7 @@ public class Execution {
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
@@ -407,6 +412,7 @@ public class Execution {
             result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
@@ -431,6 +437,7 @@ public class Execution {
             effectuationStack.append(.step(step: step))
             logger.log(LoggingEvent(
                 type: .Progress,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> STEP \(step.description)"],
@@ -458,6 +465,7 @@ public class Execution {
     private func after(step: StepID, secondsElapsed: Double) {
         logger.log(LoggingEvent(
             type: .Progress,
+            level: effectuationStack.count,
             processID: processID,
             applicationName: applicationName,
             fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(step) (duration: \(secondsElapsed) seconds)" ],
@@ -551,6 +559,7 @@ public class Execution {
             if execution.activatedOptions?.contains(partName) != true || execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
@@ -561,6 +570,7 @@ public class Execution {
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
@@ -570,6 +580,7 @@ public class Execution {
                 result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
@@ -588,6 +599,7 @@ public class Execution {
             if execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
@@ -598,6 +610,7 @@ public class Execution {
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
@@ -607,6 +620,7 @@ public class Execution {
                 result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
+                    level: execution.effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
@@ -672,6 +686,8 @@ public class Execution {
     
     /// Log a full `LoggingEvent` instance.
     public func log(event: LoggingEvent, addCrashInfo: Bool = false) -> () {
+        var event = event
+        event.level = effectuationStack.count
         if addCrashInfo || alwaysAddCrashInfo {
             self.crashLogger?.log(event)
         }
