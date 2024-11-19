@@ -124,14 +124,15 @@ open class WorstMessageTypeHolder {
 /// - keeps global information for logging
 public class Execution {
     
-    public let applicationName: String
+    public var applicationName: String
     
     private var executedSteps = Set<StepID>()
     
     var effectuationStack: [Effectuation]
     
-    let logger: Logger
-    let crashLogger: Logger?
+    public var logger: Logger
+    public var crashLogger: Logger?
+    
     var processID: String?
     var itemInfo: String? = nil
     
@@ -181,7 +182,7 @@ public class Execution {
     }
     
     private init (
-        logger: Logger,
+        logger: Logger = PrintLogger(),
         worstMessageTypeHolder: WorstMessageTypeHolder? = nil,
         crashLogger: Logger? = nil,
         processID: String? = nil,
@@ -213,7 +214,7 @@ public class Execution {
     }
     
     public convenience init (
-        logger: Logger,
+        logger: Logger = PrintLogger(),
         crashLogger: Logger? = nil,
         processID: String? = nil,
         applicationName: String,
