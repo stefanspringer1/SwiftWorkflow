@@ -650,6 +650,7 @@ public class Execution {
             event: LoggingEvent(
                 messageID: message.id,
                 type: message.type,
+                level: effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: message.fact.filling(withArguments: arguments),
