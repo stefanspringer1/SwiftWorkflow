@@ -243,7 +243,7 @@ public class Execution {
     
     public convenience init (
         processID: String? = nil,
-        applicationName: String,
+        applicationName: String = "(unkown application)",
         logger: Logger = PrintLogger(),
         crashLogger: Logger? = nil,
         itemInfo: String? = nil,
