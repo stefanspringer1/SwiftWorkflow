@@ -56,6 +56,9 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     /// The original message type.
     public var originalType: MessageType?
 
+    /// The execution level.
+    public var level: Int?
+    
     /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
     
@@ -87,6 +90,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
             messageID: self.messageID,
             type: newType,
             originalType: self.type,
+            level: self.level,
             processID: self.processID,
             applicationName: self.applicationName,
             fact: self.fact,
@@ -102,6 +106,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         messageID: MessageID? = nil,
         type: MessageType,
         originalType: MessageType? = nil,
+        level: Int? = nil,
         processID: String? = nil,
         applicationName: String,
         fact: LocalizingMessage,
@@ -114,6 +119,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         self.messageID = messageID
         self.type = type
         self.originalType = originalType
+        self.level = level
         self.processID = processID
         self.applicationName = applicationName
         self.fact = fact
