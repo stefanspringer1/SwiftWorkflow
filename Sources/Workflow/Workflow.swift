@@ -131,7 +131,25 @@ public class Execution {
     var effectuationStack: [Effectuation]
     
     public var logger: Logger
+    
     public var crashLogger: Logger?
+    
+    public func setting(
+        applicationName: String? = nil,
+        logger: Logger? = nil,
+        crashLogger: Logger? = nil
+    ) -> Self {
+        if let applicationName {
+            self.applicationName = applicationName
+        }
+        if let logger {
+            self.logger = logger
+        }
+        if let crashLogger {
+            self.crashLogger = crashLogger
+        }
+        return self
+    }
     
     var processID: String?
     var itemInfo: String? = nil
