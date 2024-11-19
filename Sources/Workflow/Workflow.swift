@@ -258,8 +258,21 @@ public class Execution {
     var forceValues = [Bool]()
     var appeaseTypes = [MessageType]()
     
+    let semaphoreForPause = DispatchSemaphore(value: 1)
+    
+    /// Pausing the execution (without effect for async execution).
+    public func pause() {
+        semaphoreForPause.wait()
+    }
+    
+    /// Proceeding a paused execution.
+    public func proceed() {
+        semaphoreForPause.signal()
+    }
+    
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
+        semaphoreForPause.wait(); semaphoreForPause.signal() // wait if the execution is paused
         forceValues.append(force)
         if let appeaseType {
             appeaseTypes.append(appeaseType)
@@ -447,6 +460,7 @@ public class Execution {
         
         /// Force all contained work to be executed, even if already executed before.
         fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () async throws -> T) async rethrows -> T {
+            // (no waiting in a paused execution for async execution)
             execution.forceValues.append(force)
             if let appeaseType {
                 execution.appeaseTypes.append(appeaseType)
