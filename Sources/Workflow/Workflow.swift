@@ -196,15 +196,25 @@ public class Execution {
     }
     
     public var parallel: Execution {
-        Execution(logger: logger, worstMessageTypeHolder: worstMessageTypeHolder, crashLogger: crashLogger, processID: processID, applicationName: applicationName, itemInfo: itemInfo, alwaysAddCrashInfo: alwaysAddCrashInfo, debug: debug, effectuationStack: effectuationStack)
+        Execution(
+            processID: processID,
+            applicationName: applicationName,
+            logger: logger,
+            worstMessageTypeHolder: worstMessageTypeHolder,
+            crashLogger: crashLogger,
+            itemInfo: itemInfo,
+            alwaysAddCrashInfo: alwaysAddCrashInfo,
+            debug: debug,
+            effectuationStack: effectuationStack
+        )
     }
     
     private init (
+        processID: String? = nil,
+        applicationName: String,
         logger: Logger = PrintLogger(),
         worstMessageTypeHolder: WorstMessageTypeHolder? = nil,
         crashLogger: Logger? = nil,
-        processID: String? = nil,
-        applicationName: String,
         itemInfo: String? = nil,
         showSteps: Bool = false,
         alwaysAddCrashInfo: Bool = false,
@@ -232,10 +242,10 @@ public class Execution {
     }
     
     public convenience init (
-        logger: Logger = PrintLogger(),
-        crashLogger: Logger? = nil,
         processID: String? = nil,
         applicationName: String,
+        logger: Logger = PrintLogger(),
+        crashLogger: Logger? = nil,
         itemInfo: String? = nil,
         showSteps: Bool = false,
         alwaysAddCrashInfo: Bool = false,
@@ -246,10 +256,10 @@ public class Execution {
         dispensingWith dispensedWith: Set<String>? = nil
     ) {
         self.init (
-            logger: logger,
-            crashLogger: crashLogger,
             processID: processID,
             applicationName: applicationName,
+            logger: logger,
+            crashLogger: crashLogger,
             itemInfo: itemInfo,
             showSteps: showSteps,
             alwaysAddCrashInfo: alwaysAddCrashInfo,

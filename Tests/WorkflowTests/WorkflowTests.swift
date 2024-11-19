@@ -14,7 +14,7 @@ final class WorkflowTests: XCTestCase {
         )
         
         let logger = PrintLogger()
-        let execution = Execution(logger: logger, applicationName: "test")
+        let execution = Execution(applicationName: "test", logger: logger)
         execution.log(success)
         print(execution.worstMessageType)
     }
