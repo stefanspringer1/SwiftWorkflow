@@ -15,7 +15,7 @@ extension LoggingEvent {
         return LoggingEvent(
             messageID: messageID,
             type: type,
-            level: level,
+            executionLevel: executionLevel,
             processID: processID,
             applicationName: applicationName,
             fact: fact.prefixed(with: prefixText),
@@ -58,7 +58,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     public var originalType: MessageType?
 
     /// The execution level.
-    public var level: Int?
+    public var executionLevel: Int?
     
     /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
@@ -91,7 +91,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
             messageID: self.messageID,
             type: newType,
             originalType: self.type,
-            level: self.level,
+            executionLevel: self.executionLevel,
             processID: self.processID,
             applicationName: self.applicationName,
             fact: self.fact,
@@ -107,7 +107,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         messageID: MessageID? = nil,
         type: MessageType,
         originalType: MessageType? = nil,
-        level: Int? = nil,
+        executionLevel: Int? = nil,
         processID: String? = nil,
         applicationName: String,
         fact: LocalizingMessage,
@@ -120,7 +120,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         self.messageID = messageID
         self.type = type
         self.originalType = originalType
-        self.level = level
+        self.executionLevel = executionLevel
         self.processID = processID
         self.applicationName = applicationName
         self.fact = fact
@@ -153,7 +153,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         case messageID
         case type
         case originalType
-        case level
+        case executionLevel
         case processID
         case applicationName
         case fact
@@ -198,7 +198,7 @@ extension LoggingEvent: Decodable {
         self.messageID = try values.decode(String?.self, forKey: .messageID)
         self.type = try values.decode(MessageType.self, forKey: .type)
         self.originalType = try values.decode(MessageType.self, forKey: .originalType)
-        self.level = try values.decode(Int.self, forKey: .level)
+        self.executionLevel = try values.decode(Int.self, forKey: .executionLevel)
         self.processID = try values.decode(String.self, forKey: .processID)
         self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
