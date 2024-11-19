@@ -15,6 +15,7 @@ extension LoggingEvent {
         return LoggingEvent(
             messageID: messageID,
             type: type,
+            level: level,
             processID: processID,
             applicationName: applicationName,
             fact: fact.prefixed(with: prefixText),
@@ -137,7 +138,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     
     /// A short textual representation of the logging event.
     public var description: String {
-        return "{\(self.type)}\(self.originalType != nil ? " <- \(self.originalType!)" : "")\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
+        return "{\(self.type)}\(self.originalType != nil ? " <- \(self.originalType!)" : "")\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "") + " L:\(self.level?.description ?? "–")"
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
@@ -152,6 +153,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         case messageID
         case type
         case originalType
+        case level
         case processID
         case applicationName
         case fact
@@ -196,6 +198,7 @@ extension LoggingEvent: Decodable {
         self.messageID = try values.decode(String?.self, forKey: .messageID)
         self.type = try values.decode(MessageType.self, forKey: .type)
         self.originalType = try values.decode(MessageType.self, forKey: .originalType)
+        self.level = try values.decode(Int.self, forKey: .level)
         self.processID = try values.decode(String.self, forKey: .processID)
         self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
