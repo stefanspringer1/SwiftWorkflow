@@ -135,9 +135,9 @@ public class Execution {
     public var crashLogger: Logger?
     
     public func setting(
-        applicationName: String? = nil,
         logger: Logger? = nil,
-        crashLogger: Logger? = nil
+        crashLogger: Logger? = nil,
+        applicationName: String? = nil
     ) -> Self {
         if let applicationName {
             self.applicationName = applicationName
