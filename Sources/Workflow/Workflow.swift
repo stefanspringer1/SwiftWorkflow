@@ -209,7 +209,7 @@ public class Execution {
         )
     }
     
-    let waitNotPauseFunction: (() -> ())?
+    let waitNotPausedFunction: (() -> ())?
     
     private init (
         processID: String? = nil,
@@ -226,7 +226,7 @@ public class Execution {
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
         dispensingWith dispensedWith: Set<String>? = nil,
-        waitNotPauseFunction: (() -> ())? = nil
+        waitNotPausedFunction: (() -> ())? = nil
     ) {
         self.effectuationStack = effectuationStack
         self.logger = logger
@@ -241,7 +241,7 @@ public class Execution {
         self._afterStepOperation = afterStepOperation
         self.activatedOptions = activatedOptions
         self.dispensedWith = dispensedWith
-        self.waitNotPauseFunction = waitNotPauseFunction
+        self.waitNotPausedFunction = waitNotPausedFunction
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -258,7 +258,7 @@ public class Execution {
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
         dispensingWith dispensedWith: Set<String>? = nil,
-        waitNotPauseFunction: (() -> ())? = nil
+        waitNotPausedFunction: (() -> ())? = nil
     ) {
         self.init (
             processID: processID,
@@ -274,7 +274,7 @@ public class Execution {
             afterStepOperation: afterStepOperation,
             withOptions: activatedOptions,
             dispensingWith: dispensedWith,
-            waitNotPauseFunction: waitNotPauseFunction
+            waitNotPausedFunction: waitNotPausedFunction
         )
     }
     
@@ -311,7 +311,7 @@ public class Execution {
             semaphoreForPause.wait(); semaphoreForPause.signal()
         }
         
-        (waitNotPauseFunction ?? waitNotPaused)() // wait if the execution is paused
+        (waitNotPausedFunction ?? waitNotPaused)() // wait if the execution is paused
     }
     
     /// Force all contained work to be executed, even if already executed before.
