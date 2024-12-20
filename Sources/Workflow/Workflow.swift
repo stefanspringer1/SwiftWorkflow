@@ -247,7 +247,6 @@ public class Execution {
         self.activatedOptions = activatedOptions
         self.dispensedWith = dispensedWith
         self.waitNotPausedFunction = waitNotPausedFunction
-        print("??? \(waitNotPausedFunction)")
         _async = AsyncEffectuation(execution: self)
     }
     
