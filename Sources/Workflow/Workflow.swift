@@ -214,7 +214,7 @@ public class Execution {
         )
     }
     
-    var waitNotPausedFunction: (() -> ())?
+    public var waitNotPausedFunction: (() -> ())?
     
     private init (
         processID: String? = nil,
