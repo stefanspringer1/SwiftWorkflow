@@ -312,8 +312,6 @@ public class Execution {
     
     func waitNotPaused() {
         
-        print("waitNotPaused(): \(waitNotPausedFunction)")
-        
         func waitNotPaused() {
             semaphoreForPause.wait(); semaphoreForPause.signal()
         }
