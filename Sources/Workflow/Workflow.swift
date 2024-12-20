@@ -257,7 +257,8 @@ public class Execution {
         beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? = nil,
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
-        dispensingWith dispensedWith: Set<String>? = nil
+        dispensingWith dispensedWith: Set<String>? = nil,
+        waitNotPauseFunction: (() -> ())? = nil
     ) {
         self.init (
             processID: processID,
@@ -272,7 +273,8 @@ public class Execution {
             beforeStepOperation: beforeStepOperation,
             afterStepOperation: afterStepOperation,
             withOptions: activatedOptions,
-            dispensingWith: dispensedWith
+            dispensingWith: dispensedWith,
+            waitNotPauseFunction: waitNotPauseFunction
         )
     }
     
