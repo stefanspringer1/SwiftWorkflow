@@ -304,6 +304,11 @@ public class Execution {
     }
     
     func waitNotPaused() {
+        
+        func waitNotPaused() {
+            semaphoreForPause.wait(); semaphoreForPause.signal()
+        }
+        
         (waitNotPauseFunction ?? waitNotPaused)() // wait if the execution is paused
     }
     
