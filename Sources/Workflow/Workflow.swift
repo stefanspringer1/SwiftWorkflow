@@ -137,7 +137,8 @@ public class Execution {
     public func setting(
         logger: Logger? = nil,
         crashLogger: Logger? = nil,
-        applicationName: String? = nil
+        applicationName: String? = nil,
+        waitNotPausedFunction: (() -> ())? = nil
     ) -> Self {
         if let applicationName {
             self.applicationName = applicationName
@@ -147,6 +148,9 @@ public class Execution {
         }
         if let crashLogger {
             self.crashLogger = crashLogger
+        }
+        if let waitNotPausedFunction {
+            self.waitNotPausedFunction = waitNotPausedFunction
         }
         return self
     }
@@ -205,11 +209,12 @@ public class Execution {
             itemInfo: itemInfo,
             alwaysAddCrashInfo: alwaysAddCrashInfo,
             debug: debug,
-            effectuationStack: effectuationStack
+            effectuationStack: effectuationStack,
+            waitNotPausedFunction: waitNotPausedFunction
         )
     }
     
-    let waitNotPausedFunction: (() -> ())?
+    var waitNotPausedFunction: (() -> ())?
     
     private init (
         processID: String? = nil,
@@ -242,6 +247,7 @@ public class Execution {
         self.activatedOptions = activatedOptions
         self.dispensedWith = dispensedWith
         self.waitNotPausedFunction = waitNotPausedFunction
+        print("??? \(waitNotPausedFunction)")
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -306,6 +312,8 @@ public class Execution {
     }
     
     func waitNotPaused() {
+        
+        print("waitNotPaused(): \(waitNotPausedFunction)")
         
         func waitNotPaused() {
             semaphoreForPause.wait(); semaphoreForPause.signal()
