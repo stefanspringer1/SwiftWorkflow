@@ -209,6 +209,8 @@ public class Execution {
         )
     }
     
+    let waitNotPauseFunction: (() -> ())?
+    
     private init (
         processID: String? = nil,
         applicationName: String,
@@ -223,7 +225,8 @@ public class Execution {
         beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? = nil,
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
-        dispensingWith dispensedWith: Set<String>? = nil
+        dispensingWith dispensedWith: Set<String>? = nil,
+        waitNotPauseFunction: (() -> ())? = nil
     ) {
         self.effectuationStack = effectuationStack
         self.logger = logger
@@ -238,6 +241,7 @@ public class Execution {
         self._afterStepOperation = afterStepOperation
         self.activatedOptions = activatedOptions
         self.dispensedWith = dispensedWith
+        self.waitNotPauseFunction = waitNotPauseFunction
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -299,9 +303,13 @@ public class Execution {
         semaphoreForPause.signal()
     }
     
+    func waitNotPaused() {
+        (waitNotPauseFunction ?? waitNotPaused)() // wait if the execution is paused
+    }
+    
     /// Force all contained work to be executed, even if already executed before.
     fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
-        semaphoreForPause.wait(); semaphoreForPause.signal() // wait if the execution is paused
+        waitNotPaused() // wait if the execution is paused
         forceValues.append(force)
         if let appeaseType {
             appeaseTypes.append(appeaseType)
