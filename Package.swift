@@ -16,6 +16,9 @@ let package = Package(
         .library(
             name: "Workflow",
             targets: ["Workflow"]),
+        .executable(
+            name: "StepsFromLog",
+            targets: ["StepsFromLog"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -35,6 +38,14 @@ let package = Package(
         ),
         .testTarget(
             name: "WorkflowTests",
-            dependencies: ["Workflow"]),
+            dependencies: ["Workflow"]
+        ),
+        .executableTarget(
+            name: "StepsFromLog",
+            path: "Sources/StepsFromLog",
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+            ]
+        ),
     ]
 )

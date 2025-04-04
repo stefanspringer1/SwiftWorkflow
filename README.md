@@ -67,6 +67,14 @@ let package = Package(
 
 [^3]: But better do not use such a `platforms` entry when building a package that has other parts that could be independendly used on older macOS versions. On Linux or Windows, you just have to make sure to use an according Swift version.
 
+## Step list tool
+
+This package contains the executable target `StepsFromLog` which lists the step called from a log with a log level of at least `Progress`.
+
+Deliver the path to the log file as an argument, the result will be printed to standard output.
+
+The step description is a "pretty print" output made from the name of the step function.
+
 ## Related packages
 
 When you need to log via an existing `LogHandler` according to [swift-log](https://github.com/apple/swift-log), you might use the `SwiftLogger` wrapper from [SwiftLoggingBindingForWorkflow](https://github.com/stefanspringer1/SwiftLoggingBindingForWorkflow).
