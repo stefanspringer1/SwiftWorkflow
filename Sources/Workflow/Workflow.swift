@@ -665,7 +665,7 @@ public class Execution {
         itemPositionInfo: String? = nil,
         addCrashInfo: Bool = false,
         withArguments arguments: [String]?
-    ) -> () {
+    ) {
         log(
             event: LoggingEvent(
                 messageID: message.id,
@@ -681,6 +681,34 @@ public class Execution {
             ),
             addCrashInfo: addCrashInfo
         )
+    }
+    
+    /// Log a `Message` instance. A full `LoggingEvent` instance will be created
+    /// that contains the message. Return a simple, English based textual presentation.
+    public func logAndUseInfo(
+        _ message: Message,
+        itemPositionInfo: String? = nil,
+        addCrashInfo: Bool = false,
+        withArguments arguments: [String]?
+    ) -> String {
+        let fact = message.fact.filling(withArguments: arguments)
+        let solution = message.solution?.filling(withArguments: arguments)
+        log(
+            event: LoggingEvent(
+                messageID: message.id,
+                type: message.type,
+                executionLevel: effectuationStack.count,
+                processID: processID,
+                applicationName: applicationName,
+                fact: fact,
+                solution: solution,
+                itemInfo: itemInfo,
+                itemPositionInfo: itemPositionInfo,
+                effectuationStack: effectuationStack
+            ),
+            addCrashInfo: addCrashInfo
+        )
+        return fact[.en]?.appending(solution?[.en]?.prepending(" → ")) ?? "(missing English text)"
     }
     
     public func log(collected: [SimpleLoggingEvent], addCrashInfo: Bool = false) async {
