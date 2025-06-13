@@ -116,7 +116,7 @@ public extension Logger {
     func log(
         processID: String? = nil,
         applicationName: String,
-        executionLevel: Int? = nil,
+        executionLevel: Int = 0,
         _ type: MessageType,
         _ fact: LocalizingMessage,
         solution: LocalizingMessage? = nil,

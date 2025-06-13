@@ -58,7 +58,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     public var originalType: MessageType?
 
     /// The execution level.
-    public var executionLevel: Int?
+    public var executionLevel: Int
     
     /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
@@ -107,7 +107,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         messageID: MessageID? = nil,
         type: MessageType,
         originalType: MessageType? = nil,
-        executionLevel: Int? = nil,
+        executionLevel: Int = 0,
         processID: String? = nil,
         applicationName: String,
         fact: LocalizingMessage,
@@ -138,7 +138,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
     
     /// A short textual representation of the logging event.
     public var description: String {
-        return "{\(self.type)}@\(executionLevel?.description ?? "none")\(self.originalType != nil ? " <- \(self.originalType!)" : "")\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
+        return "{\(self.type)}@\(executionLevel.description)\(self.originalType != nil ? " <- \(self.originalType!)" : "")\(self.messageID != nil ? " [\(self.messageID ?? "")]": ""): \(fact[.en]?.trimming() ?? "?")\(solution != nil ? " – solution: \(solution?[.en]?.trimming() ?? "?")" : "")" + (self.itemPositionInfo != nil ? " @ \(self.itemPositionInfo!)" : "")
     }
     
     /// A longer textual representation of the logging event used in the actual logging.
