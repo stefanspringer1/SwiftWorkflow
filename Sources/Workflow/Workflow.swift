@@ -307,7 +307,13 @@ public class Execution {
                 operationCount -= 1
             }
         }
+        if let step {
+            _effectuationStack.append(.step(step: step))
+        }
         let result = try work()
+        if step != nil {
+            _effectuationStack.removeLast()
+        }
         if !force, let _afterStepOperation, let step {
             operationCount += 1
             if !_afterStepOperation(operationCount, step) {
@@ -342,7 +348,6 @@ public class Execution {
     /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
     public func optional<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        _effectuationStack.append(.optionalPart(name: partName))
         if activatedOptions?.contains(partName) != true || dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -364,7 +369,9 @@ public class Execution {
                 itemInfo: itemInfo,
                 effectuationStack: _effectuationStack
             ))
+            _effectuationStack.append(.optionalPart(name: partName))
             result = try execute(step: nil, force: false, work: work)
+            _effectuationStack.removeLast()
             logger.log(LoggingEvent(
                 type: .Progress,
                 executionLevel: _effectuationStack.count,
@@ -375,14 +382,12 @@ public class Execution {
                 effectuationStack: _effectuationStack
             ))
         }
-        _effectuationStack.removeLast()
         return result
     }
     
     /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
     public func dispensable<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        _effectuationStack.append(.dispensablePart(name: partName))
         if dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
@@ -404,7 +409,9 @@ public class Execution {
                 itemInfo: itemInfo,
                 effectuationStack: _effectuationStack
             ))
+            _effectuationStack.append(.dispensablePart(name: partName))
             result = try execute(step: nil, force: false, work: work)
+            _effectuationStack.removeLast()
             logger.log(LoggingEvent(
                 type: .Progress,
                 executionLevel: _effectuationStack.count,
@@ -415,7 +422,6 @@ public class Execution {
                 effectuationStack: _effectuationStack
             ))
         }
-        _effectuationStack.removeLast()
         return result
     }
     
@@ -429,7 +435,6 @@ public class Execution {
             self.log(executionMessages.skippingStep, step.description)
         }
         else if !executedSteps.contains(step) || forceValues.last == true {
-            _effectuationStack.append(.step(step: step))
             logger.log(LoggingEvent(
                 type: .Progress,
                 executionLevel: _effectuationStack.count,
@@ -467,7 +472,6 @@ public class Execution {
             itemInfo: itemInfo,
             effectuationStack: _effectuationStack
         ))
-        _effectuationStack.removeLast()
     }
     
     /// Executes only if the step did not execute before.
@@ -503,7 +507,13 @@ public class Execution {
                     execution.operationCount -= 1
                 }
             }
+            if let step {
+                execution._effectuationStack.append(.step(step: step))
+            }
             let result = try await work()
+            if step != nil {
+                execution._effectuationStack.removeLast()
+            }
             if !force, let _afterStepOperation = execution._afterStepOperation, let step {
                 execution.operationCount += 1
                 if !_afterStepOperation(execution.operationCount, step) {
@@ -549,7 +559,7 @@ public class Execution {
         
         /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
         public func optional<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
-            execution._effectuationStack.append(.optionalPart(name: partName))
+            
             let result: T?
             if execution.activatedOptions?.contains(partName) != true || execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
@@ -572,7 +582,9 @@ public class Execution {
                     itemInfo: execution.itemInfo,
                     effectuationStack: execution._effectuationStack
                 ))
+                execution._effectuationStack.append(.optionalPart(name: partName))
                 result = try await execute(step: nil, force: false, work: work)
+                execution._effectuationStack.removeLast()
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     executionLevel: execution._effectuationStack.count,
@@ -583,14 +595,12 @@ public class Execution {
                     effectuationStack: execution._effectuationStack
                 ))
             }
-            execution._effectuationStack.removeLast()
             return result
         }
         
         /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
         public func dispensable<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
             let result: T?
-            execution._effectuationStack.append(.dispensablePart(name: partName))
             if execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
@@ -612,7 +622,9 @@ public class Execution {
                     itemInfo: execution.itemInfo,
                     effectuationStack: execution._effectuationStack
                 ))
+                execution._effectuationStack.append(.dispensablePart(name: partName))
                 result = try await execute(step: nil, force: false, work: work)
+                execution._effectuationStack.removeLast()
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
                     executionLevel: execution._effectuationStack.count,
@@ -623,7 +635,6 @@ public class Execution {
                     effectuationStack: execution._effectuationStack
                 ))
             }
-            execution._effectuationStack.removeLast()
             return result
         }
         
