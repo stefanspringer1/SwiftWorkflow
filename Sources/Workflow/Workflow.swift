@@ -222,7 +222,7 @@ public class Execution {
     
     public var waitNotPausedFunction: (() -> ())?
     
-    private init(
+    public init(
         processID: String? = nil,
         applicationName: String,
         logger: Logger = PrintLogger(),
@@ -256,41 +256,6 @@ public class Execution {
         self.waitNotPausedFunction = waitNotPausedFunction
         self.logFileInfo = logFileInfo
         _async = AsyncEffectuation(execution: self)
-    }
-    
-    public convenience init (
-        processID: String? = nil,
-        applicationName: String = "(unkown application)",
-        logger: Logger = PrintLogger(),
-        crashLogger: Logger? = nil,
-        itemInfo: String? = nil,
-        showSteps: Bool = false,
-        alwaysAddCrashInfo: Bool = false,
-        debug: Bool = false,
-        beforeStepOperation: ((OperationCount,StepID) -> AugmentOperationCount)? = nil,
-        afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
-        withOptions activatedOptions: Set<String>? = nil,
-        dispensingWith dispensedWith: Set<String>? = nil,
-        waitNotPausedFunction: (() -> ())? = nil,
-        logFileInfo: URL? = nil
-    ) {
-        self.init (
-            processID: processID,
-            applicationName: applicationName,
-            logger: logger,
-            crashLogger: crashLogger,
-            itemInfo: itemInfo,
-            showSteps: showSteps,
-            alwaysAddCrashInfo: alwaysAddCrashInfo,
-            debug: debug,
-            effectuationStack: [Effectuation](),
-            beforeStepOperation: beforeStepOperation,
-            afterStepOperation: afterStepOperation,
-            withOptions: activatedOptions,
-            dispensingWith: dispensedWith,
-            waitNotPausedFunction: waitNotPausedFunction,
-            logFileInfo: logFileInfo
-        )
     }
     
     private var force = false
