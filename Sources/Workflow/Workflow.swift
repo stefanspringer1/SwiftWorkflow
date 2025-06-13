@@ -224,7 +224,7 @@ public class Execution {
     
     public init(
         processID: String? = nil,
-        applicationName: String,
+        applicationName: String = "(unkown application)",
         logger: Logger = PrintLogger(),
         worstMessageTypeHolder: WorstMessageTypeHolder? = nil,
         crashLogger: Logger? = nil,
