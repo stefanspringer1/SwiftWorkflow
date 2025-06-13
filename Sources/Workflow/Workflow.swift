@@ -134,6 +134,8 @@ public class Execution {
     
     public var crashLogger: Logger?
     
+    public var logFileInfo: URL? = nil // URL for log file, just as an info
+    
     public func setting(
         logger: Logger? = nil,
         crashLogger: Logger? = nil,
@@ -216,7 +218,7 @@ public class Execution {
     
     public var waitNotPausedFunction: (() -> ())?
     
-    private init (
+    private init(
         processID: String? = nil,
         applicationName: String,
         logger: Logger = PrintLogger(),
@@ -231,7 +233,8 @@ public class Execution {
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
         dispensingWith dispensedWith: Set<String>? = nil,
-        waitNotPausedFunction: (() -> ())? = nil
+        waitNotPausedFunction: (() -> ())? = nil,
+        logFileInfo: URL? = nil
     ) {
         self.effectuationStack = effectuationStack
         self.logger = logger
@@ -247,6 +250,7 @@ public class Execution {
         self.activatedOptions = activatedOptions
         self.dispensedWith = dispensedWith
         self.waitNotPausedFunction = waitNotPausedFunction
+        self.logFileInfo = logFileInfo
         _async = AsyncEffectuation(execution: self)
     }
     
@@ -263,7 +267,8 @@ public class Execution {
         afterStepOperation: ((OperationCount,StepID?) -> AugmentOperationCount)? = nil,
         withOptions activatedOptions: Set<String>? = nil,
         dispensingWith dispensedWith: Set<String>? = nil,
-        waitNotPausedFunction: (() -> ())? = nil
+        waitNotPausedFunction: (() -> ())? = nil,
+        logFileInfo: URL? = nil
     ) {
         self.init (
             processID: processID,
@@ -279,7 +284,8 @@ public class Execution {
             afterStepOperation: afterStepOperation,
             withOptions: activatedOptions,
             dispensingWith: dispensedWith,
-            waitNotPausedFunction: waitNotPausedFunction
+            waitNotPausedFunction: waitNotPausedFunction,
+            logFileInfo: logFileInfo
         )
     }
     
