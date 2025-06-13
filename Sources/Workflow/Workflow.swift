@@ -128,7 +128,11 @@ public class Execution {
     
     private var executedSteps = Set<StepID>()
     
-    var effectuationStack: [Effectuation]
+    var _effectuationStack: [Effectuation]
+    
+    public var effectuationStack: [Effectuation] {
+        _effectuationStack
+    }
     
     public var logger: Logger
     
@@ -211,7 +215,7 @@ public class Execution {
             itemInfo: itemInfo,
             alwaysAddCrashInfo: alwaysAddCrashInfo,
             debug: debug,
-            effectuationStack: effectuationStack,
+            effectuationStack: _effectuationStack,
             waitNotPausedFunction: waitNotPausedFunction
         )
     }
@@ -236,7 +240,7 @@ public class Execution {
         waitNotPausedFunction: (() -> ())? = nil,
         logFileInfo: URL? = nil
     ) {
-        self.effectuationStack = effectuationStack
+        self._effectuationStack = effectuationStack
         self.logger = logger
         self.worstMessageTypeHolder = worstMessageTypeHolder ?? WorstMessageTypeHolder()
         self.crashLogger = crashLogger
@@ -373,80 +377,80 @@ public class Execution {
     /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
     public func optional<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        effectuationStack.append(.optionalPart(name: partName))
+        _effectuationStack.append(.optionalPart(name: partName))
         if activatedOptions?.contains(partName) != true || dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
             result = nil
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
             result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
         }
-        effectuationStack.removeLast()
+        _effectuationStack.removeLast()
         return result
     }
     
     /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
     public func dispensable<T>(named partName: String, work: () throws -> T) rethrows -> T? {
         let result: T?
-        effectuationStack.append(.dispensablePart(name: partName))
+        _effectuationStack.append(.dispensablePart(name: partName))
         if dispensedWith?.contains(partName) == true {
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
             result = nil
         } else {
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
             result = try execute(step: nil, force: false, work: work)
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
         }
-        effectuationStack.removeLast()
+        _effectuationStack.removeLast()
         return result
     }
     
@@ -460,15 +464,15 @@ public class Execution {
             self.log(executionMessages.skippingStep, step.description)
         }
         else if !executedSteps.contains(step) || forceValues.last == true {
-            effectuationStack.append(.step(step: step))
+            _effectuationStack.append(.step(step: step))
             logger.log(LoggingEvent(
                 type: .Progress,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: [.en: ">> STEP \(step.description)"],
                 itemInfo: itemInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ))
             executedSteps.insert(step)
             return true
@@ -480,25 +484,25 @@ public class Execution {
     
     /// Logging some work (that is not a step) as progress.
     public func doing<T>(withID id: String? = nil, _ description: String, work: () throws -> T) rethrows -> T? {
-        effectuationStack.append(.describedPart(description: description))
+        _effectuationStack.append(.describedPart(description: description))
         self.log(Message(id: id, type: .Progress, fact: [.en: "START DOING \(description)"]))
         let result = try work()
         self.log(Message(id: id, type: .Progress, fact: [.en: "DONE DOING \(description)"]))
-        effectuationStack.removeLast()
+        _effectuationStack.removeLast()
         return result
     }
     
     private func after(step: StepID, secondsElapsed: Double) {
         logger.log(LoggingEvent(
             type: .Progress,
-            executionLevel: effectuationStack.count,
+            executionLevel: _effectuationStack.count,
             processID: processID,
             applicationName: applicationName,
             fact: [.en: "<< \(stopped ? "ABORDED" : "DONE") STEP \(step) (duration: \(secondsElapsed) seconds)" ],
             itemInfo: itemInfo,
-            effectuationStack: effectuationStack
+            effectuationStack: _effectuationStack
         ))
-        effectuationStack.removeLast()
+        _effectuationStack.removeLast()
     }
     
     /// Executes only if the step did not execute before.
@@ -580,81 +584,81 @@ public class Execution {
         
         /// Something that does not run in the normal case but ca be activated. Should use module name as prefix.
         public func optional<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
-            execution.effectuationStack.append(.optionalPart(name: partName))
+            execution._effectuationStack.append(.optionalPart(name: partName))
             let result: T?
             if execution.activatedOptions?.contains(partName) != true || execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "OPTIONAL PART \"\(partName)\" NOT ACTIVATED"],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
                 result = nil
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> START OPTIONAL PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
                 result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE OPTIONAL PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
             }
-            execution.effectuationStack.removeLast()
+            execution._effectuationStack.removeLast()
             return result
         }
         
         /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
         public func dispensable<T>(named partName: String, work: () async throws -> T) async rethrows -> T? {
             let result: T?
-            execution.effectuationStack.append(.dispensablePart(name: partName))
+            execution._effectuationStack.append(.dispensablePart(name: partName))
             if execution.dispensedWith?.contains(partName) == true {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
                 result = nil
             } else {
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: ">> START DISPENSABLE PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
                 result = try await execute(step: nil, force: false, work: work)
                 execution.logger.log(LoggingEvent(
                     type: .Progress,
-                    executionLevel: execution.effectuationStack.count,
+                    executionLevel: execution._effectuationStack.count,
                     processID: execution.processID,
                     applicationName: execution.applicationName,
                     fact: [.en: "<< DONE DISPENSABLE PART \"\(partName)\""],
                     itemInfo: execution.itemInfo,
-                    effectuationStack: execution.effectuationStack
+                    effectuationStack: execution._effectuationStack
                 ))
             }
-            execution.effectuationStack.removeLast()
+            execution._effectuationStack.removeLast()
             return result
         }
         
@@ -676,14 +680,14 @@ public class Execution {
             event: LoggingEvent(
                 messageID: message.id,
                 type: message.type,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: message.fact.filling(withArguments: arguments),
                 solution: message.solution?.filling(withArguments: arguments),
                 itemInfo: itemInfo,
                 itemPositionInfo: itemPositionInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ),
             addCrashInfo: addCrashInfo
         )
@@ -703,14 +707,14 @@ public class Execution {
             event: LoggingEvent(
                 messageID: message.id,
                 type: message.type,
-                executionLevel: effectuationStack.count,
+                executionLevel: _effectuationStack.count,
                 processID: processID,
                 applicationName: applicationName,
                 fact: fact,
                 solution: solution,
                 itemInfo: itemInfo,
                 itemPositionInfo: itemPositionInfo,
-                effectuationStack: effectuationStack
+                effectuationStack: _effectuationStack
             ),
             addCrashInfo: addCrashInfo
         )
@@ -742,7 +746,7 @@ public class Execution {
     /// Log a full `LoggingEvent` instance.
     public func log(event: LoggingEvent, addCrashInfo: Bool = false) -> () {
         var event = event
-        event.executionLevel = effectuationStack.count
+        event.executionLevel = _effectuationStack.count
         if addCrashInfo || alwaysAddCrashInfo {
             self.crashLogger?.log(event)
         }
