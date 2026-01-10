@@ -229,7 +229,7 @@ extension String {
 }
 
 /// A message contains a message ID, a message type, and a `LocalizingMessage`.
-public struct Message {
+public struct Message: Sendable {
     
     public let id: MessageID?
     public let type: MessageType
@@ -257,7 +257,7 @@ public struct Message {
 public typealias Messages = [MessageID:Message]
 
 /// A `MessagesHolder` is something that contains a messages.
-public protocol MessagesHolder { }
+public protocol MessagesHolder: Sendable { }
 
 /// Getting all messages of a message holders that have an ID (only non-static members).
 public extension MessagesHolder {

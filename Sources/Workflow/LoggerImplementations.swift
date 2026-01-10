@@ -100,7 +100,8 @@ public class PrintLogger: ConcurrentLogger {
                     print(message)
                 }
                 else {
-                    print(message, to: &StandardError.instance)
+                    var stderr = StandardError()
+                    print(message, to: &stderr)
                 }
             default:
                 print(message)
@@ -140,7 +141,8 @@ public class FileLogger: ConcurrentLogger {
                 }
             }
             catch {
-                print("could not log to \(path)", to: &StandardError.instance)
+                var stderr = StandardError()
+                print("could not log to \(path)", to: &stderr)
             }
         }
         closeAction = {
@@ -148,7 +150,8 @@ public class FileLogger: ConcurrentLogger {
                 try self.writableFile.close()
             }
             catch {
-                print("could not log to \(path)", to: &StandardError.instance)
+                var stderr = StandardError()
+                print("could not log to \(path)", to: &stderr)
             }
         }
     }
@@ -180,7 +183,8 @@ public class FileCrashLogger: ConcurrentCrashLogger {
                 try self.writableFile.flush()
             }
             catch {
-                print("could not log to \(path)", to: &StandardError.instance)
+                var stderr = StandardError()
+                print("could not log to \(path)", to: &stderr)
             }
         }
         closeAction = {
@@ -188,7 +192,8 @@ public class FileCrashLogger: ConcurrentCrashLogger {
                 try self.writableFile.close()
             }
             catch {
-                print("could not log to \(path)", to: &StandardError.instance)
+                var stderr = StandardError()
+                print("could not log to \(path)", to: &stderr)
             }
         }
     }
