@@ -351,6 +351,16 @@ public class Execution {
         after(step: step, secondsElapsed: elapsedSeconds(start: start))
     }
     
+    /// Starting to force the execution of steps./
+    public func startForced() {
+        forceValues.append(true)
+    }
+    
+    /// Ending to force the execution of steps.
+    public func endForced() {
+        forceValues.removeLast()
+    }
+    
     /// Executes always.
     public func force<T>(work: () throws -> T) rethrows -> T? {
         try execute(step: nil, force: true, work: work)
@@ -408,6 +418,33 @@ public class Execution {
         }
         return result
     }
+    
+    /// Check for something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
+        public func dispensableIsActive(named partName: String) -> Bool {
+            if dispensedWith?.contains(partName) == true {
+                logger.log(LoggingEvent(
+                    type: .Progress,
+                    executionLevel: _effectuationStack.count,
+                    processID: processID,
+                    applicationName: applicationName,
+                    fact: [.en: "DISPENSABLE PART \"\(partName)\" DEACTIVATED"],
+                    itemInfo: itemInfo,
+                    effectuationStack: _effectuationStack
+                ))
+                return false
+            } else {
+                logger.log(LoggingEvent(
+                    type: .Progress,
+                    executionLevel: _effectuationStack.count,
+                    processID: processID,
+                    applicationName: applicationName,
+                    fact: [.en: "DISPENSABLE PART \"\(partName)\" IS ACTIVE"],
+                    itemInfo: itemInfo,
+                    effectuationStack: _effectuationStack
+                ))
+                return true
+            }
+        }
     
     /// Something that runs in the normal case but ca be dispensed with. Should use module name as prefix.
     public func dispensable<T>(named partName: String, work: () throws -> T) rethrows -> T? {
