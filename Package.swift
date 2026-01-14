@@ -22,7 +22,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/stefanspringer1/SwiftUtilities", from: "5.0.0"),
+        .package(url: "https://github.com/stefanspringer1/SwiftUtilities", from: "5.0.1"),
         //.package(path: "../SwiftUtilities"),
     ],
     targets: [
