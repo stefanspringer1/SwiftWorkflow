@@ -294,8 +294,7 @@ public class Execution {
         (waitNotPausedFunction ?? waitNotPaused)() // wait if the execution is paused
     }
     
-    /// Force all contained work to be executed, even if already executed before.
-    fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
+    fileprivate func beforeExecution(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil) {
         waitNotPaused() // wait if the execution is paused
         forceValues.append(force)
         if let appeaseType {
@@ -310,7 +309,9 @@ public class Execution {
         if let step {
             _effectuationStack.append(.step(step: step))
         }
-        let result = try work()
+    }
+    
+    fileprivate func afterExecution(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil) {
         if step != nil {
             _effectuationStack.removeLast()
         }
@@ -324,7 +325,30 @@ public class Execution {
         if appeaseType != nil {
             appeaseTypes.removeLast()
         }
+    }
+    
+    /// Force all contained work to be executed, even if already executed before.
+    fileprivate func execute<T>(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil, work: () throws -> T) rethrows -> T {
+        beforeExecution(step: step, force: force, appeaseTo: appeaseType)
+        let result = try work()
+        afterExecution(step: step, force: force, appeaseTo: appeaseType)
         return result
+    }
+    
+    /// Executes only if the step did not execute before.
+    public func enter(step: StepID) -> Bool {
+        if effectuateTest(forStep: step) {
+            beforeExecution(step: step, force: false, appeaseTo: nil)
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    /// Do the ending of a step.
+    public func ending(step: StepID, start: DispatchTime) {
+        afterExecution(step: step, force: false, appeaseTo: nil)
+        after(step: step, secondsElapsed: elapsedSeconds(start: start))
     }
     
     /// Executes always.
@@ -528,7 +552,7 @@ public class Execution {
         }
         
         /// Executes only if the step did not execute before.
-        public func effectuate<T>(checking step: StepID, work: () async throws -> T) async rethrows -> T? {
+        public func effectuate<T>(checking step: StepID, sendable work: () async throws -> T) async rethrows -> T? {
             if execution.effectuateTest(forStep: step) {
                 let start = DispatchTime.now()
                 let result = try await execute(step: step, force: false, work: work)
