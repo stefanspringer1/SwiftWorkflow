@@ -59,10 +59,8 @@ public class CollectingLogger: ConcurrentLogger {
     /// Get all collected message events.
     public func getLoggingEvents() -> [LoggingEvent] {
         var loggingEvents: [LoggingEvent]? = nil
-        group.enter()
         self.queue.sync {
             loggingEvents = self.loggingEvents
-            self.group.leave()
         }
         return loggingEvents!
     }
@@ -199,43 +197,43 @@ public class FileCrashLogger: ConcurrentCrashLogger {
     }
 }
 
-/// A logger using a REST API to store the information.
-public class RESTLogger: ConcurrentLogger {
-    
-    public override init(loggingLevel: MessageType = MessageType.Info, progressLogging: Bool = false) {
-        super.init(loggingLevel: loggingLevel, progressLogging: progressLogging)
-        loggingAction = { event in
-            let sem = DispatchSemaphore.init(value: 0)
-            let encoder = JSONEncoder()
-            let jsonData = try! encoder.encode(event)
-
-            //https://stackoverflow.com/a/38952964/2640045
-            //https://stackoverflow.com/a/60440711/2640045
-            let url = URL(string: "http://127.0.0.1:8080/logEvent")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("\(String(describing: jsonData.count))", forHTTPHeaderField: "Content-Length")
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            // insert json data to the request
-            request.httpBody = jsonData
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                defer { sem.signal() }
-                guard let data = data, error == nil else {
-                    print(error?.localizedDescription ?? "No data")
-                    return
-                }
-                let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-                if let responseJSON = responseJSON as? [String: Any] {
-                    print(responseJSON) //Code after successful POST request
-                }
-            }
-
-            task.resume()
-            sem.wait()
-        }
-    }
-}
+///// A logger using a REST API to store the information.
+//public class RESTLogger: ConcurrentLogger {
+//    
+//    public override init(loggingLevel: MessageType = MessageType.Info, progressLogging: Bool = false) {
+//        super.init(loggingLevel: loggingLevel, progressLogging: progressLogging)
+//        loggingAction = { event in
+//            let sem = DispatchSemaphore.init(value: 0)
+//            let encoder = JSONEncoder()
+//            let jsonData = try! encoder.encode(event)
+//
+//            //https://stackoverflow.com/a/38952964/2640045
+//            //https://stackoverflow.com/a/60440711/2640045
+//            let url = URL(string: "http://127.0.0.1:8080/logEvent")!
+//            var request = URLRequest(url: url)
+//            request.httpMethod = "POST"
+//            request.setValue("\(String(describing: jsonData.count))", forHTTPHeaderField: "Content-Length")
+//            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//            // insert json data to the request
+//            request.httpBody = jsonData
+//
+//            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+//                defer { sem.signal() }
+//                guard let data = data, error == nil else {
+//                    print(error?.localizedDescription ?? "No data")
+//                    return
+//                }
+//                let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+//                if let responseJSON = responseJSON as? [String: Any] {
+//                    print(responseJSON) //Code after successful POST request
+//                }
+//            }
+//
+//            task.resume()
+//            sem.wait()
+//        }
+//    }
+//}
 
 /// A logger that adds a prefix to all message texts
 /// before forwarding it to the contained logger.

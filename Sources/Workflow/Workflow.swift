@@ -91,28 +91,22 @@ open class WorstMessageTypeHolder {
     
     private var _worstMessageType: MessageType = .Info
     
-    private let group: DispatchGroup
     private let queue: DispatchQueue
     
     public init() {
-        self.group = DispatchGroup()
         self.queue = DispatchQueue(label: "WorstMessageTypeHolder", qos: .default)
     }
     
     public func updateWorstMessageType(with messageType: MessageType) {
-        group.enter()
         self.queue.async {
             self._worstMessageType = max(self._worstMessageType, messageType)
-            self.group.leave()
         }
     }
     
     var worstMessageType: MessageType {
         var result: MessageType = .Info
-        group.enter()
         self.queue.sync {
             result = _worstMessageType
-            self.group.leave()
         }
         return result
     }
@@ -273,6 +267,7 @@ public class Execution {
     var forceValues = [Bool]()
     var appeaseTypes = [MessageType]()
     
+    // only use when the program has only one execution!
     let semaphoreForPause = DispatchSemaphore(value: 1)
     
     /// Pausing the execution (without effect for async execution).

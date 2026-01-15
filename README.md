@@ -637,18 +637,12 @@ In a concurrent context, use `execution.parallel` to create a copy of an `execut
 Example:
 
 ```Swift
-dispatchGroup.enter()
-dispatchQueue.async {
-    semaphore.wait()
-    let parallelExecution = execution.parallel
-    myStep(
-        during: parallelExecution,
-        theDate: theData
-    )
-    ...remeber parallelExecution.worstMessageType...
-    semaphore.signal()
-    disptachGroup.leave()
-}
+let parallelExecution = execution.parallel
+myStep(
+    during: parallelExecution,
+    theDate: theData
+)
+...remeber parallelExecution.worstMessageType...
 ```
 
 You need to update the worst message type after the parallel runs:

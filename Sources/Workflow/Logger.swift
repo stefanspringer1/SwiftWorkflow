@@ -30,8 +30,7 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
     
     public var loggingLevel: MessageType
     public var progressLogging: Bool
-
-    internal let group: DispatchGroup
+    
     internal let queue: DispatchQueue
     
     public var loggingAction: ((LoggingEvent) -> ())? = nil
@@ -40,7 +39,6 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
     public init(loggingLevel: MessageType = .Debug, progressLogging: Bool = false) {
         self.loggingLevel = loggingLevel
         self.progressLogging = progressLogging
-        self.group = DispatchGroup()
         self.queue = DispatchQueue(label: "AyncLogger", qos: .background)
     }
     
@@ -48,24 +46,20 @@ open class ConcurrentLogger: Logger, WithLoggingFilter {
     
     public func log(_ event: LoggingEvent) {
         if let event = filter(event: event) {
-            group.enter()
             self.queue.async {
                 if !self.closed {
                     self.loggingAction?(event)
                 }
-                self.group.leave()
             }
         }
     }
     
     public func close() throws {
-        group.enter()
         self.queue.sync {
             if !self.closed {
                 self.closeAction?()
                 self.closed = true
                 self.closeAction = nil
-                self.group.leave()
             }
         }
     }
@@ -92,7 +86,7 @@ open class ConcurrentCrashLogger: Logger, WithLoggingFilter {
     
     public func log(_ event: LoggingEvent) {
         if let event = filter(event: event) {
-            self.queue.sync {
+            self.queue.async {
                 self.loggingAction?(event)
             }
         }
