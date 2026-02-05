@@ -244,11 +244,15 @@ public struct Message: Sendable {
     }
     
     public func setting(type newType: MessageType) -> Message {
-        return Message(id: id, type: newType, fact: fact, solution: solution)
+        Message(id: id, type: newType, fact: fact, solution: solution)
     }
     
     public func filling(withArguments arguments: [String]?) -> Message {
-        return Message(id: id, type: type, fact: fact.filling(withArguments: arguments), solution: solution?.filling(withArguments: arguments))
+        Message(id: id, type: type, fact: fact.filling(withArguments: arguments), solution: solution?.filling(withArguments: arguments))
+   }
+    
+    public func filling(withArguments arguments: String...) -> Message {
+        filling(withArguments: arguments)
    }
     
 }
