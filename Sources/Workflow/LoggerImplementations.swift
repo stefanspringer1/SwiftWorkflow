@@ -64,6 +64,12 @@ public class CollectingLogger: ConcurrentLogger {
         }
         return loggingEvents!
     }
+    
+    public func clear() {
+        self.queue.sync {
+            self.loggingEvents.removeAll()
+        }
+    }
 }
 
 /// A logger that just prints.
