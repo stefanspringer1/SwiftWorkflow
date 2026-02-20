@@ -289,6 +289,14 @@ public class Execution {
         (waitNotPausedFunction ?? waitNotPaused)() // wait if the execution is paused
     }
     
+    public func start(appeasingTo appeaseType: MessageType) {
+        appeaseTypes.append(appeaseType)
+    }
+    
+    public func stopAppeasing() {
+        appeaseTypes.removeLast()
+    }
+    
     fileprivate func beforeExecution(step: StepID?, force: Bool, appeaseTo appeaseType: MessageType? = nil) {
         waitNotPaused() // wait if the execution is paused
         forceValues.append(force)
