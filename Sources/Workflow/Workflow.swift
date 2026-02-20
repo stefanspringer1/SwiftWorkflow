@@ -120,7 +120,7 @@ public class Execution {
     
     public var applicationName: String
     
-    private var executedSteps = Set<StepID>()
+    private var _executedSteps = Set<StepID>()
     
     var _effectuationStack: [Effectuation]
     
@@ -369,11 +369,19 @@ public class Execution {
         try execute(step: nil, force: true, work: work)
     }
     
+    public var executedSteps: Set<StepID> {
+        _executedSteps
+    }
+    
+    public func setExecutedSteps(_ steps: Set<StepID>) {
+        _executedSteps = steps
+    }
+    
     /// After execution, disremember what has been executed.
     public func disremember<T>(work: () throws -> T) rethrows -> T? {
-        let oldExecutedSteps = executedSteps
+        let oldExecutedSteps = _executedSteps
         let result = try execute(step: nil, force: false, work: work)
-        executedSteps = oldExecutedSteps
+        _executedSteps = oldExecutedSteps
         return result
     }
     
@@ -498,7 +506,7 @@ public class Execution {
         if stopped {
             self.log(executionMessages.skippingStep, step.description)
         }
-        else if !executedSteps.contains(step) || forceValues.last == true {
+        else if !_executedSteps.contains(step) || forceValues.last == true {
             logger.log(LoggingEvent(
                 type: .Progress,
                 executionLevel: _effectuationStack.count,
@@ -508,7 +516,7 @@ public class Execution {
                 itemInfo: itemInfo,
                 effectuationStack: _effectuationStack
             ))
-            executedSteps.insert(step)
+            _executedSteps.insert(step)
             return true
         } else if debug {
             self.log(executionMessages.skippingStep, step.description, step.description)
@@ -610,9 +618,9 @@ public class Execution {
         
         /// After execution, disremember what has been executed.
         public func disremember<T>(work: () throws -> T) async rethrows -> T? {
-            let oldExecutedSteps = execution.executedSteps
+            let oldExecutedSteps = execution._executedSteps
             let result = try await execute(step: nil, force: false, work: work)
-            execution.executedSteps = oldExecutedSteps
+            execution._executedSteps = oldExecutedSteps
             return result
         }
         
