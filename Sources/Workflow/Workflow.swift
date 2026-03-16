@@ -860,7 +860,7 @@ public enum MessageType: Comparable, Codable, Sendable {
 }
 
 // The message type to be used as argument that informs about the severity a message.
-public enum MessageTypeArgument: String, ExpressibleByArgument, CaseIterable {
+public enum MessageTypeArgument: String, Sendable, ExpressibleByArgument, CaseIterable {
     case debug
     case progress
     case info
