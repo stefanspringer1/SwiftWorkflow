@@ -136,6 +136,8 @@ execution.force {
 }
 ```
 
+**NOTE:** This forcing overrides an execution being stopped (but only at the immediate level).
+
 You can also disremember what is executed with the following call:
 
 ```Swift
