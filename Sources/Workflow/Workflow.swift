@@ -503,7 +503,7 @@ public class Execution {
     }
     
     private func effectuateTest(forStep step: StepID) -> Bool {
-        if stopped {
+        if stopped && forceValues.last != true {
             self.log(executionMessages.skippingStep, step.description)
         }
         else if !_executedSteps.contains(step) || forceValues.last == true {
