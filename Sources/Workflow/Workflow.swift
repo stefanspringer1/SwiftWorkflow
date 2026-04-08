@@ -721,14 +721,17 @@ public class Execution {
     public func log(
         _ message: Message,
         itemPositionInfo: String? = nil,
+        significantExecutionLevel: Int? = nil,
         addCrashInfo: Bool = false,
         withArguments arguments: [String]?
     ) {
+        let executionLevel = _effectuationStack.count
         log(
             event: LoggingEvent(
                 messageID: message.id,
                 type: message.type,
-                executionLevel: _effectuationStack.count,
+                executionLevel: executionLevel,
+                significantExecutionLevel: significantExecutionLevel ?? executionLevel,
                 processID: processID,
                 applicationName: applicationName,
                 fact: message.fact.filling(withArguments: arguments),
@@ -746,16 +749,19 @@ public class Execution {
     public func logAndUseInfo(
         _ message: Message,
         itemPositionInfo: String? = nil,
+        significantExecutionLevel: Int? = nil,
         addCrashInfo: Bool = false,
         withArguments arguments: [String]?
     ) -> String {
         let fact = message.fact.filling(withArguments: arguments)
         let solution = message.solution?.filling(withArguments: arguments)
+        let executionLevel = _effectuationStack.count
         log(
             event: LoggingEvent(
                 messageID: message.id,
                 type: message.type,
-                executionLevel: _effectuationStack.count,
+                executionLevel: executionLevel,
+                significantExecutionLevel: significantExecutionLevel ?? executionLevel,
                 processID: processID,
                 applicationName: applicationName,
                 fact: fact,
@@ -785,10 +791,11 @@ public class Execution {
     public func log(
         _ message: Message,
         itemPositionInfo: String? = nil,
+        significantExecutionLevel: Int? = nil,
         addCrashInfo: Bool = false,
         _ arguments: String...
     ) -> () {
-        log(message, itemPositionInfo: itemPositionInfo, addCrashInfo: addCrashInfo, withArguments: arguments)
+        log(message, itemPositionInfo: itemPositionInfo, significantExecutionLevel: significantExecutionLevel, addCrashInfo: addCrashInfo, withArguments: arguments)
     }
     
     /// Log a full `LoggingEvent` instance.

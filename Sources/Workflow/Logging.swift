@@ -16,6 +16,7 @@ extension LoggingEvent {
             messageID: messageID,
             type: type,
             executionLevel: executionLevel,
+            significantExecutionLevel: significantExecutionLevel,
             processID: processID,
             applicationName: applicationName,
             fact: fact.prefixed(with: prefixText),
@@ -59,6 +60,9 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
 
     /// The execution level.
     public var executionLevel: Int
+    
+    /// The significant level, e.g. set `significantExecutionLevel: 0` to count as event at the top level.
+    public var significantExecutionLevel: Int
     
     /// The process ID for embedding in a complex processing scenario.
     public let processID: String?
@@ -108,6 +112,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         type: MessageType,
         originalType: MessageType? = nil,
         executionLevel: Int = 0,
+        significantExecutionLevel: Int? = nil,
         processID: String? = nil,
         applicationName: String,
         fact: LocalizingMessage,
@@ -121,6 +126,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         self.type = type
         self.originalType = originalType
         self.executionLevel = executionLevel
+        self.significantExecutionLevel = significantExecutionLevel ?? executionLevel
         self.processID = processID
         self.applicationName = applicationName
         self.fact = fact
@@ -154,6 +160,7 @@ public struct LoggingEvent: CustomStringConvertible, Encodable, Sendable {
         case type
         case originalType
         case executionLevel
+        case significantExecutionLevel
         case processID
         case applicationName
         case fact
@@ -199,6 +206,7 @@ extension LoggingEvent: Decodable {
         self.type = try values.decode(MessageType.self, forKey: .type)
         self.originalType = try values.decode(MessageType.self, forKey: .originalType)
         self.executionLevel = try values.decode(Int.self, forKey: .executionLevel)
+        self.significantExecutionLevel = try values.decode(Int.self, forKey: .significantExecutionLevel)
         self.processID = try values.decode(String.self, forKey: .processID)
         self.applicationName = try values.decode(String.self, forKey: .applicationName)
         self.itemInfo = try values.decode(String?.self, forKey: .itemInfo)
