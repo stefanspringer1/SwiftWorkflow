@@ -52,6 +52,7 @@ if CommandLine.arguments.count > 2 {
 var stepStack = [String]()
 
 var newline = false
+var lastDescription: Substring? = nil
 for logEntry in try String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8)
    .split(separator: "\n")
    .filter({ $0.contains("{Progress}") }) {
@@ -62,11 +63,12 @@ for logEntry in try String(contentsOfFile: CommandLine.arguments[1], encoding: .
         stepStack.append(String(logEntry))
         if logEntry.hasSuffix("_step") { logEntry = logEntry.dropLast(5) }
         if level > lastLevelPrint { print(":", terminator: "") }
-        if newline { print() } else { newline = true }
-        print("\(String(repeating: " ", count: level * 4))\(String(logEntry).pretty)", terminator: "")
-        if let description = stepToDescription[logEntry] {
-            print(" (\(description))", terminator: "")
+        if let lastDescription {
+            print(" _(\(lastDescription))_", terminator: "")
         }
+        if newline { print() } else { newline = true }
+        print("\(String(repeating: "\u{A0}", count: level * 8))\(String(logEntry).pretty)", terminator: "")
+        lastDescription = stepToDescription[logEntry]
         lastLevelPrint = level
     } else if let range = logEntry.firstRange(of: "<< DONE STEP ") {
         var logEntry = logEntry[range.lowerBound...].dropFirst(13)
@@ -78,5 +80,8 @@ for logEntry in try String(contentsOfFile: CommandLine.arguments[1], encoding: .
         }
         level -= 1
     }
+}
+if let lastDescription {
+    print(" _(\(lastDescription))_", terminator: "")
 }
 print()
