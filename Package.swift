@@ -43,6 +43,9 @@ let package = Package(
         ),
         .executableTarget(
             name: "StepsFromLog",
+            dependencies: [
+                .product(name: "Utilities", package: "SwiftUtilities")
+            ],
             path: "Sources/StepsFromLog",
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
