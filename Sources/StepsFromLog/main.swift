@@ -6,8 +6,9 @@ import Utilities
 // path to log file
 //
 // optional second argument:
-// path of directory with Swift file with a step "..._step"
-// and the description after "- function:".
+// a comma-seprated list of paths of directories with Swift
+// files with a step "..._step" and the description after
+// "- function:".
 // ************************************************************
 
 var level = -1
@@ -31,28 +32,34 @@ extension String {
     }
 }
 
-var stepToDescription = [Substring: Substring]()
+var stepToDescription = [String: String]()
 
 if CommandLine.arguments.count > 2 {
-    let directory = URL(fileURLWithPath: CommandLine.arguments[2])
-//    print("Reading step descriptions from \(directory.osPath)...")
-    for file in try directory.files(withPattern: #".*\.swift"#, findRecursively: true) {
-        let content = try String(contentsOf: file, encoding: .utf8)
-        if let stepFunction = content.firstMatch(of: /func ([^(]+)_step\(/), let description = content.firstMatch(of: /\- function: (.*)\n/) {
-            let stepFunctionCore = stepFunction.output.1
-            let description = description.output.1.replacing("This is a step.", with: "").trimming()
-            if !description.isEmpty {
-                stepToDescription[stepFunctionCore] = description
+    var multipleUsedStepNames = [String:Int]()
+    for directory in CommandLine.arguments[2].split(separator: ",").map({ URL(fileURLWithPath: String($0)) }) {
+        for file in try directory.files(withPattern: #".*\.swift"#, findRecursively: true) {
+            let content = try String(contentsOf: file, encoding: .utf8)
+            if let stepFunction = content.firstMatch(of: /func ([^(]+)_step\(/), let description = content.firstMatch(of: /\- function: (.*)\n/) {
+                let stepFunctionCore = String(stepFunction.output.1)
+                let description = String(description.output.1.replacing("This is a step.", with: "").trimming())
+                if !description.isEmpty {
+                    if stepToDescription[stepFunctionCore] != nil {
+                        multipleUsedStepNames[stepFunctionCore] = (multipleUsedStepNames[stepFunctionCore] ?? 1) + 1
+                    }
+                    stepToDescription[stepFunctionCore] = description
+                }
             }
         }
     }
-//    print("Reading step descriptions done.")
+    if !multipleUsedStepNames.isEmpty {
+        print("!!!! STEP CORE NAMES USED MULTIPLE TIMES: \(multipleUsedStepNames.sorted(by: { $0.key < $1.key }).map{ "\($0.key) (\($0.value))" }.joined(separator: ", "))")
+    }
 }
 
 var stepStack = [String]()
 
 var newline = false
-var lastDescription: Substring? = nil
+var lastDescription: String? = nil
 for logEntry in try String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8)
    .split(separator: "\n")
    .filter({ $0.contains("{Progress}") }) {
@@ -68,7 +75,7 @@ for logEntry in try String(contentsOfFile: CommandLine.arguments[1], encoding: .
         }
         if newline { print() } else { newline = true }
         print("\(String(repeating: "\u{A0}", count: level * 8))\(String(logEntry).pretty)", terminator: "")
-        lastDescription = stepToDescription[logEntry]
+        lastDescription = stepToDescription[String(logEntry)]
         lastLevelPrint = level
     } else if let range = logEntry.firstRange(of: "<< DONE STEP ") {
         var logEntry = logEntry[range.lowerBound...].dropFirst(13)
