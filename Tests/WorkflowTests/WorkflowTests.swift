@@ -9,7 +9,7 @@ final class WorkflowTests: XCTestCase {
             id: "error",
             type: .Error,
             fact: [
-                .en: "thsi is an error",
+                .en: "this is an error",
             ]
         )
         
